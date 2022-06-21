@@ -144,8 +144,7 @@ model patient {
 }
 
 model records {
-  id             Int              @id @default(autoincrement())
-  record_code    String
+  record_code    Int              @id @default(autoincrement())
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   patientId      Int
@@ -157,6 +156,7 @@ model records {
   doctorId       Int
   doctor         Doctor           @relation(fields: [doctorId], references: [id], onUpdate: Cascade)
   record_details record_details[]
+  medication     medication[]
 }
 
 model record_details {
@@ -168,7 +168,7 @@ model record_details {
   destination  String
   status       String
   record_code  String
-  record       records  @relation(fields: [recordId], references: [id], onUpdate: Cascade)
+  record       records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 model sign_vital {
@@ -184,4 +184,12 @@ model sign_vital {
   pulse        String
   patientId    Int
   patient      patient  @relation(fields: [patientId], references: [code], onUpdate: Cascade)
+}
+
+model medication {
+  id           Int      @id @default(autoincrement())
+  record_code  Int
+  record       records  @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
+  medications  String[]
+  instructions String[]
 }
