@@ -15,8 +15,9 @@ model Admin {
   email     String
   password  String
   fullNames String
-  type      String
+  type      String?
   contact   String
+  role      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -36,22 +37,19 @@ model Clinic {
   email     String
   type      String
   password  String
+  role      String
 
-  receptionist receptionist[]
-  Doctor       Doctor[]
-  nurse        nurse[]
-  laborante    laborante[]
-  patient      patient[]
-  records      records[]
+  patient patient[]
+  records records[]
+  User    User[]
 }
 
-model receptionist {
+model User {
   id        Int      @id @default(autoincrement())
   fullName  String
-  address   String
-  contact   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  contact   String
   province  String
   district  String
   sector    String
@@ -59,68 +57,15 @@ model receptionist {
   village   String
   email     String
   password  String
+  role      String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-}
 
-model Doctor {
-  id        Int      @id @default(autoincrement())
-  fullName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  password  String
-
-  clinicId Int
-  clinic   Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  records  records[]
-}
-
-model nurse {
-  id        Int      @id @default(autoincrement())
-  fullName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  password  String
-
-  clinicId Int
-  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-}
-
-model laborante {
-  id        Int      @id @default(autoincrement())
-  fullName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  password  String
-
-  clinicId Int
-  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model patient {
-  code           Int      @unique
+  id             Int      @id @default(autoincrement())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   fullName       String
@@ -150,11 +95,9 @@ model records {
   patientId      Int
   consultation   String
   price          Int
-  patient        patient          @relation(fields: [patientId], references: [code], onUpdate: Cascade)
+  patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  doctorId       Int
-  doctor         Doctor           @relation(fields: [doctorId], references: [id], onUpdate: Cascade)
   record_details record_details[]
   medication     medication[]
 }
@@ -183,7 +126,7 @@ model sign_vital {
   BP           String
   pulse        String
   patientId    Int
-  patient      patient  @relation(fields: [patientId], references: [code], onUpdate: Cascade)
+  patient      patient  @relation(fields: [patientId], references: [id], onUpdate: Cascade)
 }
 
 model medication {
