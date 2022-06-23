@@ -26,10 +26,14 @@ export class AuthController {
     return this.authservice.adminLogin(dto);
   }
 
+  //user-login
+
   @Post('user-signin')
   userLogin(@Body() dto: userSignInDto) {
     return this.authservice.userLogin(dto);
   }
+
+  //clinic signIn
 
   @Post('clinic-signin')
   clinicLogin(@Body() dto: clinicSignDto) {
