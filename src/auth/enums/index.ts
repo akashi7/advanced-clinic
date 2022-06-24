@@ -7,3 +7,15 @@ export enum ERoles {
   NURSE = 'NURSE',
   LABORANTE = 'LABORANTE',
 }
+
+export enum ERecords {
+  NURSE_DESTINATION = 'NURSE',
+  DOCTOR_DESTINATION = 'DOCTOR',
+  LABORANTE_DESTINATION = 'LABORANTE',
+  RECEPTONIST_DESTINATION = 'RECEPTONIST',
+}
+
+export enum EStatus {
+  READ = 'READ',
+  UNREAD = 'UNREAD',
+}

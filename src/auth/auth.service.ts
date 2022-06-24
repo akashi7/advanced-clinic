@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Admin } from '@prisma/client';
 import * as argon from 'argon2';
 import { clinicSignDto } from 'src/clinic/dto/clinic.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -24,7 +25,12 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  generateToken(id: number, email: string, contact: string, role: string) {
+  generateToken(
+    id: number,
+    email: string,
+    contact: string,
+    role: string,
+  ): { token: string } {
     const token = this.Jwt.sign(
       { id, email, contact, role },
       { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
@@ -32,7 +38,7 @@ export class AuthService {
     return { token };
   }
 
-  async adminSignUp(dto: AuthAdminSignUpDto) {
+  async adminSignUp(dto: AuthAdminSignUpDto): Promise<Admin> {
     const user = await this.prisma.admin.findFirst({
       where: { email: dto.email },
     });
@@ -53,13 +59,12 @@ export class AuthService {
     } else throw new ConflictException('Admin arleady exist');
   }
 
-  async adminLogin(dto: AuthAdminSignIn) {
+  async adminLogin(dto: AuthAdminSignIn): Promise<{ token: string }> {
     const admin = await this.prisma.admin.findFirst({
       where: { email: dto.email },
     });
-    if (!admin) {
-      throw new ForbiddenException('Admin User not found');
-    } else if (!(await argon.verify(admin.password, dto.password))) {
+    if (!admin) throw new ForbiddenException('Admin User not found');
+    else if (!(await argon.verify(admin.password, dto.password))) {
       throw new ForbiddenException('Wrong Admin password');
     } else
       return this.generateToken(
@@ -70,9 +75,23 @@ export class AuthService {
       );
   }
 
-  async userLogin(dto: userSignInDto) {}
+  async userLogin(dto: userSignInDto): Promise<{ token: string }> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
+    if (!user) throw new ForbiddenException('User not found');
+    if (!(await argon.verify(user.password, dto.password))) {
+      throw new ForbiddenException('Wrong password');
+    }
+    return this.generateToken(
+      user.clinicId,
+      user.email,
+      user.contact,
+      user.role,
+    );
+  }
 
-  async clinicLogin(dto: clinicSignDto) {
+  async clinicLogin(dto: clinicSignDto): Promise<{ token: string }> {
     const clinic = await this.prisma.clinic.findFirst({
       where: { email: dto.email },
     });

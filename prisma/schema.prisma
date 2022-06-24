@@ -110,7 +110,6 @@ model record_details {
   consultation String
   destination  String
   status       String
-  record_code  String
   record       records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 

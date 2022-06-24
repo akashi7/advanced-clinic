@@ -15,7 +15,7 @@ export class ClinicController {
 
   @Post('register-user')
   @AllowRoles(ERoles.CLINIC)
-  registerReceptionist(@Body() dto: registerEmployee, @GetUser() user: User) {
-    return this.clinic.registerUser(dto, user);
+  registerReceptionist(@Body() dto: registerEmployee, @GetUser() clinic: User) {
+    return this.clinic.registerUser(dto, clinic);
   }
 }
