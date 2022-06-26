@@ -3,7 +3,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { patient, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RecordDto, registerPatientDto } from './dto';
+import { RecordDto, registerPatientDto, searchField } from './dto';
 
 @Injectable()
 export class ReceptionistService {
@@ -11,8 +11,9 @@ export class ReceptionistService {
 
   //register patient
   async registerPatient(dto: registerPatientDto, user: User): Promise<patient> {
+    const contact = parseInt(dto.contact);
     const isPatient = await this.prisma.patient.findFirst({
-      where: { contact: dto.contact },
+      where: { contact: contact },
     });
     if (isPatient)
       throw new ConflictException(
@@ -23,7 +24,7 @@ export class ReceptionistService {
         fullName: dto.fullName,
         DOB: dto.DOB,
         email: dto.email,
-        contact: dto.contact,
+        contact,
         province: dto.province,
         district: dto.district,
         gender: dto.gender,
@@ -48,7 +49,11 @@ export class ReceptionistService {
   }
 
   //send to nurse
-  async sendToNurse(pId: number, user: User): Promise<{ message: string }> {
+  async sendToNurse(
+    pId: number,
+    user: User,
+    fullNames: string,
+  ): Promise<{ message: string }> {
     let dto = new RecordDto();
     dto.consultation = 'consultation';
     dto.price = 500;
@@ -59,6 +64,7 @@ export class ReceptionistService {
         consultation: dto.consultation,
         price: dto.price,
         clinicId: user.id,
+        fullNames,
       },
     });
 
@@ -68,6 +74,7 @@ export class ReceptionistService {
         consultation: record.consultation,
         destination: ERecords.NURSE_DESTINATION,
         status: EStatus.UNREAD,
+        fullNames,
       },
     });
     return {
@@ -83,5 +90,26 @@ export class ReceptionistService {
     });
 
     return records;
+  }
+
+  //search patient
+
+  async searchPatient(dto: searchField): Promise<{ data: patient }> {
+    const field = parseInt(dto.field);
+    const patient = await this.prisma.patient.findFirst({
+      where: {
+        OR: [
+          {
+            id: field,
+          },
+          {
+            contact: field,
+          },
+        ],
+      },
+    });
+    return {
+      data: patient,
+    };
   }
 }

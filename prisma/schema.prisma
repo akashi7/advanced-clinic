@@ -70,7 +70,7 @@ model patient {
   updatedAt      DateTime @updatedAt
   fullName       String
   address        String
-  contact        String
+  contact        Int
   DOB            String
   gender         String
   email          String
@@ -94,6 +94,7 @@ model records {
   updatedAt      DateTime         @updatedAt
   patientId      Int
   consultation   String
+  fullNames      String
   price          Int
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
@@ -108,6 +109,7 @@ model record_details {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   consultation String
+  fullNames    String
   destination  String
   status       String
   record       records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)

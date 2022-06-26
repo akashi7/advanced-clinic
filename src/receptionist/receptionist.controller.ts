@@ -36,12 +36,17 @@ export class ReceptionistController {
   sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
     @GetUser() user: User,
+    @Query('names') fullName: string,
   ) {
-    return this.receptionist.sendToNurse(id, user);
+    return this.receptionist.sendToNurse(id, user, fullName);
   }
 
   @Get('recept-data')
   seeRecords() {
     return this.receptionist.seeRecords();
+  }
+  @Post('search-patient')
+  searchPatient(@Body() dto: any) {
+    return this.receptionist.searchPatient(dto);
   }
 }

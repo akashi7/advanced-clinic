@@ -8,9 +8,8 @@ export class registerPatientDto {
   @IsString()
   @IsNotEmpty()
   address: string;
-  @IsString()
   @IsNotEmpty()
-  contact: string;
+  contact: any;
   @IsString()
   @IsString()
   DOB: string;
@@ -50,4 +49,9 @@ export class RecordDto {
   @IsNumber()
   @IsNotEmpty()
   price: number;
+}
+
+export class searchField {
+  @IsNotEmpty()
+  field: any;
 }
