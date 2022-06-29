@@ -101,6 +101,7 @@ model records {
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
   record_details record_details[]
   medication     medication[]
+  exam           exam[]
 }
 
 model record_details {
@@ -136,4 +137,11 @@ model medication {
   record       records  @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
   medications  String[]
   instructions String[]
+}
+
+model exam {
+  id          Int      @id @default(autoincrement())
+  record_code Int
+  record      records  @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
+  exam        String[]
 }

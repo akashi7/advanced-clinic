@@ -2,12 +2,13 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { patient, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
+import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RecordDto, registerPatientDto, searchField } from './dto';
 
 @Injectable()
 export class ReceptionistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, mail: MailService) {}
 
   //register patient
   async registerPatient(dto: registerPatientDto, user: User): Promise<patient> {

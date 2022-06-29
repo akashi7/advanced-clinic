@@ -3,12 +3,27 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
+import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { registerEmployee } from './dto/clinic.dto';
 
 @Injectable()
 export class ClinicService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mail: MailService,
+  ) {}
+
+  makePassword(length: number) {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
 
   //register-user
   async registerUser(dto: registerEmployee, user: User) {
@@ -24,7 +39,8 @@ export class ClinicService {
       where: { email: dto.email },
     });
     if (isUser) throw new ConflictException(`${isRole} arleady registered`);
-    const password = await argon.hash(dto.password);
+    const passwordGenerated = this.makePassword(8);
+    const password = await argon.hash(passwordGenerated);
     const User = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -41,6 +57,12 @@ export class ClinicService {
       },
     });
     delete User.password;
+    await this.mail.sendMail(
+      `${User.email}`,
+      `${User.fullName} credentials`,
+      '"No Reply" <noreply@kuranga.com>',
+      `${passwordGenerated}`,
+    );
     return User;
   }
 }

@@ -29,9 +29,6 @@ export class ClinicDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  @IsString()
-  @IsNotEmpty()
-  password: string;
 }
 
 export class registerEmployee {
@@ -62,9 +59,6 @@ export class registerEmployee {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  @IsString()
-  @IsNotEmpty()
-  password: string;
   @IsString()
   @IsNotEmpty()
   role: string;
