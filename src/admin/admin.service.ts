@@ -47,6 +47,16 @@ export class AdminService {
         address: dto.address,
       },
     });
+    const userClinic = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password,
+        fullName: dto.name,
+        role: ERoles.CLINIC,
+        clinicId: clinic.id,
+        userId: clinic.id,
+      },
+    });
     delete clinic.password;
     return this.mail.sendMail(
       clinic.email,

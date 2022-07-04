@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   ParseIntPipe,
@@ -11,6 +12,7 @@ import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { DoctorService } from './doctor.service';
+import { examDto } from './dto';
 
 @Controller('doctor')
 @UseGuards(JwtGuard, RolesGuard)
@@ -32,7 +34,8 @@ export class DoctorController {
   docSendToLabo(
     @Query('id', ParseIntPipe) id: number,
     @Query('names') fullName: string,
+    @Body() dto: examDto,
   ) {
-    return this.docService.docSendToLabo(id, fullName);
+    return this.docService.docSendToLabo(id, fullName, dto);
   }
 }

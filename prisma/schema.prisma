@@ -39,29 +39,26 @@ model Clinic {
   password  String
   role      String
 
-  patient patient[]
-  records records[]
-  User    User[]
+  patient      patient[]
+  records      records[]
+  insurance    insurance[]
+  itemList     itemList[]
+  receptionist receptionist[]
+  nurse        nurse[]
+  doctor       doctor[]
+  laborante    laborante[]
+  User         User[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  fullName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  password  String
-  role      String
-
+  id       Int    @id @default(autoincrement())
+  fullName String
+  password String
+  email    String
+  role     String
+  userId   Int
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-
 }
 
 model patient {
@@ -86,6 +83,7 @@ model patient {
   clinic     Clinic       @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
   records    records[]
   sign_vital sign_vital[]
+  invoice    invoice[]
 }
 
 model records {
@@ -102,6 +100,7 @@ model records {
   record_details record_details[]
   medication     medication[]
   exam           exam[]
+  invoice        invoice[]
 }
 
 model record_details {
@@ -145,3 +144,132 @@ model exam {
   record      records  @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
   exam        String[]
 }
+
+model itemList {
+  id              Int               @id @default(autoincrement())
+  itemName        String
+  priceTag        Int
+  priceList       priceList[]
+  clinicId        Int
+  clinic          Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  invoice_details invoice_details[]
+}
+
+model priceList {
+  id          Int       @id @default(autoincrement())
+  itemName    String
+  price       Int
+  itemId      Int
+  item        itemList  @relation(fields: [itemId], references: [id], onUpdate: Cascade)
+  insuranceId Int
+  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade)
+}
+
+model insurance {
+  id        Int         @id @default(autoincrement())
+  name      String
+  rate      Int
+  priceList priceList[]
+  clinicId  Int
+  clinic    Clinic      @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model invoice {
+  id              Int               @id @default(autoincrement())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  patientId       Int
+  patient         patient           @relation(fields: [patientId], references: [id], onUpdate: Cascade)
+  recordId        Int
+  record          records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+  totalAmount     Int
+  invoice_details invoice_details[]
+}
+
+model invoice_details {
+  id        Int      @id @default(autoincrement())
+  invoiceId Int
+  invoice   invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  itemName  String
+  price     Int
+  itemId    Int
+  item      itemList @relation(fields: [itemId], references: [id], onUpdate: Cascade)
+}
+
+model receptionist {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contact   String
+  province  String
+  district  String
+  sector    String
+  cell      String
+  village   String
+  email     String
+  password  String
+  role      String
+
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model nurse {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contact   String
+  province  String
+  district  String
+  sector    String
+  cell      String
+  village   String
+  email     String
+  password  String
+  role      String
+
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model doctor {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contact   String
+  province  String
+  district  String
+  sector    String
+  cell      String
+  village   String
+  email     String
+  password  String
+  role      String
+
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model laborante {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contact   String
+  province  String
+  district  String
+  sector    String
+  cell      String
+  village   String
+  email     String
+  password  String
+  role      String
+
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+//Model invoice,invoice_details,insurance,examList,PriceList
