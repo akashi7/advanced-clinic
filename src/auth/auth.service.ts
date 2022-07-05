@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -25,21 +26,21 @@ export class AuthService {
   ) {}
 
   generateToken(
-    id: number,
+    userId: number,
     email: string,
     fullName: string,
     role: string,
   ): {
-    data: { id: number; email: string; fullName: string; role: string };
+    data: { userId: number; email: string; fullName: string; role: string };
     token: string;
   } {
     const token = this.Jwt.sign(
-      { id, email, fullName, role },
+      { userId, email, fullName, role },
       { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
     );
     return {
       data: {
-        id,
+        userId,
         email,
         fullName,
         role,
@@ -73,7 +74,7 @@ export class AuthService {
     const admin = await this.prisma.admin.findFirst({
       where: { email: dto.email },
     });
-    if (!admin) throw new ForbiddenException('Admin User not found');
+    if (!admin) throw new NotFoundException('Admin User not found');
     else if (!(await argon.verify(admin.password, dto.password))) {
       throw new ForbiddenException('Wrong Admin password');
     } else
@@ -89,7 +90,7 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email },
     });
-    if (!user) throw new ForbiddenException('User not found');
+    if (!user) throw new NotFoundException('User not found');
     if (!(await argon.verify(user.password, dto.password))) {
       throw new ForbiddenException('Wrong password');
     }

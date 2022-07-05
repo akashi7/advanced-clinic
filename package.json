@@ -19,11 +19,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma:studio":"npx prisma studio",
-    "prisma:generate":"npx prisma generate dev",
-    "prisma:reset":"npx prisma reset",
-    "prisma:init":"npx prisma init"
-
+    "prisma:studio": "npx prisma studio",
+    "prisma:generate": "npx prisma generate dev",
+    "prisma:reset": "npx prisma reset",
+    "prisma:init": "npx prisma init"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.7.1",
@@ -33,9 +32,9 @@
     "@nestjs/jwt": "^8.0.1",
     "@nestjs/passport": "^8.2.2",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/swagger": "^5.2.1",
     "@prisma/client": "^3.15.2",
     "argon2": "^0.28.5",
-    "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "nodemailer": "^6.7.5",
@@ -43,7 +42,8 @@
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "swagger-ui-express": "^4.4.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { ClinicDto } from 'src/clinic/dto/clinic.dto';
@@ -28,7 +28,7 @@ export class AdminService {
       where: { email: dto.email },
     });
     if (clinicExist)
-      throw new ForbiddenException('Email clinic arleady registered');
+      throw new ConflictException('Email clinic arleady registered');
     const passwordGenerated = this.makePassword(8);
     const password = await argon.hash(passwordGenerated);
     const clinic = await this.prisma.clinic.create({
@@ -47,7 +47,7 @@ export class AdminService {
         address: dto.address,
       },
     });
-    const userClinic = await this.prisma.user.create({
+    await this.prisma.user.create({
       data: {
         email: dto.email,
         password,

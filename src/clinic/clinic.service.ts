@@ -1,11 +1,16 @@
 /* eslint-disable */
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { registerEmployee } from './dto/clinic.dto';
+import { registerEmployee, UpdatePasswordDto } from './dto/clinic.dto';
 
 @Injectable()
 export class ClinicService {
@@ -87,12 +92,12 @@ export class ClinicService {
           village: dto.village,
           contact: dto.contact,
           password,
-          role: isRole,
-          clinicId: user.id,
+          role: ERoles.RECEPTIONIST,
+          clinicId: user.userId,
         },
       });
       return this.RegisterUserToDataBase(
-        'receptionist',
+        ERoles.RECEPTIONIST,
         dto.email,
         password,
         dto.fullName,
@@ -119,13 +124,13 @@ export class ClinicService {
           village: dto.village,
           contact: dto.contact,
           password,
-          role: isRole,
-          clinicId: user.id,
+          role: ERoles.DOCTOR,
+          clinicId: user.userId,
         },
       });
 
       return this.RegisterUserToDataBase(
-        'doctor',
+        ERoles.DOCTOR,
         dto.email,
         password,
         dto.fullName,
@@ -152,12 +157,12 @@ export class ClinicService {
           village: dto.village,
           contact: dto.contact,
           password,
-          role: isRole,
-          clinicId: user.id,
+          role: ERoles.NURSE,
+          clinicId: user.userId,
         },
       });
       return this.RegisterUserToDataBase(
-        'nurse',
+        ERoles.NURSE,
         dto.email,
         password,
         dto.fullName,
@@ -185,12 +190,12 @@ export class ClinicService {
           village: dto.village,
           contact: dto.contact,
           password,
-          role: isRole,
-          clinicId: user.id,
+          role: ERoles.LABORANTE,
+          clinicId: user.userId,
         },
       });
       return this.RegisterUserToDataBase(
-        'laborante',
+        ERoles.LABORANTE,
         dto.email,
         password,
         dto.fullName,
@@ -198,6 +203,30 @@ export class ClinicService {
         laborante.id,
         passwordGenerated,
       );
-    }
+    } else throw new ConflictException('Role not found');
+  }
+
+  //update password
+
+  async updatePassword(
+    dto: UpdatePasswordDto,
+    user: User,
+  ): Promise<{ message: string }> {
+    const isuser = await this.prisma.user.findFirst({
+      where: { userId: user.userId, AND: [{ clinicId: user.clinicId }] },
+    });
+    if (!isuser) throw new NotFoundException('User not found');
+    if (dto.newPassword !== dto.confirmPassword)
+      throw new ConflictException('Passwords do not match');
+    const isPassword = await argon.verify(isuser.password, dto.oldPassword);
+    if (!isPassword) throw new ForbiddenException('Wrong password');
+    const password = await argon.hash(dto.newPassword);
+    await this.prisma.user.update({
+      where: { id: user.userId },
+      data: {
+        password,
+      },
+    });
+    return { message: 'Password updated' };
   }
 }

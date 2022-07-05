@@ -38,6 +38,7 @@ model Clinic {
   type      String
   password  String
   role      String
+  isActive  Boolean  @default(true)
 
   patient      patient[]
   records      records[]
@@ -51,14 +52,15 @@ model Clinic {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   fullName String
   password String
   email    String
   role     String
   userId   Int
   clinicId Int
-  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  clinic   Clinic  @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  isActive Boolean @default(true)
 }
 
 model patient {
