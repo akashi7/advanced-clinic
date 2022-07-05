@@ -7,6 +7,7 @@ import {
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -16,6 +17,7 @@ import {
 } from './dto/auth.dto';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   constructor(private readonly authservice: AuthService) {}
 

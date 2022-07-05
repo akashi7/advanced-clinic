@@ -6,7 +6,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
-  ApiQuery,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -20,6 +20,7 @@ import { registerEmployee, UpdatePasswordDto } from './dto/clinic.dto';
 @Controller('clinic')
 @UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth()
+@ApiTags('clinic')
 export class ClinicController {
   constructor(private readonly clinic: ClinicService) {}
 
@@ -42,4 +43,7 @@ export class ClinicController {
   UpdatePassword(@Body() dto: UpdatePasswordDto, @GetUser() user: User) {
     return this.clinic.updatePassword(dto, user);
   }
+}
+function Apitags(arg0: string) {
+  throw new Error('Function not implemented.');
 }

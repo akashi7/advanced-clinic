@@ -65,4 +65,34 @@ export class AdminService {
       `${passwordGenerated}`,
     );
   }
+
+  async disableClinic(clinicId: number) {
+    await this.prisma.clinic.update({
+      where: { id: clinicId },
+      data: {
+        isActive: false,
+      },
+    });
+    await this.prisma
+      .$queryRaw`UPDATE "User" SET "isActive" = ${false} WHERE "clinicId" = ${clinicId}`;
+
+    return {
+      message: 'Clinic disabled an its users are disabled',
+    };
+  }
+
+  async enableClinic(clinicId: number) {
+    await this.prisma.clinic.update({
+      where: { id: clinicId },
+      data: {
+        isActive: true,
+      },
+    });
+    await this.prisma
+      .$queryRaw`UPDATE "User" SET "isActive" = ${true} WHERE "clinicId" = ${clinicId}`;
+
+    return {
+      message: 'Clinic enabled an its users are enabled',
+    };
+  }
 }

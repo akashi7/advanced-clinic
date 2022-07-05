@@ -88,7 +88,7 @@ export class AuthService {
 
   async userLogin(dto: userSignInDto): Promise<{}> {
     const user = await this.prisma.user.findFirst({
-      where: { email: dto.email },
+      where: { email: dto.email, AND: [{ isActive: true }] },
     });
     if (!user) throw new NotFoundException('User not found');
     if (!(await argon.verify(user.password, dto.password))) {

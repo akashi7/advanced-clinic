@@ -69,10 +69,6 @@ export class ClinicService {
       : dto.role === 'nurse'
       ? (isRole = ERoles.NURSE)
       : (isRole = ERoles.LABORANTE);
-    const isUser = await this.prisma.user.findFirst({
-      where: { email: dto.email, AND: [{ clinicId: user.userId }] },
-    });
-    if (isUser) throw new ConflictException(`${isRole} arleady registered`);
     if (isRole === ERoles.RECEPTIONIST) {
       const isReceptionist = await this.prisma.receptionist.findFirst({
         where: { email: dto.email },
@@ -215,6 +211,7 @@ export class ClinicService {
     const isuser = await this.prisma.user.findFirst({
       where: { userId: user.userId, AND: [{ clinicId: user.clinicId }] },
     });
+
     if (!isuser) throw new NotFoundException('User not found');
     if (dto.newPassword !== dto.confirmPassword)
       throw new ConflictException('Passwords do not match');
