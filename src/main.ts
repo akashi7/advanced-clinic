@@ -13,7 +13,7 @@ async function bootstrap() {
     .setTitle('Kuranga')
     .setDescription('Kuranga API')
     .setVersion('1.0')
-    .addTag('Kuranga')
+    .addTag('Kuranga APIs')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);

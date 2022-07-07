@@ -95,22 +95,22 @@ export class ReceptionistService {
 
   //search patient
 
-  async searchPatient(dto: searchField): Promise<{ data: patient }> {
-    const field = parseInt(dto.field);
-    const patient = await this.prisma.patient.findFirst({
-      where: {
-        OR: [
-          {
-            id: field,
-          },
-          {
-            contact: field,
-          },
-        ],
-      },
-    });
-    return {
-      data: patient,
-    };
-  }
+  // async searchPatient(dto: searchField): Promise<{ data: patient }> {
+  //   const field = parseInt(dto.field);
+  //   const patient = await this.prisma.patient.findFirst({
+  //     where: {
+  //       OR: [
+  //         {
+  //           id: field,
+  //         },
+  //         {
+  //           contact: field,
+  //         },
+  //       ],
+  //     },
+  //   });
+  //   return {
+  //     data: patient,
+  //   };
+  // }
 }
