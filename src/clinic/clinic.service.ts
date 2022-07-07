@@ -5,12 +5,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { itemList, User } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { registerEmployee, UpdatePasswordDto } from './dto/clinic.dto';
+import {
+  InsuranceDto,
+  insuranceUpdateDto,
+  ItemDto,
+  itemUpdateDto,
+  registerEmployee,
+  UpdatePasswordDto,
+} from './dto/clinic.dto';
 
 @Injectable()
 export class ClinicService {
@@ -69,6 +76,7 @@ export class ClinicService {
       : dto.role === 'nurse'
       ? (isRole = ERoles.NURSE)
       : (isRole = ERoles.LABORANTE);
+
     if (isRole === ERoles.RECEPTIONIST) {
       const isReceptionist = await this.prisma.receptionist.findFirst({
         where: { email: dto.email },
@@ -102,6 +110,7 @@ export class ClinicService {
         passwordGenerated,
       );
     }
+
     if (isRole === ERoles.DOCTOR) {
       const isDoctor = await this.prisma.doctor.findFirst({
         where: { email: dto.email },
@@ -135,6 +144,7 @@ export class ClinicService {
         passwordGenerated,
       );
     }
+
     if (isRole === ERoles.NURSE) {
       const isNurse = await this.prisma.nurse.findFirst({
         where: { email: dto.email },
@@ -167,6 +177,7 @@ export class ClinicService {
         passwordGenerated,
       );
     }
+
     if (isRole === ERoles.LABORANTE) {
       const isLaborante = await this.prisma.laborante.findFirst({
         where: { email: dto.email },
@@ -225,5 +236,81 @@ export class ClinicService {
       },
     });
     return { message: 'Password updated' };
+  }
+
+  async registerInsurance(dto: InsuranceDto, user: User) {
+    const isInsurance = await this.prisma.insurance.findFirst({
+      where: { name: dto.name },
+    });
+    if (isInsurance)
+      throw new ConflictException('Insurance already registered');
+    const insurance = await this.prisma.insurance.create({
+      data: {
+        name: dto.name,
+        rate: dto.rate,
+        clinicId: user.userId,
+      },
+    });
+    return insurance;
+  }
+
+  async registerClinicItems(dto: ItemDto, user: User): Promise<itemList> {
+    const isItem = await this.prisma.itemList.findFirst({
+      where: { itemName: dto.itemName },
+    });
+    if (isItem) throw new ConflictException('Item already registered');
+    const item = await this.prisma.itemList.create({
+      data: {
+        itemName: dto.itemName,
+        priceTag: dto.priceTag,
+        clinicId: user.userId,
+      },
+    });
+    return item;
+  }
+
+  async updateInsurance(
+    id: number,
+    dto: insuranceUpdateDto,
+  ): Promise<{ message: string }> {
+    await this.prisma.insurance.update({
+      where: { id },
+      data: {
+        rate: dto.rate,
+      },
+    });
+    return {
+      message: 'Insurance updated',
+    };
+  }
+
+  async deleteInsurance(id: number): Promise<{ message: string }> {
+    await this.prisma.insurance.delete({
+      where: { id },
+    });
+    return {
+      message: 'Insurance deleted',
+    };
+  }
+
+  async updateItem(dto: itemUpdateDto, id: number) {
+    await this.prisma.itemList.update({
+      where: { id },
+      data: {
+        priceTag: dto.priceTag,
+      },
+    });
+    return {
+      message: 'Item updated',
+    };
+  }
+
+  async deleteItem(id: number): Promise<{ message: string }> {
+    await this.prisma.itemList.delete({
+      where: { id },
+    });
+    return {
+      message: 'Item deleted',
+    };
   }
 }
