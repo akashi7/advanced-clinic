@@ -81,6 +81,7 @@ export class ReceptionistService {
   //see records
 
   async seeRecords(): Promise<record_details[]> {
+    let k = 1;
     const records = await this.prisma.record_details.findMany({
       where: { destination: ERecords.RECEPTONIST_DESTINATION },
     });
