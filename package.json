@@ -24,7 +24,7 @@
     "prisma:reset": "npx prisma migrate reset",
     "prisma:init": "npx prisma init",
     "prisma:migrate": "npx prisma migrate dev",
-    "postinstall": "prisma introspect && prisma generate"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.7.1",
