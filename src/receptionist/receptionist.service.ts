@@ -11,8 +11,7 @@ export class ReceptionistService {
   constructor(private readonly prisma: PrismaService, mail: MailService) {}
 
   //register patient
-  async registerPatient(dto: registerPatientDto, user: User): Promise<patient> {
-    const l = 1;
+  async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
     const contact = parseInt(dto.contact);
     const isPatient = await this.prisma.patient.findFirst({
       where: { contact: contact },
@@ -35,7 +34,7 @@ export class ReceptionistService {
         marital_status: dto.marital_status,
         closeFullName: dto.closeFullName,
         closePhone: dto.closePhone,
-        clinicId: user.id,
+        clinicId: user.clinicId,
         address: dto.address,
       },
     });
@@ -45,7 +44,7 @@ export class ReceptionistService {
   //see all patients
   async getAllPatients(user: User): Promise<patient[]> {
     const patients = await this.prisma.patient.findMany({
-      where: { clinicId: user.id },
+      where: { clinicId: user.clinicId },
     });
     return patients;
   }
@@ -60,7 +59,7 @@ export class ReceptionistService {
     const record = await this.prisma.records.create({
       data: {
         patientId: pId,
-        clinicId: user.id,
+        clinicId: user.clinicId,
         fullNames,
         insurance,
       },

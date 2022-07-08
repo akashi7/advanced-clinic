@@ -38,6 +38,7 @@ import {
 
 @Controller('clinic')
 @UseGuards(JwtGuard, RolesGuard)
+@AllowRoles(ERoles.CLINIC)
 @ApiBearerAuth()
 @ApiTags('clinic')
 export class ClinicController {
@@ -48,7 +49,6 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'User already exists' })
   @ApiBody({ type: registerEmployee })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @AllowRoles(ERoles.CLINIC)
   RegisterUser(@Body() dto: registerEmployee, @GetUser() clinic: User) {
     return this.clinic.RegisterUser(dto, clinic);
   }

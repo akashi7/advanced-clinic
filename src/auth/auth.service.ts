@@ -30,12 +30,19 @@ export class AuthService {
     email: string,
     fullName: string,
     role: string,
+    clinicId: number,
   ): {
-    data: { userId: number; email: string; fullName: string; role: string };
+    data: {
+      userId: number;
+      email: string;
+      fullName: string;
+      role: string;
+      clinicId: number;
+    };
     token: string;
   } {
     const token = this.Jwt.sign(
-      { userId, email, fullName, role },
+      { userId, email, fullName, role, clinicId },
       { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
     );
     return {
@@ -44,6 +51,7 @@ export class AuthService {
         email,
         fullName,
         role,
+        clinicId,
       },
       token,
     };
@@ -83,6 +91,7 @@ export class AuthService {
         admin.email,
         admin.contact,
         admin.role,
+        1,
       );
   }
 
@@ -99,6 +108,7 @@ export class AuthService {
       user.email,
       user.fullName,
       user.role,
+      user.clinicId,
     );
   }
 }
