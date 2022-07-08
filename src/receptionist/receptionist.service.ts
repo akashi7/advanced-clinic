@@ -49,7 +49,7 @@ export class ReceptionistService {
     return patients;
   }
 
-  //send to nurse
+  //send to nurse for examination
   async sendToNurse(
     pId: number,
     user: User,

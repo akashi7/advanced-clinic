@@ -49,7 +49,6 @@ export class DoctorService {
     dto: examDto,
   ): Promise<{ message: string }> {
     const exam = dto.exams.split(',');
-    console.log({ exam });
     const record = await this.prisma.record_details.findFirst({
       where: {
         id,
