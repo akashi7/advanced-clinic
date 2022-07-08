@@ -45,8 +45,8 @@ export class ReceptionistController {
   seeRecords() {
     return this.receptionist.seeRecords();
   }
-  @Post('search-patient')
-  searchPatient(@Body() dto: any) {
-    return this.receptionist.searchPatient(dto);
-  }
+  // @Post('search-patient')
+  // searchPatient(@Body() dto: any) {
+  //   return this.receptionist.searchPatient(dto);
+  // }
 }
