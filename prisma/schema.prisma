@@ -102,15 +102,14 @@ model records {
 }
 
 model record_details {
-  id           Int      @id @default(autoincrement())
-  recordId     Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  consultation String
-  fullNames    String
-  destination  String
-  status       String
-  record       records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+  id          Int      @id @default(autoincrement())
+  recordId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fullNames   String
+  destination String
+  status      String
+  record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 model sign_vital {

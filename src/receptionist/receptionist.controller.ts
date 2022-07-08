@@ -37,8 +37,9 @@ export class ReceptionistController {
     @Query('id', ParseIntPipe) id: number,
     @GetUser() user: User,
     @Query('names') fullName: string,
+    @Query('insurance') insurance:string
   ) {
-    return this.receptionist.sendToNurse(id, user, fullName);
+    return this.receptionist.sendToNurse(id, user, fullName,insurance);
   }
 
   @Get('recept-data')

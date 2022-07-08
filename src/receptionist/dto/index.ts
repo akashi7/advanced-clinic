@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class registerPatientDto {
   @IsString()
@@ -45,10 +45,7 @@ export class registerPatientDto {
 export class RecordDto {
   @IsString()
   @IsNotEmpty()
-  consultation: string;
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
+  insurance: string;
 }
 
 export class searchField {

@@ -69,7 +69,6 @@ export class NurseService {
     await this.prisma.record_details.create({
       data: {
         recordId: record.recordId,
-        consultation: record.consultation,
         destination: ERecords.DOCTOR_DESTINATION,
         status: EStatus.UNREAD,
         fullNames,

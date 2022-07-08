@@ -9,10 +9,12 @@
 
 */
 -- AlterTable
-ALTER TABLE "records" DROP COLUMN "consultation",
+ALTER TABLE "records" DROP COLUMN "consultation"
+,
 DROP COLUMN "price",
 ADD COLUMN     "insurance" TEXT NOT NULL;
 
 -- AlterTable
-ALTER TABLE "sign_vital" DROP COLUMN "hasInsurance",
+ALTER TABLE "sign_vital" DROP COLUMN "hasInsurance"
+,
 DROP COLUMN "insurance";

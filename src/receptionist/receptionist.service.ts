@@ -54,25 +54,20 @@ export class ReceptionistService {
     pId: number,
     user: User,
     fullNames: string,
+    insurance: string,
   ): Promise<{ message: string }> {
-    let dto = new RecordDto();
-    dto.consultation = 'consultation';
-    dto.price = 500;
-
     const record = await this.prisma.records.create({
       data: {
         patientId: pId,
-        consultation: dto.consultation,
-        price: dto.price,
         clinicId: user.id,
         fullNames,
+        insurance,
       },
     });
 
     await this.prisma.record_details.create({
       data: {
         recordId: record.record_code,
-        consultation: record.consultation,
         destination: ERecords.NURSE_DESTINATION,
         status: EStatus.UNREAD,
         fullNames,
