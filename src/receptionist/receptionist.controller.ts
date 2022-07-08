@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   Body,
   Controller,
@@ -39,6 +40,7 @@ export class ReceptionistController {
   @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
   registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
+    let v = 1;
     return this.receptionist.RegisterPatient(dto, user);
   }
 
