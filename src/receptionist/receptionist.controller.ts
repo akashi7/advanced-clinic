@@ -7,6 +7,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
@@ -18,15 +27,23 @@ import { ReceptionistService } from './receptionist.service';
 @Controller('receptionist')
 @UseGuards(JwtGuard, RolesGuard)
 @AllowRoles(ERoles.RECEPTIONIST)
+@ApiTags('receptionist')
+@ApiBearerAuth()
 export class ReceptionistController {
   constructor(private readonly receptionist: ReceptionistService) {}
 
   //register patient
+  @ApiCreatedResponse({ description: 'Patient created successfully' })
+  @ApiConflictResponse({ description: 'Patient already exists' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
   registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
-    return this.receptionist.registerPatient(dto, user);
+    return this.receptionist.RegisterPatient(dto, user);
   }
 
+  @ApiOkResponse({ description: 'Patient successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-patients')
   getAllPatients(@GetUser() user: User) {
     return this.receptionist.getAllPatients(user);
