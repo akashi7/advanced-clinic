@@ -4,7 +4,7 @@ import { patient, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RecordDto, registerPatientDto, searchField } from './dto';
+import { registerPatientDto } from './dto';
 
 @Injectable()
 export class ReceptionistService {
@@ -12,6 +12,7 @@ export class ReceptionistService {
 
   //register patient
   async registerPatient(dto: registerPatientDto, user: User): Promise<patient> {
+    const l = 1;
     const contact = parseInt(dto.contact);
     const isPatient = await this.prisma.patient.findFirst({
       where: { contact: contact },
