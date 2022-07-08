@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   Body,
   Controller,
@@ -16,7 +17,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
@@ -39,6 +39,7 @@ export class ReceptionistController {
   @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
   registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
+    let v = 1;
     return this.receptionist.RegisterPatient(dto, user);
   }
 
