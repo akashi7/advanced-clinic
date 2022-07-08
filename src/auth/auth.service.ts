@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   async userLogin(dto: userSignInDto): Promise<{}> {
-    let verified = false;
+    let verified = true;
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email, AND: [{ isActive: true }] },
     });
