@@ -119,6 +119,7 @@ export class ClinicController {
   @ApiOkResponse({ description: 'Item removed successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
+  @HttpCode(200)
   DeleteItem(@Query('id', ParseIntPipe) id: number) {
     return this.clinic.deleteItem(id);
   }

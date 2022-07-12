@@ -25,7 +25,9 @@ export class AdminService {
   //register- new clinic
   async RegisterClinic(dto: ClinicDto) {
     const clinicExist = await this.prisma.clinic.findFirst({
-      where: { email: dto.email },
+      where: {
+        OR: [{ clinicCode: dto.clicnicCode, email: dto.email }],
+      },
     });
     if (clinicExist)
       throw new ConflictException('Email clinic arleady registered');
@@ -40,11 +42,12 @@ export class AdminService {
         cell: dto.cell,
         village: dto.village,
         email: dto.email,
-        password,
-        contact: dto.contact,
         role: ERoles.CLINIC,
-        type: 'o',
-        address: dto.address,
+        contactEmail: dto.contactEmail,
+        contactPhone: dto.contactPhone,
+        contactName: dto.contactName,
+        contactTitle: dto.contactTitle,
+        clinicCode: dto.clicnicCode,
       },
     });
     await this.prisma.user.create({
@@ -57,7 +60,6 @@ export class AdminService {
         userId: clinic.id,
       },
     });
-    delete clinic.password;
     return this.mail.sendMail(
       clinic.email,
       `${clinic.name} credentials`,

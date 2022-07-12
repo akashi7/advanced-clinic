@@ -12,7 +12,6 @@ model Admin {
   email     String
   password  String
   fullNames String
-  type      String?
   contact   String
   role      String
   createdAt DateTime @default(now())
@@ -20,22 +19,23 @@ model Admin {
 }
 
 model Clinic {
-  id        Int      @id @default(autoincrement())
-  name      String
-  address   String
-  contact   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  type      String
-  password  String
-  role      String
-  isActive  Boolean  @default(true)
+  id           Int      @id @default(autoincrement())
+  name         String
+  clinicCode   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  province     String
+  district     String
+  sector       String
+  cell         String
+  village      String
+  email        String
+  contactEmail String
+  contactPhone String
+  contactName  String
+  contactTitle String
+  role         String
+  isActive     Boolean  @default(true)
 
   patient      patient[]
   records      records[]
@@ -65,18 +65,23 @@ model patient {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   fullName       String
-  address        String
-  contact        Int
+  phone          Int
   DOB            String
   gender         String
-  email          String
+  email          String?
   province       String
   district       String
   sector         String
   village        String
-  marital_status String
-  closeFullName  String
-  closePhone     String
+  marital_status String?
+  isInfant       Boolean? @default(false)
+  GuardianNames  String?
+  GuardianPhone  String?
+  idNumber       String
+  MotherName     String?
+  MotherPhone    String?
+  FatherName     String?
+  FatherPhone    String?
 
   clinicId   Int
   clinic     Clinic       @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -92,6 +97,7 @@ model records {
   patientId      Int
   fullNames      String
   insurance      String
+  insuranceCode  Int
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -196,15 +202,10 @@ model receptionist {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -215,15 +216,10 @@ model nurse {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -234,15 +230,10 @@ model doctor {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -253,15 +244,10 @@ model laborante {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)

@@ -1,19 +1,22 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
   @IsString()
   @IsNotEmpty()
   fullName: string;
-  @ApiProperty({ type: String, required: true })
-  @IsString()
+  @ApiProperty({ type: Number, required: true })
   @IsNotEmpty()
-  address: string;
-  @ApiProperty({ type: String, required: true })
-  @IsNotEmpty()
-  contact: any;
+  @IsNumber()
+  phone: number;
   @ApiProperty({ type: String, required: true })
   @IsString()
   @IsString()
@@ -24,7 +27,6 @@ export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
   gender: string;
   @IsEmail()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   email: string;
   @IsString()
@@ -44,17 +46,33 @@ export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
   village: string;
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   marital_status: string;
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
-  closeFullName: string;
+  GuardianNames: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  GuardianPhone: string;
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
-  closePhone: string;
+  idNumber: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  MotherName: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  MotherPhone: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  FatherName: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  FatherPhone: string;
+  @IsBoolean()
+  @ApiProperty({ type: Boolean, required: true })
+  isInfant: boolean;
 }
 
 export class RecordDto {

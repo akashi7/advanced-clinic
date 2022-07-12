@@ -12,9 +12,39 @@ export class ReceptionistService {
 
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
-    const contact = parseInt(dto.contact);
+    if (dto.isInfant && dto.isInfant === true) {
+      const isInfants = await this.prisma.patient.findFirst({
+        where: { AND: [{ isInfant: true }, { idNumber: dto.idNumber }] },
+      });
+      if (isInfants) throw new ConflictException('Infant already exists');
+      const Infant = await this.prisma.patient.create({
+        data: {
+          fullName: dto.fullName,
+          DOB: dto.DOB,
+          phone: dto.phone,
+          gender: dto.gender,
+          sector: dto.sector,
+          village: dto.village,
+          province: dto.province,
+          district: dto.district,
+          email: dto.email,
+          marital_status: dto.marital_status,
+          clinicId: user.clinicId,
+          GuardianNames: dto.GuardianNames,
+          GuardianPhone: dto.GuardianPhone,
+          idNumber: dto.idNumber,
+          isInfant: dto.isInfant,
+          FatherName: dto.FatherName,
+          MotherName: dto.MotherName,
+          FatherPhone: dto.FatherPhone,
+          MotherPhone: dto.MotherPhone,
+        },
+      });
+      return Infant;
+    }
+
     const isPatient = await this.prisma.patient.findFirst({
-      where: { contact: contact },
+      where: { idNumber: dto.idNumber },
     });
     if (isPatient)
       throw new ConflictException(
@@ -24,18 +54,23 @@ export class ReceptionistService {
       data: {
         fullName: dto.fullName,
         DOB: dto.DOB,
-        email: dto.email,
-        contact,
-        province: dto.province,
-        district: dto.district,
+        phone: dto.phone,
         gender: dto.gender,
         sector: dto.sector,
         village: dto.village,
+        province: dto.province,
+        district: dto.district,
+        email: dto.email,
         marital_status: dto.marital_status,
-        closeFullName: dto.closeFullName,
-        closePhone: dto.closePhone,
         clinicId: user.clinicId,
-        address: dto.address,
+        GuardianNames: dto.GuardianNames,
+        GuardianPhone: dto.GuardianPhone,
+        idNumber: dto.idNumber,
+        isInfant: dto.isInfant,
+        FatherName: dto.FatherName,
+        MotherName: dto.MotherName,
+        FatherPhone: dto.FatherPhone,
+        MotherPhone: dto.MotherPhone,
       },
     });
     return patient;
@@ -55,6 +90,7 @@ export class ReceptionistService {
     user: User,
     fullNames: string,
     insurance: string,
+    insuranceCode: number,
   ): Promise<{ message: string }> {
     const record = await this.prisma.records.create({
       data: {
@@ -62,6 +98,7 @@ export class ReceptionistService {
         clinicId: user.clinicId,
         fullNames,
         insurance,
+        insuranceCode,
       },
     });
 
@@ -81,11 +118,9 @@ export class ReceptionistService {
   //see records
 
   async seeRecords(): Promise<record_details[]> {
-    let k = 1;
     const records = await this.prisma.record_details.findMany({
       where: { destination: ERecords.RECEPTONIST_DESTINATION },
     });
-
     return records;
   }
 
@@ -110,3 +145,23 @@ export class ReceptionistService {
   //   };
   // }
 }
+
+// data: {
+//   fullName: dto.fullName,
+//   DOB: dto.DOB,
+//   phone: dto.phone,
+//   gender: dto.gender,
+//   sector: dto.sector,
+//   village: dto.village,
+//   email:dto.email,
+//   marital_status: dto.marital_status,
+//   clinicId: user.clinicId,
+//   GuardianNames: dto.GuardianNames,
+//   GuardianPhone: dto.GuardianPhone,
+//   idNumber: dto.idNumber,
+//   isInfant: dto.isInfant,
+//   FatherName: dto.FatherName,
+//   MotherName: dto.MotherName,
+//   FatherPhone: dto.FatherPhone,
+//   MotherPhone: dto.MotherPhone,
+// },

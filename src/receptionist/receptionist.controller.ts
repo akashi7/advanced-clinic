@@ -40,11 +40,10 @@ export class ReceptionistController {
   @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
   registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
-    let v = 1;
     return this.receptionist.RegisterPatient(dto, user);
   }
 
-  @ApiOkResponse({ description: 'Patient successfully' })
+  @ApiOkResponse({ description: 'All Patients fetched successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-patients')
   getAllPatients(@GetUser() user: User) {
@@ -57,8 +56,15 @@ export class ReceptionistController {
     @GetUser() user: User,
     @Query('names') fullName: string,
     @Query('insurance') insurance: string,
+    @Query('insuranceCode', ParseIntPipe) insuranceCode: number,
   ) {
-    return this.receptionist.sendToNurse(id, user, fullName, insurance);
+    return this.receptionist.sendToNurse(
+      id,
+      user,
+      fullName,
+      insurance,
+      insuranceCode,
+    );
   }
 
   @Get('recept-data')

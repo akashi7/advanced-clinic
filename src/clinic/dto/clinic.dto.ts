@@ -14,10 +14,6 @@ export class ClinicDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
-  contact: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
   province: string;
   @IsString()
   @IsNotEmpty()
@@ -39,6 +35,26 @@ export class ClinicDto {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String, format: 'email' })
   email: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  clicnicCode: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactEmail: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactPhone: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactName: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactTitle: string;
 }
 
 export class registerEmployee {
@@ -46,34 +62,6 @@ export class registerEmployee {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
   fullName: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  address: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  contact: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  province: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  district: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  sector: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  cell: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  village: string;
   @IsEmail()
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String, format: 'email' })
@@ -82,6 +70,14 @@ export class registerEmployee {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
   role: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  gender: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  phone: string;
 }
 
 export class UpdatePasswordDto {
