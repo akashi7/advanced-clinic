@@ -40,12 +40,14 @@ model Clinic {
   patient      patient[]
   records      records[]
   insurance    insurance[]
-  itemList     itemList[]
   receptionist receptionist[]
   nurse        nurse[]
   doctor       doctor[]
   laborante    laborante[]
   User         User[]
+  examList     examList[]
+  consultation consultation[]
+  priceList    priceList[]
 }
 
 model User {
@@ -146,33 +148,39 @@ model exam {
   exam        String[]
 }
 
-model itemList {
-  id              Int               @id @default(autoincrement())
-  itemName        String
-  priceTag        Int
-  priceList       priceList[]
-  clinicId        Int
-  clinic          Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  invoice_details invoice_details[]
+model examList {
+  id          Int    @id @default(autoincrement())
+  Name        String
+  Code        String
+  description String
+  clinicId    Int
+  clinic      Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model consultation {
+  id           Int    @id @default(autoincrement())
+  type         String
+  description  String
+  clinicId     Int
+  clinic       Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  consultation String
 }
 
 model priceList {
-  id          Int       @id @default(autoincrement())
-  itemName    String
-  price       Int
-  itemId      Int
-  item        itemList  @relation(fields: [itemId], references: [id], onUpdate: Cascade)
-  insuranceId Int
-  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade)
+  id        Int    @id @default(autoincrement())
+  itemName  String
+  price     Int
+  insurance String
+  clinicId  Int
+  clinic    Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model insurance {
-  id        Int         @id @default(autoincrement())
-  name      String
-  rate      Int
-  priceList priceList[]
-  clinicId  Int
-  clinic    Clinic      @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  id       Int    @id @default(autoincrement())
+  name     String
+  rate     Int
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model invoice {
@@ -188,13 +196,11 @@ model invoice {
 }
 
 model invoice_details {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   invoiceId Int
-  invoice   invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  invoice   invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
   itemName  String
   price     Int
-  itemId    Int
-  item      itemList @relation(fields: [itemId], references: [id], onUpdate: Cascade)
 }
 
 model receptionist {

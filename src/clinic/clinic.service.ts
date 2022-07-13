@@ -5,16 +5,23 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { itemList, User } from '@prisma/client';
+import {
+  consultation,
+  examList,
+  insurance,
+  priceList,
+  User,
+} from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  consultationDto,
+  ExamDto,
   InsuranceDto,
   insuranceUpdateDto,
-  ItemDto,
-  itemUpdateDto,
+  PriceListDto,
   registerEmployee,
   UpdatePasswordDto,
 } from './dto/clinic.dto';
@@ -234,21 +241,6 @@ export class ClinicService {
     return insurance;
   }
 
-  async registerClinicItems(dto: ItemDto, user: User): Promise<itemList> {
-    const isItem = await this.prisma.itemList.findFirst({
-      where: { itemName: dto.itemName },
-    });
-    if (isItem) throw new ConflictException('Item already registered');
-    const item = await this.prisma.itemList.create({
-      data: {
-        itemName: dto.itemName,
-        priceTag: dto.priceTag,
-        clinicId: user.userId,
-      },
-    });
-    return item;
-  }
-
   async updateInsurance(
     id: number,
     dto: insuranceUpdateDto,
@@ -264,6 +256,13 @@ export class ClinicService {
     };
   }
 
+  async getAllInsurance(user: User): Promise<insurance[]> {
+    const insurance = await this.prisma.insurance.findMany({
+      where: { clinicId: user.userId },
+    });
+    return insurance;
+  }
+
   async deleteInsurance(id: number): Promise<{ message: string }> {
     await this.prisma.insurance.delete({
       where: { id },
@@ -273,24 +272,194 @@ export class ClinicService {
     };
   }
 
-  async updateItem(dto: itemUpdateDto, id: number) {
-    await this.prisma.itemList.update({
-      where: { id },
+  async registerConsultation(
+    dto: consultationDto,
+    user: User,
+  ): Promise<{ message: string }> {
+    const isConsultation = await this.prisma.consultation.findFirst({
+      where: { type: dto.type },
+    });
+    if (isConsultation)
+      throw new ConflictException('Consultation already registered');
+    await this.prisma.consultation.create({
       data: {
-        priceTag: dto.priceTag,
+        type: dto.type,
+        description: dto.description,
+        clinicId: user.userId,
+        consultation: dto.consultation,
       },
     });
     return {
-      message: 'Item updated',
+      message: 'Consultation registered',
     };
   }
 
-  async deleteItem(id: number): Promise<{ message: string }> {
-    await this.prisma.itemList.delete({
+  async updateConsultation(
+    dto: consultationDto,
+    id: number,
+  ): Promise<{ message: string }> {
+    const isConsultation = await this.prisma.consultation.findFirst({
+      where: { id },
+    });
+
+    let type: any, description: any, consultation: any;
+
+    dto.type ? (type = dto.type) : (type = isConsultation.type);
+    dto.description
+      ? (description = dto.description)
+      : (description = isConsultation.description);
+    dto.consultation
+      ? (consultation = dto.consultation)
+      : (consultation = isConsultation.consultation);
+
+    await this.prisma.consultation.update({
+      where: { id },
+      data: {
+        type,
+        description,
+        consultation,
+      },
+    });
+    return {
+      message: 'Consultation updated',
+    };
+  }
+
+  async deleteConsultation(id: number): Promise<{ message: string }> {
+    await this.prisma.consultation.delete({
       where: { id },
     });
     return {
-      message: 'Item deleted',
+      message: 'Consultation deleted',
     };
+  }
+
+  async getAllConsultation(user: User): Promise<consultation[]> {
+    const consultation = await this.prisma.consultation.findMany({
+      where: { clinicId: user.userId },
+    });
+    return consultation;
+  }
+
+  async registerExams(dto: ExamDto, user: User): Promise<{ message: string }> {
+    const isExam = await this.prisma.examList.findFirst({
+      where: { Code: dto.Code },
+    });
+    if (isExam) throw new ConflictException('Exam already registered');
+    await this.prisma.examList.create({
+      data: {
+        Name: dto.Name,
+        description: dto.description,
+        Code: dto.Code,
+        clinicId: user.userId,
+      },
+    });
+    return {
+      message: 'Exam registered',
+    };
+  }
+
+  async updateExam(dto: ExamDto, id: number): Promise<{ message: string }> {
+    const isExam = await this.prisma.examList.findFirst({
+      where: { id },
+    });
+
+    let Name: any, description: any, Code: any;
+
+    dto.Name ? (Name = dto.Name) : (Name = isExam.Name);
+    dto.description
+      ? (description = dto.description)
+      : (description = isExam.description);
+    dto.Code ? (Code = dto.Code) : (Code = isExam.Code);
+
+    await this.prisma.examList.update({
+      where: { id },
+      data: {
+        Name,
+        description,
+        Code,
+      },
+    });
+    return {
+      message: 'Exam updated',
+    };
+  }
+
+  async deleteExams(id: number): Promise<{ message: string }> {
+    await this.prisma.examList.delete({
+      where: { id },
+    });
+    return {
+      message: 'Exam deleted',
+    };
+  }
+
+  async getAllExams(user: User): Promise<examList[]> {
+    const exam = await this.prisma.examList.findMany({
+      where: { clinicId: user.userId },
+    });
+    return exam;
+  }
+
+  async createPriceList(
+    dto: PriceListDto,
+    user: User,
+  ): Promise<{ message: string }> {
+    await this.prisma.priceList.create({
+      data: {
+        itemName: dto.itemName,
+        price: dto.price,
+        insurance: dto.insurance,
+        clinicId: user.userId,
+      },
+    });
+    return {
+      message: 'PriceList created',
+    };
+  }
+  async updatePriceList(
+    dto: PriceListDto,
+    id: number,
+  ): Promise<{ message: string }> {
+    const isPriceList = await this.prisma.priceList.findFirst({
+      where: { id },
+    });
+
+    let itemName: any, price: any, insurance: any;
+
+    dto.itemName
+      ? (itemName = dto.itemName)
+      : (itemName = isPriceList.itemName);
+    dto.price ? (price = dto.price) : (price = isPriceList.price);
+    dto.insurance
+      ? (insurance = dto.insurance)
+      : (insurance = isPriceList.insurance);
+
+    await this.prisma.priceList.update({
+      where: { id },
+      data: {
+        itemName,
+        price,
+        insurance,
+      },
+    });
+    return {
+      message: 'PriceList updated',
+    };
+  }
+  async deletePriceList(id: number): Promise<{ message: string }> {
+    await this.prisma.priceList.delete({
+      where: { id },
+    });
+    return {
+      message: 'PriceList deleted',
+    };
+  }
+
+  async getAllPriceList(user: User): Promise<priceList[]> {
+    const priceList = await this.prisma.priceList.findMany({
+      where: { clinicId: user.userId },
+    });
+    return priceList;
   }
 }

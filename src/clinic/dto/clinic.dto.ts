@@ -105,16 +105,6 @@ export class InsuranceDto {
   @ApiProperty({ required: true, type: Number })
   rate: number;
 }
-export class ItemDto {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  itemName: string;
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: Number })
-  priceTag: number;
-}
 
 export class insuranceUpdateDto {
   @IsNumber()
@@ -123,9 +113,41 @@ export class insuranceUpdateDto {
   rate: number;
 }
 
-export class itemUpdateDto {
+export class consultationDto {
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  type: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  description: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  consultation: string;
+}
+
+export class ExamDto {
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  Name: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  Code: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  description: string;
   @IsNumber()
-  @IsNotEmpty()
   @ApiProperty({ required: true, type: Number })
   priceTag: number;
+}
+
+export class PriceListDto {
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  itemName: string;
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  price: number;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  insurance: string;
 }

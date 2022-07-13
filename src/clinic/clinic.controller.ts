@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   ParseIntPipe,
   Patch,
@@ -28,10 +29,11 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { ClinicService } from './clinic.service';
 import {
+  consultationDto,
+  ExamDto,
   InsuranceDto,
   insuranceUpdateDto,
-  ItemDto,
-  itemUpdateDto,
+  PriceListDto,
   registerEmployee,
   UpdatePasswordDto,
 } from './dto/clinic.dto';
@@ -44,23 +46,30 @@ import {
 export class ClinicController {
   constructor(private readonly clinic: ClinicService) {}
 
-  @Post('register-user')
   @ApiCreatedResponse({ description: 'User created successfully' })
   @ApiConflictResponse({ description: 'User already exists' })
   @ApiBody({ type: registerEmployee })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post('register-user')
   RegisterUser(@Body() dto: registerEmployee, @GetUser() clinic: User) {
     return this.clinic.RegisterUser(dto, clinic);
   }
 
-  @Patch('update-clinic')
   @ApiCreatedResponse({ description: 'Clinic password reset successfully' })
   @ApiConflictResponse({ description: 'Clinic password reset failed' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiBody({ type: UpdatePasswordDto })
+  @Patch('update-clinic')
   UpdatePassword(@Body() dto: UpdatePasswordDto, @GetUser() user: User) {
     return this.clinic.updatePassword(dto, user);
+  }
+
+  @ApiOkResponse({ description: 'All insurances returned successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('all-insurance')
+  ClinicGetAllInsurance(@GetUser() user: User) {
+    return this.clinic.getAllInsurance(user);
   }
 
   @ApiCreatedResponse({ description: 'Insurance created successfully' })
@@ -70,15 +79,6 @@ export class ClinicController {
   @Post('register-insurance')
   RegisterInsurance(@Body() dto: InsuranceDto, @GetUser() user: User) {
     return this.clinic.registerInsurance(dto, user);
-  }
-
-  @ApiCreatedResponse({ description: 'Item created successfully' })
-  @ApiConflictResponse({ description: 'Item already exists' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBody({ type: ItemDto })
-  @Post('register-item')
-  RegisterItem(@Body() dto: ItemDto, @GetUser() user: User) {
-    return this.clinic.registerClinicItems(dto, user);
   }
 
   @ApiOkResponse({ description: 'Insurance updated successfully' })
@@ -102,25 +102,109 @@ export class ClinicController {
     return this.clinic.deleteInsurance(id);
   }
 
-  @ApiOkResponse({ description: 'Item updated successfully' })
+  @ApiOkResponse({ description: 'All consultations returned successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBody({ type: itemUpdateDto })
-  @ApiQuery({ name: 'id', type: Number })
-  @HttpCode(200)
-  @Patch('update-item')
-  UpdateItem(
-    @Body() dto: itemUpdateDto,
-    @Query('id', ParseIntPipe) id: number,
-  ) {
-    return this.clinic.updateItem(dto, id);
+  @Get('all-consultation')
+  ClinicGetAllConsultation(@GetUser() user: User) {
+    return this.clinic.getAllConsultation(user);
   }
 
-  @Delete('delete-item')
-  @ApiOkResponse({ description: 'Item removed successfully' })
+  @ApiCreatedResponse({ description: 'Consultation added successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiConflictResponse({ description: 'Consultation already exists' })
+  @ApiBody({ type: consultationDto })
+  @Post('register-consultation')
+  RegisterConsultation(@Body() dto: consultationDto, @GetUser() user: User) {
+    return this.clinic.registerConsultation(dto, user);
+  }
+  @ApiOkResponse({ description: 'Consultation updated successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @ApiBody({ type: consultationDto })
+  @HttpCode(200)
+  @Patch('update-consultation')
+  UpdateConsultation(
+    @Body() dto: consultationDto,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
+    return this.clinic.updateConsultation(dto, id);
+  }
+
+  @ApiOkResponse({ description: 'Consultation deleted successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
-  DeleteItem(@Query('id', ParseIntPipe) id: number) {
-    return this.clinic.deleteItem(id);
+  @Delete('delete-consultation')
+  DeleteConsultation(@Query('id', ParseIntPipe) id: number) {
+    return this.clinic.deleteConsultation(id);
+  }
+
+  @ApiOkResponse({ description: 'All exams returned successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('all-exam')
+  ClinicGetAllExam(@GetUser() user: User) {
+    return this.clinic.getAllExams(user);
+  }
+
+  @ApiCreatedResponse({ description: 'Exam added successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiConflictResponse({ description: 'Exam already exists' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post('register-exam')
+  RegisterExaminations(@Body() dto: ExamDto, @GetUser() user: User) {
+    return this.clinic.registerExams(dto, user);
+  }
+
+  @ApiOkResponse({ description: 'Exam updated successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @ApiBody({ type: ExamDto })
+  @HttpCode(200)
+  @Patch('update-exam')
+  UpdateExam(@Body() dto: ExamDto, @Query('id', ParseIntPipe) id: number) {
+    return this.clinic.updateExam(dto, id);
+  }
+
+  @ApiOkResponse({ description: 'Exam deleted successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @HttpCode(200)
+  @Delete('delete-exam')
+  DeleteExam(@Query('id', ParseIntPipe) id: number) {
+    return this.clinic.deleteExams(id);
+  }
+
+  @ApiOkResponse({ description: 'All price lists returned successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('all-price-list')
+  ClinicGetAllPriceList(@GetUser() user: User) {
+    return this.clinic.getAllPriceList(user);
+  }
+
+  @ApiCreatedResponse({ description: 'Pricelist created successfully' })
+  @ApiBody({ type: PriceListDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post('register-pricelist')
+  RegisterPriceList(dto: PriceListDto, @GetUser() user: User) {
+    return this.clinic.createPriceList(dto, user);
+  }
+
+  @ApiOkResponse({ description: 'Pricelist updated successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @ApiBody({ type: PriceListDto })
+  @HttpCode(200)
+  @Patch('update-pricelist')
+  UpdatePriceList(@Body() dto: PriceListDto, id: number) {
+    return this.clinic.updatePriceList(dto, id);
+  }
+
+  @ApiOkResponse({ description: 'PriceList deleted successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @HttpCode(200)
+  @Delete('delete-rice-list')
+  DeletePriceList(@Query('id', ParseIntPipe) id: number) {
+    return this.clinic.deletePriceList(id);
   }
 }
