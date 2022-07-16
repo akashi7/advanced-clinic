@@ -277,7 +277,7 @@ export class ClinicService {
     user: User,
   ): Promise<{ message: string }> {
     const isConsultation = await this.prisma.consultation.findFirst({
-      where: { type: dto.type },
+      where: { AND: [{ clinicId: user.userId }, { type: dto.type }] },
     });
     if (isConsultation)
       throw new ConflictException('Consultation already registered');
@@ -343,7 +343,7 @@ export class ClinicService {
 
   async registerExams(dto: ExamDto, user: User): Promise<{ message: string }> {
     const isExam = await this.prisma.examList.findFirst({
-      where: { Code: dto.Code },
+      where: { AND: [{ clinicId: user.userId }, { Code: dto.Code }] },
     });
     if (isExam) throw new ConflictException('Exam already registered');
     await this.prisma.examList.create({
