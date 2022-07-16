@@ -227,7 +227,7 @@ export class ClinicService {
 
   async registerInsurance(dto: InsuranceDto, user: User) {
     const isInsurance = await this.prisma.insurance.findFirst({
-      where: { name: dto.name },
+      where: { AND: [{ clinicId: user.clinicId }, { name: dto.name }] },
     });
     if (isInsurance)
       throw new ConflictException('Insurance already registered');

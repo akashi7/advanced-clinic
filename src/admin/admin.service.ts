@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { Clinic } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { ClinicDto } from 'src/clinic/dto/clinic.dto';
@@ -83,7 +84,7 @@ export class AdminService {
     };
   }
 
-  async enableClinic(clinicId: number) {
+  async enableClinic(clinicId: number): Promise<{ message: string }> {
     await this.prisma.clinic.update({
       where: { id: clinicId },
       data: {
@@ -96,5 +97,10 @@ export class AdminService {
     return {
       message: 'Clinic enabled an its users are enabled',
     };
+  }
+
+  async getAllClinics(): Promise<Clinic[]> {
+    const clinics = await this.prisma.clinic.findMany();
+    return clinics;
   }
 }
