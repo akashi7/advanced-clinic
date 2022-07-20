@@ -36,6 +36,7 @@ import {
   PriceListDto,
   registerEmployee,
   UpdatePasswordDto,
+  UpdatePriceListDto,
 } from './dto/clinic.dto';
 
 @Controller('clinic')
@@ -55,6 +56,24 @@ export class ClinicController {
     return this.clinic.RegisterUser(dto, clinic);
   }
 
+  @ApiOkResponse({ description: 'Users fecthed successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('get-all-users')
+  GetAllUsers(@GetUser() user: User) {
+    return this.clinic.getAllUsers(user);
+  }
+
+  @ApiOkResponse({ description: 'User fecthed successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiQuery({ name: 'id', type: Number })
+  @ApiQuery({ name: 'role', type: String })
+  @Get('view-user')
+  GetOneUser(
+    @Query('id', ParseIntPipe) id: number,
+    @Query('role') role: string,
+  ) {
+    return this.clinic.getOneUser(id, role);
+  }
   @ApiCreatedResponse({ description: 'Clinic password reset successfully' })
   @ApiConflictResponse({ description: 'Clinic password reset failed' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -192,10 +211,10 @@ export class ClinicController {
   @ApiOkResponse({ description: 'Pricelist updated successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
-  @ApiBody({ type: PriceListDto })
+  @ApiBody({ type: UpdatePriceListDto })
   @HttpCode(200)
   @Patch('update-pricelist')
-  UpdatePriceList(@Body() dto: PriceListDto, id: number) {
+  UpdatePriceList(@Body() dto: UpdatePriceListDto, id: number) {
     return this.clinic.updatePriceList(dto, id);
   }
 

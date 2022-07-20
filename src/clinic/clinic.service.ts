@@ -7,9 +7,13 @@ import {
 } from '@nestjs/common';
 import {
   consultation,
+  doctor,
   examList,
   insurance,
+  laborante,
+  nurse,
   priceList,
+  receptionist,
   User,
 } from '@prisma/client';
 import * as argon from 'argon2';
@@ -24,6 +28,7 @@ import {
   PriceListDto,
   registerEmployee,
   UpdatePasswordDto,
+  UpdatePriceListDto,
 } from './dto/clinic.dto';
 
 @Injectable()
@@ -86,7 +91,7 @@ export class ClinicService {
 
     if (isRole === ERoles.RECEPTIONIST) {
       const isReceptionist = await this.prisma.receptionist.findFirst({
-        where: { email: dto.email },
+        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
       });
       if (isReceptionist)
         throw new ConflictException('Receptionist already registered');
@@ -115,7 +120,7 @@ export class ClinicService {
 
     if (isRole === ERoles.DOCTOR) {
       const isDoctor = await this.prisma.doctor.findFirst({
-        where: { email: dto.email },
+        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
       });
       if (isDoctor) throw new ConflictException('Doctor already registered');
       const passwordGenerated = this.makePassword(8);
@@ -144,7 +149,7 @@ export class ClinicService {
 
     if (isRole === ERoles.NURSE) {
       const isNurse = await this.prisma.nurse.findFirst({
-        where: { email: dto.email },
+        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
       });
       if (isNurse) throw new ConflictException('Nurse already registered');
       const passwordGenerated = this.makePassword(8);
@@ -172,7 +177,7 @@ export class ClinicService {
 
     if (isRole === ERoles.LABORANTE) {
       const isLaborante = await this.prisma.laborante.findFirst({
-        where: { email: dto.email },
+        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
       });
       if (isLaborante)
         throw new ConflictException('Laborante already registered');
@@ -223,6 +228,46 @@ export class ClinicService {
       },
     });
     return { message: 'Password updated' };
+  }
+
+  async getAllUsers(user: User): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        clinicId: user.clinicId,
+      },
+    });
+    users.shift();
+    return users;
+  }
+
+  async getOneUser(
+    id: number,
+    role: string,
+  ): Promise<receptionist | doctor | nurse | laborante> {
+    if (role === ERoles.RECEPTIONIST) {
+      const user = await this.prisma.receptionist.findFirst({
+        where: { id },
+      });
+      return user;
+    }
+    if (role === ERoles.DOCTOR) {
+      const user = await this.prisma.doctor.findFirst({
+        where: { id },
+      });
+      return user;
+    }
+    if (role === ERoles.NURSE) {
+      const user = await this.prisma.nurse.findFirst({
+        where: { id },
+      });
+      return user;
+    }
+    if (role === ERoles.LABORANTE) {
+      const user = await this.prisma.laborante.findFirst({
+        where: { id },
+      });
+      return user;
+    }
   }
 
   async registerInsurance(dto: InsuranceDto, user: User) {
@@ -407,10 +452,11 @@ export class ClinicService {
   ): Promise<{ message: string }> {
     await this.prisma.priceList.create({
       data: {
-        itemName: dto.itemName,
+        itemId: dto.itemId,
         price: dto.price,
-        insurance: dto.insurance,
         clinicId: user.userId,
+        insuranceId: dto.insuranceId,
+        type: dto.type,
       },
     });
     return {
@@ -418,29 +464,13 @@ export class ClinicService {
     };
   }
   async updatePriceList(
-    dto: PriceListDto,
+    dto: UpdatePriceListDto,
     id: number,
   ): Promise<{ message: string }> {
-    const isPriceList = await this.prisma.priceList.findFirst({
-      where: { id },
-    });
-
-    let itemName: any, price: any, insurance: any;
-
-    dto.itemName
-      ? (itemName = dto.itemName)
-      : (itemName = isPriceList.itemName);
-    dto.price ? (price = dto.price) : (price = isPriceList.price);
-    dto.insurance
-      ? (insurance = dto.insurance)
-      : (insurance = isPriceList.insurance);
-
     await this.prisma.priceList.update({
       where: { id },
       data: {
-        itemName,
-        price,
-        insurance,
+        price: dto.price,
       },
     });
     return {

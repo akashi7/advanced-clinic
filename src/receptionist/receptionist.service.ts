@@ -14,28 +14,48 @@ export class ReceptionistService {
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
-        where: { AND: [{ isInfant: true }, { idNumber: dto.idNumber }] },
+        where: {
+          AND: [
+            {
+              clinicId: user.clinicId,
+            },
+            {
+              isInfant: true,
+            },
+            {
+              fullName: dto.fullName,
+            },
+          ],
+          OR: [
+            { FatherIdnumber: dto?.FatherIdNumber },
+            { MotherIdnumber: dto?.MotherIdnumber },
+            { GuardianIdNumber: dto?.GuardianIdNumber },
+          ],
+        },
       });
+
+      // const enfant = await this.prisma
+      //   .$queryRaw`SELECT * FROM "patient" WHERE "clinicId" = ${user.clinicId} AND "isInfant" = true  AND("FatherIdnumber" = ${dto?.FatherIdNumber} OR "MotherIdnumber" = ${dto?.MotherIdnumber} OR "GuardianIdNumber" = ${dto?.GuardianIdNumber})`;
+      // console.log({ enfant });
       if (isInfants) throw new ConflictException('Infant already exists');
       const Infant = await this.prisma.patient.create({
         data: {
           fullName: dto.fullName,
           DOB: dto.DOB,
-          phone: dto.phone,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,
           province: dto.province,
           district: dto.district,
-          email: dto.email,
-          marital_status: dto.marital_status,
           clinicId: user.clinicId,
           GuardianNames: dto.GuardianNames,
           GuardianPhone: dto.GuardianPhone,
-          idNumber: dto.idNumber,
+          GuardianIdNumber: dto.GuardianIdNumber,
           isInfant: dto.isInfant,
           FatherName: dto.FatherName,
           MotherName: dto.MotherName,
+          FatherIdnumber: dto.FatherIdNumber,
+          MotherIdnumber: dto.MotherIdnumber,
           FatherPhone: dto.FatherPhone,
           MotherPhone: dto.MotherPhone,
         },
@@ -44,7 +64,9 @@ export class ReceptionistService {
     }
 
     const isPatient = await this.prisma.patient.findFirst({
-      where: { idNumber: dto.idNumber },
+      where: {
+        AND: [{ clinicId: user.clinicId }, { idNumber: dto.idNumber }],
+      },
     });
     if (isPatient)
       throw new ConflictException(
@@ -63,14 +85,7 @@ export class ReceptionistService {
         email: dto.email,
         marital_status: dto.marital_status,
         clinicId: user.clinicId,
-        GuardianNames: dto.GuardianNames,
-        GuardianPhone: dto.GuardianPhone,
         idNumber: dto.idNumber,
-        isInfant: dto.isInfant,
-        FatherName: dto.FatherName,
-        MotherName: dto.MotherName,
-        FatherPhone: dto.FatherPhone,
-        MotherPhone: dto.MotherPhone,
       },
     });
     return patient;
@@ -145,23 +160,3 @@ export class ReceptionistService {
   //   };
   // }
 }
-
-// data: {
-//   fullName: dto.fullName,
-//   DOB: dto.DOB,
-//   phone: dto.phone,
-//   gender: dto.gender,
-//   sector: dto.sector,
-//   village: dto.village,
-//   email:dto.email,
-//   marital_status: dto.marital_status,
-//   clinicId: user.clinicId,
-//   GuardianNames: dto.GuardianNames,
-//   GuardianPhone: dto.GuardianPhone,
-//   idNumber: dto.idNumber,
-//   isInfant: dto.isInfant,
-//   FatherName: dto.FatherName,
-//   MotherName: dto.MotherName,
-//   FatherPhone: dto.FatherPhone,
-//   MotherPhone: dto.MotherPhone,
-// },

@@ -63,27 +63,30 @@ model User {
 }
 
 model patient {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  fullName       String
-  phone          Int
-  DOB            String
-  gender         String
-  email          String?
-  province       String
-  district       String
-  sector         String
-  village        String
-  marital_status String?
-  isInfant       Boolean? @default(false)
-  GuardianNames  String?
-  GuardianPhone  String?
-  idNumber       String
-  MotherName     String?
-  MotherPhone    String?
-  FatherName     String?
-  FatherPhone    String?
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  fullName         String
+  phone            Int?
+  DOB              String
+  gender           String
+  email            String?
+  province         String
+  district         String
+  sector           String
+  village          String
+  marital_status   String?
+  isInfant         Boolean? @default(false)
+  GuardianNames    String?
+  GuardianPhone    String?
+  GuardianIdNumber String?
+  idNumber         String?
+  MotherName       String?
+  MotherPhone      String?
+  MotherIdnumber   String?
+  FatherName       String?
+  FatherPhone      String?
+  FatherIdnumber   String?
 
   clinicId   Int
   clinic     Clinic       @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -167,20 +170,23 @@ model consultation {
 }
 
 model priceList {
-  id        Int    @id @default(autoincrement())
-  itemName  String
-  price     Int
-  insurance String
-  clinicId  Int
-  clinic    Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  id          Int       @id @default(autoincrement())
+  itemId      Int
+  price       Int
+  insuranceId Int
+  clinicId    Int
+  type        String
+  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  clinic      Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model insurance {
-  id       Int    @id @default(autoincrement())
-  name     String
-  rate     Int
-  clinicId Int
-  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  id        Int         @id @default(autoincrement())
+  name      String
+  rate      Int
+  clinicId  Int
+  clinic    Clinic      @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  priceList priceList[]
 }
 
 model invoice {

@@ -44,7 +44,7 @@ export class AuthService {
   } {
     const token = this.Jwt.sign(
       { userId, email, fullName, role, clinicId },
-      { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
+      { secret: this.config.get('JWT_SECRET') },
     );
     return {
       data: {
@@ -103,7 +103,7 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email },
     });
-    if (!isActive) throw new ForbiddenException('User is disabled');
+    if (!isActive && user) throw new ForbiddenException('User is disabled');
     if (!user) throw new NotFoundException('User not found');
     if (!(await argon.verify(user.password, dto.password))) {
       throw new ForbiddenException('Wrong password');

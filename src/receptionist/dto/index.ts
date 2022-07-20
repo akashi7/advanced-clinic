@@ -26,7 +26,7 @@ export class registerPatientDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   gender: string;
-  @IsEmail()
+  @IsString()
   @ApiProperty({ type: String, required: true })
   email: string;
   @IsString()
@@ -73,6 +73,15 @@ export class registerPatientDto {
   @IsBoolean()
   @ApiProperty({ type: Boolean, required: true })
   isInfant: boolean;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  GuardianIdNumber: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  MotherIdnumber: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  FatherIdNumber: string;
 }
 
 export class RecordDto {

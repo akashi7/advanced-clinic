@@ -141,13 +141,22 @@ export class ExamDto {
 }
 
 export class PriceListDto {
-  @IsString()
-  @ApiProperty({ required: true, type: String })
-  itemName: string;
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  itemId: number;
   @IsNumber()
   @ApiProperty({ required: true, type: Number })
   price: number;
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  insuranceId: number;
   @IsString()
   @ApiProperty({ required: true, type: String })
-  insurance: string;
+  type: string;
+}
+
+export class UpdatePriceListDto {
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  price: number;
 }
