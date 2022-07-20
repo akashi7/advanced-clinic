@@ -44,6 +44,7 @@ export class AuthController {
   //user-login
   @ApiOkResponse({ description: 'User logged in successfully' })
   @ApiForbiddenResponse({ description: 'Forbidden User' })
+  @ApiForbiddenResponse({ description: 'Forbidden User' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiBody({ type: userSignInDto })
   @HttpCode(200)

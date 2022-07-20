@@ -12,7 +12,6 @@ model Admin {
   email     String
   password  String
   fullNames String
-  type      String?
   contact   String
   role      String
   createdAt DateTime @default(now())
@@ -20,32 +19,35 @@ model Admin {
 }
 
 model Clinic {
-  id        Int      @id @default(autoincrement())
-  name      String
-  address   String
-  contact   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
-  email     String
-  type      String
-  password  String
-  role      String
-  isActive  Boolean  @default(true)
+  id           Int      @id @default(autoincrement())
+  name         String
+  clinicCode   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  province     String
+  district     String
+  sector       String
+  cell         String
+  village      String
+  email        String
+  contactEmail String
+  contactPhone String
+  contactName  String
+  contactTitle String
+  role         String
+  isActive     Boolean  @default(true)
 
   patient      patient[]
   records      records[]
   insurance    insurance[]
-  itemList     itemList[]
   receptionist receptionist[]
   nurse        nurse[]
   doctor       doctor[]
   laborante    laborante[]
   User         User[]
+  examList     examList[]
+  consultation consultation[]
+  priceList    priceList[]
 }
 
 model User {
@@ -61,22 +63,30 @@ model User {
 }
 
 model patient {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  fullName       String
-  address        String
-  contact        Int
-  DOB            String
-  gender         String
-  email          String
-  province       String
-  district       String
-  sector         String
-  village        String
-  marital_status String
-  closeFullName  String
-  closePhone     String
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  fullName         String
+  phone            Int?
+  DOB              String
+  gender           String
+  email            String?
+  province         String
+  district         String
+  sector           String
+  village          String
+  marital_status   String?
+  isInfant         Boolean? @default(false)
+  GuardianNames    String?
+  GuardianPhone    String?
+  GuardianIdNumber String?
+  idNumber         String?
+  MotherName       String?
+  MotherPhone      String?
+  MotherIdnumber   String?
+  FatherName       String?
+  FatherPhone      String?
+  FatherIdnumber   String?
 
   clinicId   Int
   clinic     Clinic       @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -92,6 +102,7 @@ model records {
   patientId      Int
   fullNames      String
   insurance      String
+  insuranceCode  Int
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -140,33 +151,42 @@ model exam {
   exam        String[]
 }
 
-model itemList {
-  id              Int               @id @default(autoincrement())
-  itemName        String
-  priceTag        Int
-  priceList       priceList[]
-  clinicId        Int
-  clinic          Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  invoice_details invoice_details[]
+model examList {
+  id          Int    @id @default(autoincrement())
+  Name        String
+  Code        String
+  description String
+  clinicId    Int
+  clinic      Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model consultation {
+  id           Int    @id @default(autoincrement())
+  type         String
+  description  String
+  clinicId     Int
+  clinic       Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  consultation String
 }
 
 model priceList {
   id          Int       @id @default(autoincrement())
-  itemName    String
-  price       Int
   itemId      Int
-  item        itemList  @relation(fields: [itemId], references: [id], onUpdate: Cascade)
+  price       Int
   insuranceId Int
-  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade)
+  clinicId    Int
+  type        String
+  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  clinic      Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model insurance {
   id        Int         @id @default(autoincrement())
   name      String
   rate      Int
-  priceList priceList[]
   clinicId  Int
   clinic    Clinic      @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  priceList priceList[]
 }
 
 model invoice {
@@ -182,13 +202,11 @@ model invoice {
 }
 
 model invoice_details {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   invoiceId Int
-  invoice   invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  invoice   invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
   itemName  String
   price     Int
-  itemId    Int
-  item      itemList @relation(fields: [itemId], references: [id], onUpdate: Cascade)
 }
 
 model receptionist {
@@ -196,15 +214,10 @@ model receptionist {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -215,15 +228,10 @@ model nurse {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -234,15 +242,10 @@ model doctor {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -253,15 +256,10 @@ model laborante {
   fullName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   String
-  province  String
-  district  String
-  sector    String
-  cell      String
-  village   String
+  phone     String
   email     String
-  password  String
   role      String
+  gender    String
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)

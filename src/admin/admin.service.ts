@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { Clinic } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
 import { ClinicDto } from 'src/clinic/dto/clinic.dto';
@@ -25,7 +26,9 @@ export class AdminService {
   //register- new clinic
   async RegisterClinic(dto: ClinicDto) {
     const clinicExist = await this.prisma.clinic.findFirst({
-      where: { email: dto.email },
+      where: {
+        OR: [{ clinicCode: dto.clicnicCode, email: dto.email }],
+      },
     });
     if (clinicExist)
       throw new ConflictException('Email clinic arleady registered');
@@ -40,11 +43,12 @@ export class AdminService {
         cell: dto.cell,
         village: dto.village,
         email: dto.email,
-        password,
-        contact: dto.contact,
         role: ERoles.CLINIC,
-        type: 'o',
-        address: dto.address,
+        contactEmail: dto.contactEmail,
+        contactPhone: dto.contactPhone,
+        contactName: dto.contactName,
+        contactTitle: dto.contactTitle,
+        clinicCode: dto.clicnicCode,
       },
     });
     await this.prisma.user.create({
@@ -57,7 +61,6 @@ export class AdminService {
         userId: clinic.id,
       },
     });
-    delete clinic.password;
     return this.mail.sendMail(
       clinic.email,
       `${clinic.name} credentials`,
@@ -81,7 +84,7 @@ export class AdminService {
     };
   }
 
-  async enableClinic(clinicId: number) {
+  async enableClinic(clinicId: number): Promise<{ message: string }> {
     await this.prisma.clinic.update({
       where: { id: clinicId },
       data: {
@@ -94,5 +97,10 @@ export class AdminService {
     return {
       message: 'Clinic enabled an its users are enabled',
     };
+  }
+
+  async getAllClinics(): Promise<Clinic[]> {
+    const clinics = await this.prisma.clinic.findMany();
+    return clinics;
   }
 }

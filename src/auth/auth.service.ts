@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Admin } from '@prisma/client';
 import * as argon from 'argon2';
+import console from 'console';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AuthAdminSignIn,
@@ -30,13 +31,20 @@ export class AuthService {
     email: string,
     fullName: string,
     role: string,
+    clinicId: number,
   ): {
-    data: { userId: number; email: string; fullName: string; role: string };
+    data: {
+      userId: number;
+      email: string;
+      fullName: string;
+      role: string;
+      clinicId: number;
+    };
     token: string;
   } {
     const token = this.Jwt.sign(
-      { userId, email, fullName, role },
-      { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
+      { userId, email, fullName, role, clinicId },
+      { secret: this.config.get('JWT_SECRET') },
     );
     return {
       data: {
@@ -44,6 +52,7 @@ export class AuthService {
         email,
         fullName,
         role,
+        clinicId,
       },
       token,
     };
@@ -83,13 +92,18 @@ export class AuthService {
         admin.email,
         admin.contact,
         admin.role,
+        1,
       );
   }
 
   async userLogin(dto: userSignInDto): Promise<{}> {
-    const user = await this.prisma.user.findFirst({
-      where: { email: dto.email, AND: [{ isActive: true }] },
+    const isActive = await this.prisma.user.findFirst({
+      where: { AND: [{ isActive: true }, { email: dto.email }] },
     });
+    const user = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
+    if (!isActive && user) throw new ForbiddenException('User is disabled');
     if (!user) throw new NotFoundException('User not found');
     if (!(await argon.verify(user.password, dto.password))) {
       throw new ForbiddenException('Wrong password');
@@ -99,6 +113,7 @@ export class AuthService {
       user.email,
       user.fullName,
       user.role,
+      user.clinicId,
     );
   }
 }

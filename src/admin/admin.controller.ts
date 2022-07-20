@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   ParseIntPipe,
   Patch,
@@ -57,5 +58,13 @@ export class AdminController {
   @ApiQuery({ name: 'id', type: Number })
   enableClinic(@Query('id', ParseIntPipe) clinicId: number) {
     return this.adminService.enableClinic(clinicId);
+  }
+
+  @HttpCode(200)
+  @Get('all-clinics')
+  @ApiOkResponse({ description: 'All clinics received successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  GetAllClinics() {
+    return this.adminService.getAllClinics();
   }
 }

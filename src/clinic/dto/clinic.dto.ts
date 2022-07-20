@@ -14,10 +14,6 @@ export class ClinicDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
-  contact: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
   province: string;
   @IsString()
   @IsNotEmpty()
@@ -39,6 +35,26 @@ export class ClinicDto {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String, format: 'email' })
   email: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  clicnicCode: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactEmail: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactPhone: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactName: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  contactTitle: string;
 }
 
 export class registerEmployee {
@@ -46,34 +62,6 @@ export class registerEmployee {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
   fullName: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  address: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  contact: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  province: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  district: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  sector: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  cell: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  village: string;
   @IsEmail()
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String, format: 'email' })
@@ -82,6 +70,14 @@ export class registerEmployee {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
   role: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  gender: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, type: String })
+  phone: string;
 }
 
 export class UpdatePasswordDto {
@@ -109,16 +105,6 @@ export class InsuranceDto {
   @ApiProperty({ required: true, type: Number })
   rate: number;
 }
-export class ItemDto {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: String })
-  itemName: string;
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: Number })
-  priceTag: number;
-}
 
 export class insuranceUpdateDto {
   @IsNumber()
@@ -127,9 +113,50 @@ export class insuranceUpdateDto {
   rate: number;
 }
 
-export class itemUpdateDto {
+export class consultationDto {
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  type: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  description: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  consultation: string;
+}
+
+export class ExamDto {
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  Name: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  Code: string;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  description: string;
   @IsNumber()
-  @IsNotEmpty()
   @ApiProperty({ required: true, type: Number })
   priceTag: number;
+}
+
+export class PriceListDto {
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  itemId: number;
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  price: number;
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  insuranceId: number;
+  @IsString()
+  @ApiProperty({ required: true, type: String })
+  type: string;
+}
+
+export class UpdatePriceListDto {
+  @IsNumber()
+  @ApiProperty({ required: true, type: Number })
+  price: number;
 }
