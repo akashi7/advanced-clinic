@@ -236,6 +236,9 @@ export class ClinicService {
         clinicId: user.clinicId,
       },
     });
+    users.map((user) => {
+      delete user.password;
+    });
     users.shift();
     return users;
   }
