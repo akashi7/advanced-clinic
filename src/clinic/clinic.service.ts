@@ -1,5 +1,6 @@
 /* eslint-disable */
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -453,13 +454,33 @@ export class ClinicService {
     dto: PriceListDto,
     user: User,
   ): Promise<{ message: string }> {
+    let type: string;
+    if (dto.type !== 'consultation' && dto.type !== 'exam') {
+      throw new BadRequestException('Invalid type');
+    }
+    if (dto.type === 'consultation') {
+      const isConsultation = await this.prisma.consultation.findFirst({
+        where: { id: dto.itemId },
+      });
+      if (!isConsultation)
+        throw new BadRequestException('Consultation not registered');
+      else type = 'consultation';
+    }
+    if (dto.type === 'exam') {
+      const isExam = await this.prisma.examList.findFirst({
+        where: { id: dto.itemId },
+      });
+      if (!isExam) throw new BadRequestException('Exam not registered');
+      else type = 'exam';
+    }
+    console.log(type);
     await this.prisma.priceList.create({
       data: {
         itemId: dto.itemId,
         price: dto.price,
         clinicId: user.userId,
         insuranceId: dto.insuranceId,
-        type: dto.type,
+        type,
       },
     });
     return {

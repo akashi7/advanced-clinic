@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -203,8 +204,9 @@ export class ClinicController {
   @ApiCreatedResponse({ description: 'Pricelist created successfully' })
   @ApiBody({ type: PriceListDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request invalid type ' })
   @Post('register-pricelist')
-  RegisterPriceList(dto: PriceListDto, @GetUser() user: User) {
+  RegisterPriceList(@Body() dto: PriceListDto, @GetUser() user: User) {
     return this.clinic.createPriceList(dto, user);
   }
 
