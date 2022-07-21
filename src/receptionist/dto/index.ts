@@ -14,11 +14,9 @@ export class registerPatientDto {
   @IsNotEmpty()
   fullName: string;
   @ApiProperty({ type: Number, required: true })
-  @IsNotEmpty()
   @IsNumber()
   phone: number;
   @ApiProperty({ type: String, required: true })
-  @IsString()
   @IsString()
   @ApiProperty({ type: String, required: true })
   DOB: string;
@@ -55,7 +53,6 @@ export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
   GuardianPhone: string;
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   idNumber: string;
   @IsString()
