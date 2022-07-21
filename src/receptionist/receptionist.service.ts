@@ -12,8 +12,6 @@ export class ReceptionistService {
 
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
-    let phone: number;
-    dto.phone ? (phone = parseInt(dto.phone)) : (phone = 0);
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
         where: {
@@ -44,7 +42,7 @@ export class ReceptionistService {
         data: {
           fullName: dto.fullName,
           DOB: dto.DOB,
-          phone,
+          phone: dto.phone,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,
@@ -79,7 +77,7 @@ export class ReceptionistService {
       data: {
         fullName: dto.fullName,
         DOB: dto.DOB,
-        phone,
+        phone: dto.phone,
         gender: dto.gender,
         sector: dto.sector,
         village: dto.village,
