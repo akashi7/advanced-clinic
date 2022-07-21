@@ -42,6 +42,7 @@ export class ReceptionistService {
         data: {
           fullName: dto.fullName,
           DOB: dto.DOB,
+          phone: dto.phone,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,

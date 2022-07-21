@@ -67,7 +67,7 @@ model patient {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   fullName         String
-  phone            Int?
+  phone            String?
   DOB              String
   gender           String
   email            String?
