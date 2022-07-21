@@ -1,12 +1,6 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEmail,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
@@ -14,8 +8,8 @@ export class registerPatientDto {
   @IsNotEmpty()
   fullName: string;
   @ApiProperty({ type: Number, required: true })
-  @IsNumber()
-  phone: number;
+  @IsString()
+  phone: string;
   @ApiProperty({ type: String, required: true })
   @IsString()
   @ApiProperty({ type: String, required: true })

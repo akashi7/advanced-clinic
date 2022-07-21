@@ -59,6 +59,10 @@ export class ClinicService {
     userId: number,
     passwordGenerated: string,
   ) {
+    const isUser = await this.prisma.user.findFirst({
+      where: { email },
+    });
+    if (isUser) throw new ConflictException('User Email already registered');
     const User = await this.prisma.user.create({
       data: {
         email,
