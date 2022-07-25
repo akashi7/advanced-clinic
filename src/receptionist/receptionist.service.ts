@@ -4,7 +4,7 @@ import { patient, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { registerPatientDto } from './dto';
+import { RecordDto, registerPatientDto } from './dto';
 
 @Injectable()
 export class ReceptionistService {
@@ -104,17 +104,31 @@ export class ReceptionistService {
   async sendToNurse(
     pId: number,
     user: User,
-    fullNames: string,
-    insurance: string,
-    insuranceCode: number,
+    dto: RecordDto,
   ): Promise<{ message: string }> {
+    let totalAmount = 0;
+
     const record = await this.prisma.records.create({
       data: {
         patientId: pId,
         clinicId: user.clinicId,
-        fullNames,
-        insurance,
-        insuranceCode,
+        fullNames: dto.fullName,
+        insurance: dto.insurance,
+      },
+    });
+
+    const insurance = await this.prisma.insurance.findFirst({
+      where: { name: dto.insurance },
+    });
+
+    await this.prisma.invoice.create({
+      data: {
+        patientId: pId,
+        recordId: record.record_code,
+        totalAmount,
+        rating: dto.rate,
+        insuranceId: insurance?.id,
+        clinicId: user.clinicId,
       },
     });
 
@@ -123,9 +137,16 @@ export class ReceptionistService {
         recordId: record.record_code,
         destination: ERecords.NURSE_DESTINATION,
         status: EStatus.UNREAD,
-        fullNames,
+        fullNames: dto.fullName,
       },
     });
+
+    // await this.prisma.invoice_details.create({
+    //   data: {
+    //     invoiceId: invoice.id,
+    //   },
+    // });
+
     return {
       message: 'Record sent',
     };

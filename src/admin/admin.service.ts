@@ -51,6 +51,13 @@ export class AdminService {
         clinicCode: dto.clicnicCode,
       },
     });
+
+    const isUserExist = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
+
+    if (isUserExist)
+      throw new ConflictException('User by this email arleady exists');
     await this.prisma.user.create({
       data: {
         email: dto.email,

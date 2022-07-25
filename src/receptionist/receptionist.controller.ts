@@ -22,7 +22,7 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { registerPatientDto } from './dto';
+import { RecordDto, registerPatientDto } from './dto';
 import { ReceptionistService } from './receptionist.service';
 
 @Controller('receptionist')
@@ -50,23 +50,21 @@ export class ReceptionistController {
     return this.receptionist.getAllPatients(user);
   }
 
+  @ApiCreatedResponse({ description: 'Record created successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Post('to-nurse')
   sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
     @GetUser() user: User,
-    @Query('names') fullName: string,
-    @Query('insurance') insurance: string,
-    @Query('insuranceCode', ParseIntPipe) insuranceCode: number,
+    @Body() dto: RecordDto,
   ) {
-    return this.receptionist.sendToNurse(
-      id,
-      user,
-      fullName,
-      insurance,
-      insuranceCode,
-    );
+    return this.receptionist.sendToNurse(id, user, dto);
   }
 
+  @ApiOkResponse({
+    description: 'All Records for receptionist fetched successfully',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('recept-data')
   seeRecords() {
     return this.receptionist.seeRecords();
