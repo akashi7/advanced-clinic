@@ -48,6 +48,7 @@ model Clinic {
   examList     examList[]
   consultation consultation[]
   priceList    priceList[]
+  invoice      invoice[]
 }
 
 model User {
@@ -102,7 +103,6 @@ model records {
   patientId      Int
   fullNames      String
   insurance      String
-  insuranceCode  Int
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -198,15 +198,20 @@ model invoice {
   recordId        Int
   record          records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
   totalAmount     Int
+  rating          String
+  insuranceId     Int
+  clinicId        Int
+  clinic          Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
   invoice_details invoice_details[]
 }
 
 model invoice_details {
-  id        Int     @id @default(autoincrement())
-  invoiceId Int
-  invoice   invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
-  itemName  String
-  price     Int
+  id           Int     @id @default(autoincrement())
+  invoiceId    Int
+  invoice      invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  itemName     String
+  initialPrice Int
+  price        Int
 }
 
 model receptionist {

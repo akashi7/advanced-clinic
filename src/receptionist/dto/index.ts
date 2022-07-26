@@ -75,14 +75,22 @@ export class registerPatientDto {
   FatherIdNumber: string;
 }
 
-export class RecordDto {
-  @ApiProperty({ type: String, required: true })
-  @IsString()
-  @IsNotEmpty()
-  insurance: string;
-}
-
 export class searchField {
   @IsNotEmpty()
   field: any;
+}
+
+export class RecordDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  fullName: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  insurance: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  rate: string;
 }
