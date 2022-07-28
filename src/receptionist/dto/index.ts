@@ -1,14 +1,14 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
   @IsString()
   @IsNotEmpty()
   fullName: string;
-  @ApiProperty({ type: Number, required: true })
   @IsString()
+  @ApiProperty({ type: String, required: true })
   phone: string;
   @ApiProperty({ type: String, required: true })
   @IsString()
@@ -84,13 +84,29 @@ export class RecordDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
-  fullName: string;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
   insurance: string;
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   rate: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  itemId: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  insuranceId: number;
+}
+
+export class FilterPatients {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  fullName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  idNumber: string;
 }

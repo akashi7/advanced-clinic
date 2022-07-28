@@ -1,5 +1,5 @@
 /*eslint-disable*/
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class vitalsDto {
   @IsString()
@@ -8,12 +8,6 @@ export class vitalsDto {
   @IsString()
   @IsNotEmpty()
   height: string;
-  @IsBoolean()
-  @IsNotEmpty()
-  hasInsurance: boolean;
-  @IsString()
-  @IsNotEmpty()
-  insurance: string;
   @IsString()
   @IsNotEmpty()
   temperature: string;

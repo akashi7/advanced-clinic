@@ -14,6 +14,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -52,13 +53,16 @@ export class ReceptionistController {
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Post('to-nurse')
+  @ApiQuery({ name: 'id', required: true })
+  @ApiQuery({ name: 'patientName', required: true })
+  @Post('create-record')
   sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
+    @Query('patientName') fullName: string,
     @GetUser() user: User,
     @Body() dto: RecordDto,
   ) {
-    return this.receptionist.sendToNurse(id, user, dto);
+    return this.receptionist.sendToNurse(id, user, dto, fullName);
   }
 
   @ApiOkResponse({

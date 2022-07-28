@@ -100,34 +100,32 @@ export class ReceptionistService {
     return patients;
   }
 
+  async filterPatients() {}
+
   //send to nurse for examination
   async sendToNurse(
     pId: number,
     user: User,
     dto: RecordDto,
+    fullNames: string,
   ): Promise<{ message: string }> {
     let totalAmount = 0;
-
     const record = await this.prisma.records.create({
       data: {
         patientId: pId,
         clinicId: user.clinicId,
-        fullNames: dto.fullName,
+        fullNames,
         insurance: dto.insurance,
       },
     });
 
-    const insurance = await this.prisma.insurance.findFirst({
-      where: { name: dto.insurance },
-    });
-
-    await this.prisma.invoice.create({
+    const invoice = await this.prisma.invoice.create({
       data: {
         patientId: pId,
         recordId: record.record_code,
         totalAmount,
         rating: dto.rate,
-        insuranceId: insurance?.id,
+        insuranceId: dto.insuranceId,
         clinicId: user.clinicId,
       },
     });
@@ -137,15 +135,30 @@ export class ReceptionistService {
         recordId: record.record_code,
         destination: ERecords.NURSE_DESTINATION,
         status: EStatus.UNREAD,
-        fullNames: dto.fullName,
+        fullNames,
       },
     });
 
-    // await this.prisma.invoice_details.create({
-    //   data: {
-    //     invoiceId: invoice.id,
-    //   },
-    // });
+    const itemPrice = await this.prisma.priceList.findFirst({
+      where: {
+        AND: [
+          { clinicId: user.clinicId },
+          { Type: 'consultation' },
+          { itemId: dto.itemId },
+          { insuranceId: dto.insuranceId },
+        ],
+      },
+    });
+
+    await this.prisma.invoice_details.create({
+      data: {
+        invoiceId: invoice.id,
+        itemId: dto.itemId,
+        type: 'consultation',
+        price: itemPrice.price,
+        initialPrice: 0,
+      },
+    });
 
     return {
       message: 'Record sent',
