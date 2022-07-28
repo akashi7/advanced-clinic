@@ -175,7 +175,7 @@ model priceList {
   price       Int
   insuranceId Int
   clinicId    Int
-  type        String
+  Type        String
   insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   clinic      Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
@@ -209,7 +209,8 @@ model invoice_details {
   id           Int     @id @default(autoincrement())
   invoiceId    Int
   invoice      invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
-  itemName     String
+  itemId       Int
+  type         String
   initialPrice Int
   price        Int
 }

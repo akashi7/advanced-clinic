@@ -13,7 +13,6 @@ import {
   insurance,
   laborante,
   nurse,
-  priceList,
   receptionist,
   User,
 } from '@prisma/client';
@@ -477,14 +476,14 @@ export class ClinicService {
       if (!isExam) throw new BadRequestException('Exam not registered');
       else type = 'exam';
     }
-    console.log(type);
+
     await this.prisma.priceList.create({
       data: {
         itemId: dto.itemId,
         price: dto.price,
         clinicId: user.userId,
         insuranceId: dto.insuranceId,
-        type,
+        Type: type,
       },
     });
     return {
@@ -514,10 +513,15 @@ export class ClinicService {
     };
   }
 
-  async getAllPriceList(user: User): Promise<priceList[]> {
-    const priceList = await this.prisma.priceList.findMany({
-      where: { clinicId: user.userId },
-    });
-    return priceList;
+  async getConsultationPriceList(user: User): Promise<unknown> {
+    const prices = await this.prisma
+      .$queryRaw`SELECT * FROM "priceList" LEFT JOIN "consultation" ON "priceList"."itemId" = "consultation"."id"  LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'consultation'`;
+    return prices;
+  }
+
+  async getExamPriceList(user: User): Promise<unknown> {
+    const prices = await this.prisma
+      .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "examList" ON "priceList"."itemId" = "examList"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'exam'`;
+    return prices;
   }
 }

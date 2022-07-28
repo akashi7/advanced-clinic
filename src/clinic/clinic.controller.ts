@@ -194,11 +194,22 @@ export class ClinicController {
     return this.clinic.deleteExams(id);
   }
 
-  @ApiOkResponse({ description: 'All price lists returned successfully' })
+  @ApiOkResponse({
+    description: 'Consultations price lists returned successfully',
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Get('all-price-list')
-  ClinicGetAllPriceList(@GetUser() user: User) {
-    return this.clinic.getAllPriceList(user);
+  @Get('consultation-price-list')
+  ClinicGetAllConsultationPriceList(@GetUser() user: User) {
+    return this.clinic.getConsultationPriceList(user);
+  }
+
+  @ApiOkResponse({
+    description: 'Exams price lists returned successfully',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('exam-price-list')
+  ClinicGetAllExamPriceList(@GetUser() user: User) {
+    return this.clinic.getExamPriceList(user);
   }
 
   @ApiCreatedResponse({ description: 'Pricelist created successfully' })

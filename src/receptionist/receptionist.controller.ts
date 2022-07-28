@@ -14,6 +14,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -22,7 +23,7 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { RecordDto, registerPatientDto } from './dto';
+import { FilterPatients, RecordDto, registerPatientDto } from './dto';
 import { ReceptionistService } from './receptionist.service';
 
 @Controller('receptionist')
@@ -50,15 +51,25 @@ export class ReceptionistController {
     return this.receptionist.getAllPatients(user);
   }
 
+  @ApiOkResponse({ description: 'Patient fetched successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post('filter-patients')
+  filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
+    return this.receptionist.filterPatients(dto, user);
+  }
+
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Post('to-nurse')
+  @ApiQuery({ name: 'id', required: true })
+  @ApiQuery({ name: 'patientName', required: true })
+  @Post('create-record')
   sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
+    @Query('patientName') fullName: string,
     @GetUser() user: User,
     @Body() dto: RecordDto,
   ) {
-    return this.receptionist.sendToNurse(id, user, dto);
+    return this.receptionist.sendToNurse(id, user, dto, fullName);
   }
 
   @ApiOkResponse({

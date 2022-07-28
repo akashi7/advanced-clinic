@@ -135,9 +135,6 @@ export class ExamDto {
   @IsString()
   @ApiProperty({ required: true, type: String })
   description: string;
-  @IsNumber()
-  @ApiProperty({ required: true, type: Number })
-  priceTag: number;
 }
 
 export class PriceListDto {
