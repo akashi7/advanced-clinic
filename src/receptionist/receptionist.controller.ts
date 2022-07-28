@@ -23,7 +23,7 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { RecordDto, registerPatientDto } from './dto';
+import { FilterPatients, RecordDto, registerPatientDto } from './dto';
 import { ReceptionistService } from './receptionist.service';
 
 @Controller('receptionist')
@@ -49,6 +49,13 @@ export class ReceptionistController {
   @Get('all-patients')
   getAllPatients(@GetUser() user: User) {
     return this.receptionist.getAllPatients(user);
+  }
+
+  @ApiOkResponse({ description: 'Patient fetched successfully' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post('filter-patients')
+  filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
+    return this.receptionist.filterPatients(dto, user);
   }
 
   @ApiCreatedResponse({ description: 'Record created successfully' })

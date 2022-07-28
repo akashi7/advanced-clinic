@@ -101,12 +101,10 @@ export class RecordDto {
 
 export class FilterPatients {
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   fullName: string;
 
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   idNumber: string;
 }
