@@ -215,6 +215,7 @@ export class ClinicController {
   @ApiCreatedResponse({ description: 'Pricelist created successfully' })
   @ApiBody({ type: PriceListDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiConflictResponse({ description: 'Pricelist already exists' })
   @ApiBadRequestResponse({ description: 'Bad request invalid type ' })
   @Post('register-pricelist')
   RegisterPriceList(@Body() dto: PriceListDto, @GetUser() user: User) {
