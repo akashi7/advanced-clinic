@@ -477,6 +477,19 @@ export class ClinicService {
       else type = 'exam';
     }
 
+    const isPriceList = await this.prisma.priceList.findFirst({
+      where: {
+        AND: [
+          { clinicId: user.userId },
+          { itemId: dto.itemId },
+          { insuranceId: dto.insuranceId },
+        ],
+      },
+    });
+
+    if (isPriceList)
+      throw new ConflictException('Price list already registered');
+
     await this.prisma.priceList.create({
       data: {
         itemId: dto.itemId,
