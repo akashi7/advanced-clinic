@@ -104,7 +104,15 @@ export class ReceptionistService {
     if (dto.fullName) {
       const patients = await this.prisma.patient.findMany({
         where: {
-          AND: [{ clinicId: user.clinicId }, { fullName: dto.fullName }],
+          AND: [
+            { clinicId: user.clinicId },
+            {
+              fullName: {
+                mode: 'insensitive',
+                contains: dto.fullName,
+              },
+            },
+          ],
         },
       });
       return patients;
