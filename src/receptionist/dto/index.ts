@@ -96,7 +96,18 @@ export class RecordDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  doctor: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  nurse: string;
   insuranceId: number;
+  amountToBePaid: number;
+  amountPaid: number;
+  unpaidAmount: number;
+  amountPaidByInsurance: number;
 }
 
 export class FilterPatients {

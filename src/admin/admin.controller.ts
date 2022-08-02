@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -37,6 +38,7 @@ export class AdminController {
   @Post('register-clinic')
   @ApiCreatedResponse({ description: 'Clinic created successfully' })
   @ApiConflictResponse({ description: 'Clinic already exists' })
+  @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: ClinicDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   RegisterClinic(@Body() dto: ClinicDto) {

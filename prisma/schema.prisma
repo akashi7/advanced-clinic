@@ -97,19 +97,38 @@ model patient {
 }
 
 model records {
-  record_code    Int              @id @default(autoincrement())
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  patientId      Int
-  fullNames      String
-  insurance      String
-  patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
-  clinicId       Int
-  clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  record_details record_details[]
-  medication     medication[]
-  exam           exam[]
-  invoice        invoice[]
+  record_code           Int              @id @default(autoincrement())
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  patientId             Int
+  fullNames             String
+  insurance             String
+  patient               patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
+  clinicId              Int
+  clinic                Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  doctor                String
+  status                String           @default("inactive")
+  recordStatus          String?
+  nurse                 String?
+  amountToBePaid        Int
+  amountPaid            Int
+  unpaidAmount          Int
+  amountPaidByInsurance Int
+  record_details        record_details[]
+  medication            medication[]
+  exam                  exam[]
+  invoice               invoice[]
+  sign_vital            sign_vital[]
+  payment               payment[]
+}
+
+model payment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount    Int
+  recordId  Int
+  record    records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 model record_details {
@@ -134,6 +153,8 @@ model sign_vital {
   pulse       String
   patientId   Int
   patient     patient  @relation(fields: [patientId], references: [id], onUpdate: Cascade)
+  recordId    Int
+  record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 model medication {
@@ -197,7 +218,6 @@ model invoice {
   patient         patient           @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   recordId        Int
   record          records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-  totalAmount     Int
   rating          String
   insuranceId     Int
   clinicId        Int
@@ -206,13 +226,12 @@ model invoice {
 }
 
 model invoice_details {
-  id           Int     @id @default(autoincrement())
-  invoiceId    Int
-  invoice      invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
-  itemId       Int
-  type         String
-  initialPrice Int
-  price        Int
+  id        Int     @id @default(autoincrement())
+  invoiceId Int
+  invoice   invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  itemId    Int
+  type      String
+  price     Int
 }
 
 model receptionist {

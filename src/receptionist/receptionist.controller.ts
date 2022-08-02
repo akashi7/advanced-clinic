@@ -69,7 +69,7 @@ export class ReceptionistController {
     @GetUser() user: User,
     @Body() dto: RecordDto,
   ) {
-    return this.receptionist.sendToNurse(id, user, dto, fullName);
+    return this.receptionist.CreateRecord(id, user, dto, fullName);
   }
 
   @ApiOkResponse({

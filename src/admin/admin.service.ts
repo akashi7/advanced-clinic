@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { Clinic } from '@prisma/client';
 import * as argon from 'argon2';
 import { ERoles } from 'src/auth/enums';
@@ -58,7 +62,7 @@ export class AdminService {
 
     if (isUserExist)
       throw new ConflictException('User by this email arleady exists');
-    await this.prisma.user.create({
+    const User = await this.prisma.user.create({
       data: {
         email: dto.email,
         password,
@@ -68,12 +72,18 @@ export class AdminService {
         userId: clinic.id,
       },
     });
-    return this.mail.sendMail(
-      clinic.email,
-      `${clinic.name} credentials`,
-      '"No Reply" <noreply@kuranga.com>',
-      `${passwordGenerated}`,
-    );
+    try {
+      return this.mail.sendMail(
+        clinic.email,
+        `${clinic.name} credentials`,
+        '"No Reply" <noreply@kuranga.com>',
+        `${passwordGenerated}`,
+      );
+    } catch (error) {
+      await this.prisma.clinic.delete({ where: { id: clinic.id } });
+      await this.prisma.user.delete({ where: { id: User.id } });
+      throw new BadRequestException('Error sending email');
+    }
   }
 
   async disableClinic(clinicId: number) {

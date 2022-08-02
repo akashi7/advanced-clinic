@@ -50,6 +50,7 @@ export class ClinicController {
 
   @ApiCreatedResponse({ description: 'User created successfully' })
   @ApiConflictResponse({ description: 'User already exists' })
+  @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: registerEmployee })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Post('register-user')
@@ -197,6 +198,7 @@ export class ClinicController {
   @ApiOkResponse({
     description: 'Consultations price lists returned successfully',
   })
+  @AllowRoles(ERoles.RECEPTIONIST)
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('consultation-price-list')
   ClinicGetAllConsultationPriceList(@GetUser() user: User) {

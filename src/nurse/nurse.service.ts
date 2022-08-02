@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { record_details } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -38,18 +38,13 @@ export class NurseService {
   async nurseRegisterVitals(
     dto: vitalsDto,
     id: number,
+    recordId: number,
   ): Promise<{ message: string }> {
-    const vitals = await this.prisma.sign_vital.findFirst({
-      where: { patientId: id },
-    });
-
-    if (vitals)
-      throw new ConflictException(`Vitals for patient are arleady registered `);
-
     await this.prisma.sign_vital.create({
       data: {
         ...dto,
         patientId: id,
+        recordId,
       },
     });
     return {
