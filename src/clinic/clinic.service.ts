@@ -523,6 +523,7 @@ export class ClinicService {
           { clinicId: user.userId },
           { itemId: dto.itemId },
           { insuranceId: dto.insuranceId },
+          { Type: type },
         ],
       },
     });

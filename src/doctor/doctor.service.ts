@@ -22,6 +22,7 @@ export class DoctorService {
       });
       return record;
     } catch (error) {
+      console.log(error);
       throw new BadRequestException('Server down');
     }
   }

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -30,6 +31,7 @@ import { NurseService } from './nurse.service';
 @UseGuards(JwtGuard, RolesGuard)
 @AllowRoles(ERoles.NURSE)
 @ApiTags('Nurse')
+@ApiBearerAuth()
 export class NurseController {
   constructor(private readonly nurseService: NurseService) {}
 

@@ -25,7 +25,12 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { FilterPatients, RecordDto, registerPatientDto } from './dto';
+import {
+  FilterPatients,
+  MakePaymentDto,
+  RecordDto,
+  registerPatientDto,
+} from './dto';
 import { ReceptionistService } from './receptionist.service';
 
 @Controller('receptionist')
@@ -100,8 +105,49 @@ export class ReceptionistController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ type: Number, name: 'recordId', required: true })
-  @Get('record-payment')
+  @Get('record-payments')
   GetRecordPayment(@Query('recordId', ParseIntPipe) recordId: number) {
     return this.receptionist.seeRecordPayment(recordId);
+  }
+
+  @Get('view-record-payment')
+  ViewRecordPayment(
+    @Query('paymentId', ParseIntPipe) paymentId: number,
+    @Query('type') type: string,
+  ) {
+    return this.receptionist.viewOneRecordPayment(paymentId, type);
+  }
+
+  @ApiCreatedResponse({ description: 'Record payment created ' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
+  @ApiQuery({ type: Number, name: 'recordId', required: true })
+  @Post('pay-record')
+  @ApiBody({ type: MakePaymentDto })
+  CreateRecordPayment(
+    @Body() dto: MakePaymentDto,
+    @Query('recordId', ParseIntPipe) recordId: number,
+  ) {
+    return this.receptionist.makePayment(recordId, dto);
+  }
+
+  @ApiOkResponse({ description: 'Record invoice ' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
+  @ApiQuery({ type: Number, name: 'recordId', required: true })
+  @Get('view-record-invoice')
+  ViewRecordInvoice(@Query('recordId', ParseIntPipe) recordId: number) {
+    return this.receptionist.viewInvoiceOfRecord(recordId);
+  }
+
+  @ApiOkResponse({ description: 'Record invoice details ' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
+  @ApiQuery({ type: Number, name: 'invoiceId', required: true })
+  @Get('view-record-invoice-details')
+  ViewRecordInvoiceDetails(
+    @Query('invoiceId', ParseIntPipe) invoiceId: number,
+  ) {
+    return this.receptionist.viewInvoiceDetails(invoiceId);
   }
 }

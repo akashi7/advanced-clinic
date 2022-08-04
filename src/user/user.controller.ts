@@ -1,7 +1,16 @@
-import { Controller, Get, HttpCode, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -17,12 +26,13 @@ import { UserService } from './user.service';
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('user')
 @ApiTags('user')
+@ApiBearerAuth()
 @AllowRoles(
-  ERoles.CLINIC,
+  ERoles.RECEPTIONIST,
+  ERoles.NURSE,
   ERoles.DOCTOR,
   ERoles.LABORANTE,
-  ERoles.NURSE,
-  ERoles.RECEPTIONIST,
+  ERoles.CLINIC,
 )
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -39,9 +49,12 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unthorized' })
   @ApiBadRequestResponse({ description: 'Server down' })
   @ApiBody({ type: UpdatePasswordDto })
+  @ApiForbiddenResponse({
+    description: 'Wrong password or passwords do not match',
+  })
   @HttpCode(200)
   @Patch('update-password')
-  UpdatePassword(@GetUser() user: User, dto: UpdatePasswordDto) {
+  UpdatePassword(@GetUser() user: User, @Body() dto: UpdatePasswordDto) {
     return this.userService.updateUserPassword(user, dto);
   }
 }

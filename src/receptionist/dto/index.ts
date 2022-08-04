@@ -102,17 +102,13 @@ export class RecordDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
-  itemName: string;
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true })
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
   doctor: string;
   @IsString()
   @ApiProperty({ type: String, required: true })
   nurse: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
   insuranceId: number;
   amountToBePaid: number;
   amountPaid: number;

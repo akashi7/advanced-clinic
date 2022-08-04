@@ -5,7 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { patient, payment, record_details, User } from '@prisma/client';
+import {
+  invoice,
+  invoice_details,
+  patient,
+  payment,
+  record_details,
+  User,
+} from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -265,6 +272,26 @@ export class ReceptionistService {
     }
   }
 
+  async viewOneRecordPayment(
+    paymentId: number,
+    type: string,
+  ): Promise<unknown> {
+    try {
+      if (type === 'consultation') {
+        const payment = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId" = "consultation"."id" WHERE "payment"."id" = ${paymentId}`;
+        return payment;
+      }
+      if (type === 'exam') {
+        const payment = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "exam" ON "payment"."itemId" = "exam"."id" WHERE "payment"."id" = ${paymentId}`;
+        return payment;
+      }
+    } catch (error) {
+      throw new BadRequestException('Server down');
+    }
+  }
+
   async activateRecord(id: number): Promise<{ message: string }> {
     try {
       const record = await this.prisma.records.findFirst({
@@ -286,15 +313,17 @@ export class ReceptionistService {
           },
         });
       }
-      await this.prisma.record_details.create({
-        data: {
-          recordId: record.record_code,
-          fullNames: record.fullNames,
-          destination: ERecords.DOCTOR_DESTINATION,
-          status: EStatus.UNREAD,
-          doctor: record.doctor,
-        },
-      });
+      if (!record.nurse) {
+        await this.prisma.record_details.create({
+          data: {
+            recordId: record.record_code,
+            fullNames: record.fullNames,
+            destination: ERecords.DOCTOR_DESTINATION,
+            status: EStatus.UNREAD,
+            doctor: record.doctor,
+          },
+        });
+      }
 
       return { message: 'Record activated' };
     } catch (error) {
@@ -329,5 +358,29 @@ export class ReceptionistService {
       });
       if (message) return { message };
     } catch (error) {}
+  }
+
+  async viewInvoiceOfRecord(recordId: number): Promise<invoice> {
+    try {
+      const invoice = await this.prisma.invoice.findFirst({
+        where: {
+          recordId,
+        },
+      });
+      return invoice;
+    } catch (error) {
+      throw new BadRequestException('Server Error');
+    }
+  }
+
+  async viewInvoiceDetails(invoiceId: number): Promise<invoice_details[]> {
+    try {
+      const invoiceDetails = await this.prisma.invoice_details.findMany({
+        where: { invoiceId },
+      });
+      return invoiceDetails;
+    } catch (error) {
+      throw new BadRequestException('Server Error');
+    }
   }
 }

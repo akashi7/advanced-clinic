@@ -100,6 +100,11 @@ export class AuthService {
           278,
         );
     } catch (error) {
+      if (error.message === 'Admin User not found') {
+        throw new NotFoundException('Admin User not found');
+      } else if (error.message === 'Wrong Admin password') {
+        throw new ForbiddenException('Wrong Admin password');
+      }
       throw new BadRequestException('Server down');
     }
   }
@@ -126,6 +131,15 @@ export class AuthService {
         user.id,
       );
     } catch (error) {
+      if (error.message === 'User is disabled') {
+        throw new ForbiddenException('User is disabled');
+      }
+      if (error.message === 'Wrong password') {
+        throw new ForbiddenException('Wrong password');
+      }
+      if (error.message === 'User not found') {
+        throw new NotFoundException('User not found');
+      }
       throw new BadRequestException('Server down');
     }
   }

@@ -19,6 +19,9 @@ export class UserService {
           id: user.id,
         },
       });
+      delete User.password;
+      delete User.isActive;
+      delete User.clinicId;
       return User;
     } catch (error) {
       throw new BadRequestException('Server down');
@@ -55,6 +58,12 @@ export class UserService {
         message: 'Password updated succesfully',
       };
     } catch (error) {
+      if (error.message === 'Wrong password') {
+        throw new ForbiddenException(error.message);
+      }
+      if (error.message === 'new Passwords do not match') {
+        throw new BadRequestException(error.message);
+      }
       throw new BadRequestException('Server down');
     }
   }
