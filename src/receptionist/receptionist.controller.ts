@@ -9,10 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
   ApiTags,
@@ -38,6 +40,7 @@ export class ReceptionistController {
   @ApiCreatedResponse({ description: 'Patient created successfully' })
   @ApiConflictResponse({ description: 'Patient already exists' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
   registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
@@ -46,6 +49,7 @@ export class ReceptionistController {
 
   @ApiOkResponse({ description: 'All Patients fetched successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
   @Get('all-patients')
   getAllPatients(@GetUser() user: User) {
     return this.receptionist.getAllPatients(user);
@@ -53,6 +57,7 @@ export class ReceptionistController {
 
   @ApiOkResponse({ description: 'Patient fetched successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
   @Post('filter-patients')
   filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
     return this.receptionist.filterPatients(dto, user);
@@ -60,6 +65,7 @@ export class ReceptionistController {
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ name: 'id', required: true })
   @ApiQuery({ name: 'patientName', required: true })
   @Post('create-record')
@@ -72,16 +78,30 @@ export class ReceptionistController {
     return this.receptionist.CreateRecord(id, user, dto, fullName);
   }
 
-  @ApiOkResponse({
-    description: 'All Records for receptionist fetched successfully',
-  })
+  @ApiOkResponse({ description: 'All Records for receptionist fetched ' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
   @Get('recept-data')
   seeRecords() {
     return this.receptionist.seeRecords();
   }
-  // @Post('search-patient')
-  // searchPatient(@Body() dto: any) {
-  //   return this.receptionist.searchPatient(dto);
-  // }
+
+  @ApiCreatedResponse({ description: 'Record activated ' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
+  @ApiNotFoundResponse({ description: 'Record not found' })
+  @ApiQuery({ type: Number, name: 'id', required: true })
+  @Post('activate-record')
+  ActivateRecord(@Query('id', ParseIntPipe) id: number) {
+    return this.receptionist.activateRecord(id);
+  }
+
+  @ApiOkResponse({ description: 'Record payments ' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Server Error' })
+  @ApiQuery({ type: Number, name: 'recordId', required: true })
+  @Get('record-payment')
+  GetRecordPayment(@Query('recordId', ParseIntPipe) recordId: number) {
+    return this.receptionist.seeRecordPayment(recordId);
+  }
 }

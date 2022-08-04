@@ -19,4 +19,9 @@ export enum ERecords {
 export enum EStatus {
   READ = 'READ',
   UNREAD = 'UNREAD',
+  ACTIVE = 'ACTIVE',
+}
+export enum ETypes {
+  ALL_TYPE = 'ALL_TYPE',
+  SOME = 'SOME',
 }

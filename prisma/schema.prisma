@@ -97,38 +97,39 @@ model patient {
 }
 
 model records {
-  record_code           Int              @id @default(autoincrement())
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
-  patientId             Int
-  fullNames             String
-  insurance             String
-  patient               patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
-  clinicId              Int
-  clinic                Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  doctor                String
-  status                String           @default("inactive")
-  recordStatus          String?
-  nurse                 String?
-  amountToBePaid        Int
-  amountPaid            Int
-  unpaidAmount          Int
-  amountPaidByInsurance Int
-  record_details        record_details[]
-  medication            medication[]
-  exam                  exam[]
-  invoice               invoice[]
-  sign_vital            sign_vital[]
-  payment               payment[]
+  record_code    Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  patientId      Int
+  fullNames      String
+  insurance      String
+  patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
+  clinicId       Int
+  clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  doctor         String
+  status         String           @default("inactive")
+  recordStatus   String?
+  nurse          String?
+  record_details record_details[]
+  medication     medication[]
+  exam           exam[]
+  invoice        invoice[]
+  sign_vital     sign_vital[]
+  payment        payment[]
 }
 
 model payment {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  amount    Int
-  recordId  Int
-  record    records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  amount        Int
+  insurancePaid Int
+  recordId      Int
+  itemId        Int
+  type          String
+  invoiceId     Int
+  invoice       invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  record        records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 model record_details {
@@ -139,6 +140,9 @@ model record_details {
   fullNames   String
   destination String
   status      String
+  nurse       String?
+  doctor      String?
+  laborante   String?
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
@@ -211,27 +215,34 @@ model insurance {
 }
 
 model invoice {
-  id              Int               @id @default(autoincrement())
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  patientId       Int
-  patient         patient           @relation(fields: [patientId], references: [id], onUpdate: Cascade)
-  recordId        Int
-  record          records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-  rating          String
-  insuranceId     Int
-  clinicId        Int
-  clinic          Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  invoice_details invoice_details[]
+  id                    Int               @id @default(autoincrement())
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  patientId             Int
+  patient               patient           @relation(fields: [patientId], references: [id], onUpdate: Cascade)
+  recordId              Int
+  record                records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+  rating                String
+  insuranceId           Int
+  clinicId              Int
+  amountToBePaid        Int
+  amountPaid            Int
+  unpaidAmount          Int
+  amountPaidByInsurance Int
+  clinic                Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  invoice_details       invoice_details[]
+  payment               payment[]
 }
 
 model invoice_details {
-  id        Int     @id @default(autoincrement())
-  invoiceId Int
-  invoice   invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
-  itemId    Int
-  type      String
-  price     Int
+  id            Int     @id @default(autoincrement())
+  invoiceId     Int
+  invoice       invoice @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
+  itemId        Int
+  type          String
+  price         Int
+  priceToPay    Int
+  insurancePaid Int
 }
 
 model receptionist {
