@@ -50,6 +50,7 @@ export class ClinicController {
 
   @ApiCreatedResponse({ description: 'User created successfully' })
   @ApiConflictResponse({ description: 'User already exists' })
+  @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: registerEmployee })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Post('register-user')
@@ -59,6 +60,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Users fecthed successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @Get('get-all-users')
   GetAllUsers(@GetUser() user: User) {
     return this.clinic.getAllUsers(user);
@@ -194,18 +196,15 @@ export class ClinicController {
     return this.clinic.deleteExams(id);
   }
 
-  @ApiOkResponse({
-    description: 'Consultations price lists returned successfully',
-  })
+  @ApiOkResponse({ description: 'Consultations price lists returned' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @Get('consultation-price-list')
   ClinicGetAllConsultationPriceList(@GetUser() user: User) {
     return this.clinic.getConsultationPriceList(user);
   }
 
-  @ApiOkResponse({
-    description: 'Exams price lists returned successfully',
-  })
+  @ApiOkResponse({ description: 'Exams price lists returned ' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('exam-price-list')
   ClinicGetAllExamPriceList(@GetUser() user: User) {

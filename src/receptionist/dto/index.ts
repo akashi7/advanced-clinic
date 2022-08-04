@@ -1,6 +1,12 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class registerPatientDto {
   @ApiProperty({ type: String, required: true })
@@ -93,10 +99,21 @@ export class RecordDto {
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   itemId: number;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  doctor: string;
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  nurse: string;
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   insuranceId: number;
+  amountToBePaid: number;
+  amountPaid: number;
+  unpaidAmount: number;
+  amountPaidByInsurance: number;
 }
 
 export class FilterPatients {
@@ -107,4 +124,21 @@ export class FilterPatients {
   @IsString()
   @ApiProperty({ type: String, required: true })
   idNumber: string;
+}
+
+export class MakePaymentDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  type: string;
+  @IsArray()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  cart: [
+    {
+      itemId: number;
+      type: string;
+      priceToPay: number;
+    },
+  ];
 }

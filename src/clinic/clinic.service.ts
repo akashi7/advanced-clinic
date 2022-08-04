@@ -73,13 +73,53 @@ export class ClinicService {
       },
     });
     delete User.password;
-    await this.mail.sendMail(
-      `${User.email}`,
-      `${User.fullName} credentials`,
-      '"No Reply" <noreply@kuranga.com>',
-      `${passwordGenerated}`,
-    );
-    return User;
+    try {
+      await this.mail.sendMail(
+        `${User.email}`,
+        `${User.fullName} credentials`,
+        '"No Reply" <noreply@kuranga.com>',
+        `${passwordGenerated}`,
+      );
+      return User;
+    } catch (error) {
+      console.log('Error', error);
+      if (role === ERoles.RECEPTIONIST) {
+        await this.prisma.receptionist.delete({
+          where: { id: userId },
+        });
+        await this.prisma.user.delete({
+          where: { id: User.id },
+        });
+        throw new BadRequestException('Email not sent');
+      }
+      if (role === ERoles.DOCTOR) {
+        await this.prisma.doctor.delete({
+          where: { id: userId },
+        });
+        await this.prisma.user.delete({
+          where: { id: User.id },
+        });
+        throw new BadRequestException('Email not sent');
+      }
+      if (role === ERoles.NURSE) {
+        await this.prisma.nurse.delete({
+          where: { id: userId },
+        });
+        await this.prisma.user.delete({
+          where: { id: User.id },
+        });
+        throw new BadRequestException('Email not sent');
+      }
+      if (role === ERoles.LABORANTE) {
+        await this.prisma.laborante.delete({
+          where: { id: userId },
+        });
+        await this.prisma.user.delete({
+          where: { id: User.id },
+        });
+        throw new BadRequestException('Email not sent');
+      }
+    }
   }
 
   //Register-user
@@ -483,6 +523,7 @@ export class ClinicService {
           { clinicId: user.userId },
           { itemId: dto.itemId },
           { insuranceId: dto.insuranceId },
+          { Type: type },
         ],
       },
     });
