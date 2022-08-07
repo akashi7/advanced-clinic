@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -246,7 +247,7 @@ export class ReceptionistService {
 
       return { message: 'Record created successfully' };
     } catch (error) {
-      throw new BadRequestException('Data Server Error');
+      throw new InternalServerErrorException('Data Server Error');
     }
   }
 
@@ -357,7 +358,9 @@ export class ReceptionistService {
         message = 'Payment made successfully';
       });
       if (message) return { message };
-    } catch (error) {}
+    } catch (error) {
+      throw new BadRequestException('Server down');
+    }
   }
 
   async viewInvoiceOfRecord(recordId: number): Promise<invoice> {
