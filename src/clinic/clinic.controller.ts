@@ -87,6 +87,7 @@ export class ClinicController {
     return this.clinic.updatePassword(dto, user);
   }
 
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @ApiOkResponse({ description: 'All insurances returned successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-insurance')
