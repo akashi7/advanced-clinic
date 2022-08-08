@@ -5,10 +5,12 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { GenericResponse } from '../__shared__/dto/generic-response.dto';
 import { AuthService } from './auth.service';
 import {
   AuthAdminSignIn,
@@ -18,6 +20,7 @@ import {
 
 @Controller('auth')
 @ApiTags('auth')
+@ApiInternalServerErrorResponse({ description: 'Internal server error' })
 export class AuthController {
   constructor(private readonly authservice: AuthService) {}
 
@@ -37,8 +40,9 @@ export class AuthController {
   @ApiBody({ type: AuthAdminSignIn })
   @HttpCode(200)
   @Post('admin-login')
-  adminLogin(@Body() dto: AuthAdminSignIn) {
-    return this.authservice.adminLogin(dto);
+  async adminLogin(@Body() dto: AuthAdminSignIn) {
+    const result = await this.authservice.adminLogin(dto);
+    return new GenericResponse('Admin logged in successfully', result);
   }
 
   //user-login
@@ -49,7 +53,8 @@ export class AuthController {
   @ApiBody({ type: userSignInDto })
   @HttpCode(200)
   @Post('user-signin')
-  userLogin(@Body() dto: userSignInDto) {
-    return this.authservice.userLogin(dto);
+  async userLogin(@Body() dto: userSignInDto) {
+    const result = await this.authservice.userLogin(dto);
+    return new GenericResponse('User logged in successfully', result);
   }
 }

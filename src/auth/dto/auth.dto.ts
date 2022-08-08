@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class AuthAdminSignUpDto {
   @IsEmail()
@@ -48,4 +48,19 @@ export class userSignInDto {
   @IsString()
   @ApiProperty({ type: String, format: 'password', required: true })
   password: string;
+}
+
+export class cartDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  itemId: number;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  type: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  priceToPay: number;
 }

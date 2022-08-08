@@ -10,14 +10,20 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors();
   const options = new DocumentBuilder()
-    .setTitle('Kuranga')
-    .setDescription('Kuranga API')
+    .setTitle('advanced-clinic-api')
+    .setDescription('adbvanced-clinic-api')
     .setVersion('1.0')
-    .addTag('Kuranga APIs')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api/doc', app, document);
+  SwaggerModule.setup('api/doc', app, document, {
+    customSiteTitle: 'Kuranga',
+    customCss: '.swagger-ui .topbar { display: none }',
+    swaggerOptions: {
+      persistAuthorization: true,
+      docExpansion: 'none',
+    },
+  });
   await app.listen(process.env.PORT || 5000);
 }
 bootstrap();
