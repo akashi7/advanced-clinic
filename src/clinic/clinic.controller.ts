@@ -18,6 +18,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiQuery,
   ApiTags,
@@ -28,6 +29,7 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { ClinicService } from './clinic.service';
 import {
   consultationDto,
@@ -45,6 +47,8 @@ import {
 @AllowRoles(ERoles.CLINIC)
 @ApiBearerAuth()
 @ApiTags('clinic')
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+@ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 export class ClinicController {
   constructor(private readonly clinic: ClinicService) {}
 
@@ -52,184 +56,192 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'User already exists' })
   @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: registerEmployee })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Post('register-user')
-  RegisterUser(@Body() dto: registerEmployee, @GetUser() clinic: User) {
-    return this.clinic.RegisterUser(dto, clinic);
+  async RegisterUser(@Body() dto: registerEmployee, @GetUser() clinic: User) {
+    const result = await this.clinic.RegisterUser(dto, clinic);
+    return new GenericResponse('User created successfully', result);
   }
 
   @ApiOkResponse({ description: 'Users fecthed successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @Get('get-all-users')
-  GetAllUsers(@GetUser() user: User) {
-    return this.clinic.getAllUsers(user);
+  async GetAllUsers(@GetUser() user: User) {
+    const result = await this.clinic.getAllUsers(user);
+    return new GenericResponse('Users fecthed successfully', result);
   }
 
   @ApiOkResponse({ description: 'User fecthed successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @ApiQuery({ name: 'role', type: String })
   @Get('view-user')
-  GetOneUser(
+  async GetOneUser(
     @Query('id', ParseIntPipe) id: number,
     @Query('role') role: string,
   ) {
-    return this.clinic.getOneUser(id, role);
+    const result = await this.clinic.getOneUser(id, role);
+    return new GenericResponse('User fecthed successfully', result);
   }
   @ApiCreatedResponse({ description: 'Clinic password reset successfully' })
   @ApiConflictResponse({ description: 'Clinic password reset failed' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiBody({ type: UpdatePasswordDto })
   @Patch('update-clinic')
-  UpdatePassword(@Body() dto: UpdatePasswordDto, @GetUser() user: User) {
-    return this.clinic.updatePassword(dto, user);
+  async UpdatePassword(@Body() dto: UpdatePasswordDto, @GetUser() user: User) {
+    const result = await this.clinic.updatePassword(dto, user);
+    return new GenericResponse('Password updated successfully', result);
   }
 
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @ApiOkResponse({ description: 'All insurances returned successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-insurance')
-  ClinicGetAllInsurance(@GetUser() user: User) {
-    return this.clinic.getAllInsurance(user);
+  async ClinicGetAllInsurance(@GetUser() user: User) {
+    const result = await this.clinic.getAllInsurance(user);
+    return new GenericResponse('All insurances returned successfully', result);
   }
 
   @ApiCreatedResponse({ description: 'Insurance created successfully' })
   @ApiConflictResponse({ description: 'Insurance already exists' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBody({ type: InsuranceDto })
   @Post('register-insurance')
-  RegisterInsurance(@Body() dto: InsuranceDto, @GetUser() user: User) {
-    return this.clinic.registerInsurance(dto, user);
+  async RegisterInsurance(@Body() dto: InsuranceDto, @GetUser() user: User) {
+    const result = await this.clinic.registerInsurance(dto, user);
+    return new GenericResponse('Insurance created successfully', result);
   }
 
   @ApiOkResponse({ description: 'Insurance updated successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: insuranceUpdateDto })
   @HttpCode(200)
   @Patch('update-insurance')
-  UpdateInsurance(
+  async UpdateInsurance(
     @Body() dto: insuranceUpdateDto,
     @Query('id', ParseIntPipe) id: number,
   ) {
-    return this.clinic.updateInsurance(id, dto);
+    const result = await this.clinic.updateInsurance(id, dto);
+    return new GenericResponse('Insurance updated successfully', result);
   }
 
   @ApiOkResponse({ description: 'Insurance removed successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @Delete('delete-insurance')
-  DeleteInsurance(@Query('id', ParseIntPipe) id: number) {
-    return this.clinic.deleteInsurance(id);
+  async DeleteInsurance(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.deleteInsurance(id);
+    return new GenericResponse('Insurance removed successfully', result);
   }
 
   @ApiOkResponse({ description: 'All consultations returned successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-consultation')
-  ClinicGetAllConsultation(@GetUser() user: User) {
-    return this.clinic.getAllConsultation(user);
+  async ClinicGetAllConsultation(@GetUser() user: User) {
+    const result = await this.clinic.getAllConsultation(user);
+    return new GenericResponse(
+      'All consultations returned successfully',
+      result,
+    );
   }
 
   @ApiCreatedResponse({ description: 'Consultation added successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiConflictResponse({ description: 'Consultation already exists' })
   @ApiBody({ type: consultationDto })
   @Post('register-consultation')
-  RegisterConsultation(@Body() dto: consultationDto, @GetUser() user: User) {
-    return this.clinic.registerConsultation(dto, user);
+  async RegisterConsultation(
+    @Body() dto: consultationDto,
+    @GetUser() user: User,
+  ) {
+    const result = await this.clinic.registerConsultation(dto, user);
+    return new GenericResponse('Consultation added successfully', result);
   }
   @ApiOkResponse({ description: 'Consultation updated successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: consultationDto })
   @HttpCode(200)
   @Patch('update-consultation')
-  UpdateConsultation(
+  async UpdateConsultation(
     @Body() dto: consultationDto,
     @Query('id', ParseIntPipe) id: number,
   ) {
-    return this.clinic.updateConsultation(dto, id);
+    const result = await this.clinic.updateConsultation(dto, id);
+    return new GenericResponse('Consultation updated successfully', result);
   }
 
   @ApiOkResponse({ description: 'Consultation deleted successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-consultation')
-  DeleteConsultation(@Query('id', ParseIntPipe) id: number) {
-    return this.clinic.deleteConsultation(id);
+  async DeleteConsultation(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.deleteConsultation(id);
+    return new GenericResponse('Consultation deleted successfully', result);
   }
 
   @ApiOkResponse({ description: 'All exams returned successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('all-exam')
-  ClinicGetAllExam(@GetUser() user: User) {
-    return this.clinic.getAllExams(user);
+  async ClinicGetAllExam(@GetUser() user: User) {
+    const result = await this.clinic.getAllExams(user);
+    return new GenericResponse('All exams returned successfully', result);
   }
 
   @ApiCreatedResponse({ description: 'Exam added successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiConflictResponse({ description: 'Exam already exists' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Post('register-exam')
-  RegisterExaminations(@Body() dto: ExamDto, @GetUser() user: User) {
-    return this.clinic.registerExams(dto, user);
+  async RegisterExaminations(@Body() dto: ExamDto, @GetUser() user: User) {
+    const result = await this.clinic.registerExams(dto, user);
+    return new GenericResponse('Exam added successfully', result);
   }
 
   @ApiOkResponse({ description: 'Exam updated successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: ExamDto })
   @HttpCode(200)
   @Patch('update-exam')
-  UpdateExam(@Body() dto: ExamDto, @Query('id', ParseIntPipe) id: number) {
-    return this.clinic.updateExam(dto, id);
+  async UpdateExam(
+    @Body() dto: ExamDto,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
+    const result = await this.clinic.updateExam(dto, id);
+    return new GenericResponse('Exam updated successfully', result);
   }
 
   @ApiOkResponse({ description: 'Exam deleted successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-exam')
-  DeleteExam(@Query('id', ParseIntPipe) id: number) {
-    return this.clinic.deleteExams(id);
+  async DeleteExam(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.deleteExams(id);
+    return new GenericResponse('Exam deleted successfully', result);
   }
 
   @ApiOkResponse({ description: 'Consultations price lists returned' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @Get('consultation-price-list')
-  ClinicGetAllConsultationPriceList(@GetUser() user: User) {
-    return this.clinic.getConsultationPriceList(user);
+  async ClinicGetAllConsultationPriceList(@GetUser() user: User) {
+    const result = await this.clinic.getConsultationPriceList(user);
+    return new GenericResponse('Consultations price lists returned', result);
   }
 
   @ApiOkResponse({ description: 'Exams price lists returned ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @Get('exam-price-list')
-  ClinicGetAllExamPriceList(@GetUser() user: User) {
-    return this.clinic.getExamPriceList(user);
+  async ClinicGetAllExamPriceList(@GetUser() user: User) {
+    const result = await this.clinic.getExamPriceList(user);
+    return new GenericResponse('Exams price lists returned', result);
   }
 
   @ApiCreatedResponse({ description: 'Pricelist created successfully' })
   @ApiBody({ type: PriceListDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiConflictResponse({ description: 'Pricelist already exists' })
   @ApiBadRequestResponse({ description: 'Bad request invalid type ' })
   @Post('register-pricelist')
-  RegisterPriceList(@Body() dto: PriceListDto, @GetUser() user: User) {
-    return this.clinic.createPriceList(dto, user);
+  async RegisterPriceList(@Body() dto: PriceListDto, @GetUser() user: User) {
+    const result = await this.clinic.createPriceList(dto, user);
+    return new GenericResponse('Pricelist created successfully', result);
   }
 
   @ApiOkResponse({ description: 'Pricelist updated successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: UpdatePriceListDto })
   @HttpCode(200)
   @Patch('update-pricelist')
-  UpdatePriceList(@Body() dto: UpdatePriceListDto, id: number) {
-    return this.clinic.updatePriceList(dto, id);
+  async UpdatePriceList(@Body() dto: UpdatePriceListDto, id: number) {
+    const result = await this.clinic.updatePriceList(dto, id);
+    return new GenericResponse('Pricelist updated successfully', result);
   }
 
   @ApiOkResponse({ description: 'PriceList deleted successfully' })
@@ -237,7 +249,8 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-rice-list')
-  DeletePriceList(@Query('id', ParseIntPipe) id: number) {
-    return this.clinic.deletePriceList(id);
+  async DeletePriceList(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.deletePriceList(id);
+    return new GenericResponse('PriceList deleted successfully', result);
   }
 }

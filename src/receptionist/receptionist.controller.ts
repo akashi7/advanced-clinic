@@ -3,17 +3,18 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   ParseIntPipe,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
@@ -25,8 +26,10 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import {
   FilterPatients,
+  FilterRecordDto,
   MakePaymentDto,
   RecordDto,
   registerPatientDto,
@@ -38,116 +41,118 @@ import { ReceptionistService } from './receptionist.service';
 @AllowRoles(ERoles.RECEPTIONIST)
 @ApiTags('receptionist')
 @ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+@ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 export class ReceptionistController {
   constructor(private readonly receptionist: ReceptionistService) {}
 
   //register patient
   @ApiCreatedResponse({ description: 'Patient created successfully' })
   @ApiConflictResponse({ description: 'Patient already exists' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiBody({ type: registerPatientDto })
   @Post('register-patient')
-  registerPatient(@Body() dto: registerPatientDto, @GetUser() user: User) {
-    return this.receptionist.RegisterPatient(dto, user);
+  async registerPatient(
+    @Body() dto: registerPatientDto,
+    @GetUser() user: User,
+  ) {
+    const result = await this.receptionist.RegisterPatient(dto, user);
+    return new GenericResponse('Patient created successfully', result);
   }
 
   @ApiOkResponse({ description: 'All Patients fetched successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @Get('all-patients')
-  getAllPatients(@GetUser() user: User) {
-    return this.receptionist.getAllPatients(user);
+  async getAllPatients(@GetUser() user: User) {
+    const result = await this.receptionist.getAllPatients(user);
+    return new GenericResponse('All Patients fetched successfully', result);
   }
 
   @ApiOkResponse({ description: 'Patient fetched successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @Post('filter-patients')
-  filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
-    return this.receptionist.filterPatients(dto, user);
+  async filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
+    const result = await this.receptionist.filterPatients(dto, user);
+    return new GenericResponse('Patients fetched successfully', result);
   }
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ name: 'id', required: true })
-  @ApiQuery({ name: 'patientName', required: true })
   @Post('create-record')
-  sendPatientToNurse(
+  async sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
-    @Query('patientName') fullName: string,
     @GetUser() user: User,
     @Body() dto: RecordDto,
   ) {
-    return this.receptionist.CreateRecord(id, user, dto, fullName);
+    const result = await this.receptionist.CreateRecord(id, user, dto);
+    return new GenericResponse('Record created successfully', result);
   }
 
-  @ApiOkResponse({ description: 'All Records for receptionist fetched ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
-  @Get('recept-data')
-  seeRecords() {
-    return this.receptionist.seeRecords();
+  @ApiOkResponse({ description: 'Records for receptionist fetched ' })
+  @Post('recept-data')
+  @HttpCode(200)
+  @ApiBody({ type: FilterRecordDto })
+  async seeRecords(@Body() dto: FilterRecordDto, @GetUser() user: User) {
+    const result = await this.receptionist.seeRecords(dto, user);
+    return new GenericResponse('Records fetched successfully', result);
   }
 
   @ApiCreatedResponse({ description: 'Record activated ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiNotFoundResponse({ description: 'Record not found' })
   @ApiQuery({ type: Number, name: 'id', required: true })
   @Post('activate-record')
-  ActivateRecord(@Query('id', ParseIntPipe) id: number) {
-    return this.receptionist.activateRecord(id);
+  async ActivateRecord(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.receptionist.activateRecord(id);
+    return new GenericResponse('Record activated successfully', result);
   }
 
   @ApiOkResponse({ description: 'Record payments ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ type: Number, name: 'recordId', required: true })
   @Get('record-payments')
-  GetRecordPayment(@Query('recordId', ParseIntPipe) recordId: number) {
-    return this.receptionist.seeRecordPayment(recordId);
+  async GetRecordPayment(@Query('recordId', ParseIntPipe) recordId: number) {
+    const result = await this.receptionist.seeRecordPayment(recordId);
+    return new GenericResponse('Record payments fetched successfully', result);
   }
 
   @Get('view-record-payment')
-  ViewRecordPayment(
+  async ViewRecordPayment(
     @Query('paymentId', ParseIntPipe) paymentId: number,
     @Query('type') type: string,
   ) {
-    return this.receptionist.viewOneRecordPayment(paymentId, type);
+    const result = await this.receptionist.viewOneRecordPayment(
+      paymentId,
+      type,
+    );
+    return new GenericResponse('Record payment fetched successfully', result);
   }
 
   @ApiCreatedResponse({ description: 'Record payment created ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ type: Number, name: 'recordId', required: true })
   @Post('pay-record')
   @ApiBody({ type: MakePaymentDto })
-  CreateRecordPayment(
+  async CreateRecordPayment(
     @Body() dto: MakePaymentDto,
     @Query('recordId', ParseIntPipe) recordId: number,
   ) {
-    return this.receptionist.makePayment(recordId, dto);
+    const result = await this.receptionist.makePayment(recordId, dto);
+    return new GenericResponse('Record payment created successfully', result);
   }
 
   @ApiOkResponse({ description: 'Record invoice ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ type: Number, name: 'recordId', required: true })
   @Get('view-record-invoice')
-  ViewRecordInvoice(@Query('recordId', ParseIntPipe) recordId: number) {
-    return this.receptionist.viewInvoiceOfRecord(recordId);
+  async ViewRecordInvoice(@Query('recordId', ParseIntPipe) recordId: number) {
+    const result = await this.receptionist.viewInvoiceOfRecord(recordId);
+    return new GenericResponse('Record invoice fetched successfully', result);
   }
 
   @ApiOkResponse({ description: 'Record invoice details ' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Error' })
   @ApiQuery({ type: Number, name: 'invoiceId', required: true })
   @Get('view-record-invoice-details')
-  ViewRecordInvoiceDetails(
+  async ViewRecordInvoiceDetails(
     @Query('invoiceId', ParseIntPipe) invoiceId: number,
   ) {
-    return this.receptionist.viewInvoiceDetails(invoiceId);
+    const result = await this.receptionist.viewInvoiceDetails(invoiceId);
+    return new GenericResponse(
+      'Record invoice details fetched successfully',
+      result,
+    );
   }
 }

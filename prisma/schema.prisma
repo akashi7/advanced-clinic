@@ -243,6 +243,7 @@ model invoice_details {
   price         Int
   priceToPay    Int
   insurancePaid Int
+  hasPaid       Boolean @default(false)
 }
 
 model receptionist {
