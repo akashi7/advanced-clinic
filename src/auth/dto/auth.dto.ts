@@ -54,13 +54,9 @@ export class cartDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
-  itemId: number;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  type: string;
+  id: number;
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
-  priceToPay: number;
+  pricePaid: number;
 }
