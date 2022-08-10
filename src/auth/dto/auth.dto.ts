@@ -60,3 +60,17 @@ export class cartDto {
   @ApiProperty({ type: Number, required: true })
   pricePaid: number;
 }
+
+export class ExamCreationDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  itemId: number;
+}
+
+export class ExamConductDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  examId: number;
+}

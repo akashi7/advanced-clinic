@@ -108,7 +108,7 @@ model records {
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
   doctor         String
   status         String           @default("inactive")
-  recordStatus   String?
+  recordStatus   String?          @default("pending")
   nurse          String?
   record_details record_details[]
   medication     medication[]
@@ -170,10 +170,11 @@ model medication {
 }
 
 model exam {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   record_code Int
-  record      records  @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
-  exam        String[]
+  record      records @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
+  exam        Int
+  conducted   String  @default("no")
 }
 
 model examList {

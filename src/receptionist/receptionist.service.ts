@@ -14,7 +14,7 @@ import {
   User,
 } from '@prisma/client';
 import { endOfDay, startOfDay } from 'date-fns';
-import { ERecords, EStatus } from 'src/auth/enums';
+import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   FilterPatients,
@@ -169,6 +169,7 @@ export class ReceptionistService {
     let priceToPay: number;
     let insurancePaid: number;
     let nurse: string;
+    let insuranceRate: number;
 
     const insurance = await this.prisma.insurance.findFirst({
       where: { AND: [{ clinicId: user.clinicId }, { id: dto.insuranceId }] },
@@ -226,7 +227,8 @@ export class ReceptionistService {
       },
     });
     priceToPay = itemPrice.price - (itemPrice.price * parseInt(dto.rate)) / 100;
-    insurancePaid = (itemPrice.price * parseInt(dto.rate)) / 100;
+    insuranceRate = 100 - parseInt(dto.rate);
+    insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
 
     await this.prisma.invoice_details.create({
       data: {
@@ -420,5 +422,19 @@ export class ReceptionistService {
       where: { invoiceId },
     });
     return invoiceDetails;
+  }
+
+  async allDoctors(user: User): Promise<User[]> {
+    const doctors = await this.prisma.user.findMany({
+      where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.DOCTOR }] },
+    });
+    return doctors;
+  }
+
+  async allNurses(user: User): Promise<User[]> {
+    const nurses = await this.prisma.user.findMany({
+      where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.NURSE }] },
+    });
+    return nurses;
   }
 }
