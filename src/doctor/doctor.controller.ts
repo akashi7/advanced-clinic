@@ -8,8 +8,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -19,6 +20,7 @@ import { AllowRoles, GetUser } from 'src/auth/decorators';
 import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { DoctorService } from './doctor.service';
 import { examDto } from './dto';
 
@@ -27,31 +29,33 @@ import { examDto } from './dto';
 @AllowRoles(ERoles.DOCTOR)
 @ApiTags('doctor')
 @ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+@ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 export class DoctorController {
   constructor(private readonly docService: DoctorService) {}
 
   @ApiOkResponse({ description: 'Doctor requests' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Down' })
   @Get('see-requests')
-  docSeeAllRequets(@GetUser() user: User) {
-    return this.docService.docSeeAllRequets(user);
+  async docSeeAllRequets(@GetUser() user: User) {
+    const result = await this.docService.docSeeAllRequets(user);
+    return new GenericResponse('doctor requests', result);
   }
 
-  @ApiOkResponse({ description: 'Doctor requests' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Server Down' })
+  @ApiOkResponse({ description: 'Doctor one request' })
   @Get('view-request')
-  docViewRequet(@Query('id', ParseIntPipe) id: number) {
-    return this.docService.docViewRequet(id);
+  async docViewRequet(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.docService.docViewRequet(id);
+    return new GenericResponse('doctor one request', result);
   }
 
+  @ApiCreatedResponse({ description: 'Sent to labo' })
   @Post('send-to-labo')
-  docSendToLabo(
-    @Query('id', ParseIntPipe) id: number,
-    @Query('names') fullName: string,
+  async docSendToLabo(
+    @Query('recordid', ParseIntPipe) recordId: number,
     @Body() dto: examDto,
+    @GetUser() user: User,
   ) {
-    return this.docService.docSendToLabo(id, fullName, dto);
+    const result = await this.docService.docSendToLabo(user, recordId, dto);
+    return new GenericResponse('sent to labo', result);
   }
 }

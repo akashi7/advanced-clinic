@@ -159,4 +159,18 @@ export class ReceptionistController {
       result,
     );
   }
+
+  @ApiOkResponse({ description: 'Doctors ' })
+  @Get('all-doctors')
+  async getAllDoctors(@GetUser() user: User) {
+    const result = await this.receptionist.allDoctors(user);
+    return new GenericResponse('All doctors fetched successfully', result);
+  }
+
+  @ApiOkResponse({ description: 'Nurses ' })
+  @Get('all-nurses')
+  async getAllNurses(@GetUser() user: User) {
+    const result = await this.receptionist.allNurses(user);
+    return new GenericResponse('All nurses fetched successfully', result);
+  }
 }
