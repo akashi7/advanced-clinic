@@ -102,10 +102,10 @@ export class RecordDto {
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   doctor: number;
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  @ApiPropertyOptional({ type: Number })
-  nurse: number;
+  @ApiPropertyOptional({ type: String })
+  nurse: string;
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
@@ -136,7 +136,6 @@ export class MakePaymentDto {
 export class FilterRecordDto {
   @IsString()
   @IsOptional()
-  @Matches(/^(\d{4})-(\d{2})-(\d{2})$/)
   @ApiPropertyOptional({ type: String })
   recordDate: string;
 }

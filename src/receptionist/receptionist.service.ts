@@ -184,7 +184,7 @@ export class ReceptionistService {
 
     if (dto.nurse) {
       const Nurse = await this.prisma.user.findFirst({
-        where: { id: dto.nurse },
+        where: { id: parseInt(dto.nurse) },
       });
       nurse = Nurse.fullName;
     }
@@ -259,6 +259,12 @@ export class ReceptionistService {
   async seeRecords(dto: FilterRecordDto, user: User): Promise<records[]> {
     let today = new Date();
     if (dto.recordDate) {
+      const validate = new RegExp(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!validate.test(dto.recordDate)) {
+        throw new BadRequestException(
+          'Invalid date format , format must be YYYY-MM-DD',
+        );
+      }
       today = new Date(dto.recordDate);
       const records = await this.prisma.records.findMany({
         where: {
@@ -356,19 +362,23 @@ export class ReceptionistService {
     const invoice = await this.prisma.invoice.findFirst({
       where: { recordId: record.record_code },
     });
+
     dto.cart.forEach(async (item) => {
+      const invoice_details = await this.prisma.invoice_details.findFirst({
+        where: { id: item.id },
+      });
       await this.prisma.payment.create({
         data: {
           invoiceId: invoice.id,
-          amount: item.priceToPay,
-          itemId: item.itemId,
-          type: item.type,
+          amount: item.pricePaid,
+          itemId: invoice_details.itemId,
+          type: invoice_details.type,
           recordId: record.record_code,
           insurancePaid: invoice.amountPaidByInsurance,
         },
       });
-      unpaidAmount = invoice.unpaidAmount - item.priceToPay;
-      amountPaid = invoice.amountPaid + item.priceToPay;
+      unpaidAmount = invoice.unpaidAmount - item.pricePaid;
+      amountPaid = invoice.amountPaid + item.pricePaid;
       await this.prisma.invoice.update({
         data: {
           unpaidAmount,
@@ -379,14 +389,16 @@ export class ReceptionistService {
         },
       });
       await this.prisma
-        .$queryRaw`UPDATE "invoice_details" SET "hasPaid" = true WHERE "invoiceId" = ${invoice.id} AND "itemId" = ${item.itemId}`;
+        .$queryRaw`UPDATE "invoice_details" SET "hasPaid" = true WHERE "invoiceId" = ${invoice.id} AND "itemId" = ${invoice_details.itemId}`;
 
       message = 'Payment made successfully';
     });
     if (message) return { message };
   }
 
-  async viewInvoiceOfRecord(recordId: number): Promise<invoice> {
+  async viewInvoiceOfRecord(
+    recordId: number,
+  ): Promise<{ Invoice: invoice; Patient: patient }> {
     const invoice = await this.prisma.invoice.findFirst({
       where: {
         recordId,
@@ -395,7 +407,12 @@ export class ReceptionistService {
         invoice_details: true,
       },
     });
-    return invoice;
+
+    const patient = await this.prisma.patient.findFirst({
+      where: { id: invoice.patientId },
+    });
+
+    return { Invoice: invoice, Patient: patient };
   }
 
   async viewInvoiceDetails(invoiceId: number): Promise<invoice_details[]> {

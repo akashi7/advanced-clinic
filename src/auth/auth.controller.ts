@@ -10,7 +10,6 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { GenericResponse } from '../__shared__/dto/generic-response.dto';
 import { AuthService } from './auth.service';
 import {
   AuthAdminSignIn,
@@ -42,7 +41,7 @@ export class AuthController {
   @Post('admin-login')
   async adminLogin(@Body() dto: AuthAdminSignIn) {
     const result = await this.authservice.adminLogin(dto);
-    return new GenericResponse('Admin logged in successfully', result);
+    return result;
   }
 
   //user-login
@@ -55,6 +54,6 @@ export class AuthController {
   @Post('user-signin')
   async userLogin(@Body() dto: userSignInDto) {
     const result = await this.authservice.userLogin(dto);
-    return new GenericResponse('User logged in successfully', result);
+    return result;
   }
 }

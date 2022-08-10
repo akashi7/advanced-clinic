@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -86,6 +87,9 @@ export class ReceptionistController {
   }
 
   @ApiOkResponse({ description: 'Records for receptionist fetched ' })
+  @ApiBadRequestResponse({
+    description: 'Invalid date format , format must be YYYY-MM-DD',
+  })
   @Post('recept-data')
   @HttpCode(200)
   @ApiBody({ type: FilterRecordDto })
