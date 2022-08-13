@@ -260,6 +260,40 @@ export class ReceptionistService {
 
   async seeRecords(dto: FilterRecordDto, user: User): Promise<records[]> {
     let today = new Date();
+
+    if (dto.status) {
+      if (dto.recordDate) {
+        const validate = new RegExp(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!validate.test(dto.recordDate)) {
+          throw new BadRequestException(
+            'Invalid date format , format must be YYYY-MM-DD',
+          );
+        }
+        today = new Date(dto.recordDate);
+        const records = await this.prisma.records.findMany({
+          where: {
+            AND: [
+              { clinicId: user.clinicId },
+              { createdAt: { gte: startOfDay(today) } },
+              { createdAt: { lte: endOfDay(today) } },
+              { recordStatus: EStatus.FINISHED },
+            ],
+          },
+        });
+        return records;
+      }
+      const records = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { clinicId: user.clinicId },
+            { createdAt: { gte: startOfDay(today) } },
+            { createdAt: { lte: endOfDay(today) } },
+            { recordStatus: EStatus.FINISHED },
+          ],
+        },
+      });
+      return records;
+    }
     if (dto.recordDate) {
       const validate = new RegExp(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!validate.test(dto.recordDate)) {
@@ -311,7 +345,7 @@ export class ReceptionistService {
     }
     if (type === 'exam') {
       const payment = await this.prisma
-        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "exam" ON "payment"."itemId" = "exam"."id" WHERE "payment"."id" = ${paymentId}`;
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId" = "examList"."id" WHERE "payment"."id" = ${paymentId}`;
       return payment;
     }
   }

@@ -9,9 +9,11 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -22,7 +24,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { DoctorService } from './doctor.service';
-import { examDto } from './dto';
+import { examDto, FilterResult } from './dto';
 
 @Controller('doctor')
 @UseGuards(JwtGuard, RolesGuard)
@@ -36,19 +38,23 @@ export class DoctorController {
 
   @ApiOkResponse({ description: 'Doctor requests' })
   @Get('see-requests')
-  async docSeeAllRequets(@GetUser() user: User) {
-    const result = await this.docService.docSeeAllRequets(user);
+  @ApiBody({ type: FilterResult })
+  async docSeeAllRequets(@GetUser() user: User, @Body() dto: FilterResult) {
+    const result = await this.docService.docSeeAllRequets(user, dto);
     return new GenericResponse('doctor requests', result);
   }
 
   @ApiOkResponse({ description: 'Doctor one request' })
+  @ApiQuery({ name: 'recordId', required: true })
   @Get('view-request')
-  async docViewRequet(@Query('id', ParseIntPipe) id: number) {
+  async docViewRequet(@Query('recordId', ParseIntPipe) id: number) {
     const result = await this.docService.docViewRequet(id);
     return new GenericResponse('doctor one request', result);
   }
 
   @ApiCreatedResponse({ description: 'Sent to labo' })
+  @ApiQuery({ name: 'recordid', required: true })
+  @ApiBody({ type: examDto })
   @Post('send-to-labo')
   async docSendToLabo(
     @Query('recordid', ParseIntPipe) recordId: number,
@@ -57,5 +63,15 @@ export class DoctorController {
   ) {
     const result = await this.docService.docSendToLabo(user, recordId, dto);
     return new GenericResponse('sent to labo', result);
+  }
+
+  @ApiCreatedResponse({ description: 'Sent to labo' })
+  @ApiQuery({ name: 'recordId', required: true })
+  @Post('terminate-record')
+  async docTerminateRecordProccess(
+    @Query('recordId', ParseIntPipe) id: number,
+  ) {
+    const result = await this.docService.docTerminateRecordProccess(id);
+    return new GenericResponse('Terminated record', result);
   }
 }

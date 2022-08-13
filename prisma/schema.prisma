@@ -143,6 +143,7 @@ model record_details {
   nurse       String?
   doctor      String?
   laborante   String?
+  examResults String?
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
@@ -175,6 +176,7 @@ model exam {
   record      records @relation(fields: [record_code], references: [record_code], onUpdate: Cascade)
   exam        Int
   conducted   String  @default("no")
+  observation String?
 }
 
 model examList {

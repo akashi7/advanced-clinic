@@ -2,13 +2,30 @@ import { Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { examDto } from './dto';
+import { examDto, FilterResult } from './dto';
 
 @Injectable()
 export class DoctorService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async docSeeAllRequets(user: User): Promise<record_details[]> {
+  async docSeeAllRequets(
+    user: User,
+    dto: FilterResult,
+  ): Promise<record_details[]> {
+    if (dto.results) {
+      const record = await this.prisma.record_details.findMany({
+        where: {
+          AND: [
+            {
+              destination: ERecords.DOCTOR_DESTINATION,
+              doctor: user.fullName,
+              examResults: ERecords.EXAM_RESULTS,
+            },
+          ],
+        },
+      });
+      return record;
+    }
     const record = await this.prisma.record_details.findMany({
       where: {
         AND: [
@@ -31,6 +48,10 @@ export class DoctorService {
     const record = await this.prisma.records.findFirst({
       where: {
         record_code: record_details.recordId,
+      },
+      include: {
+        exam: true,
+        sign_vital: true,
       },
     });
 
@@ -131,5 +152,17 @@ export class DoctorService {
     });
 
     return { message: 'Record sent to laboratory' };
+  }
+
+  async docTerminateRecordProccess(id: number): Promise<{ message: string }> {
+    await this.prisma.records.update({
+      where: {
+        record_code: id,
+      },
+      data: {
+        recordStatus: EStatus.FINISHED,
+      },
+    });
+    return { message: '' };
   }
 }
