@@ -7,7 +7,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Matches,
 } from 'class-validator';
 import { cartDto } from 'src/auth/dto/auth.dto';
 
@@ -138,4 +137,8 @@ export class FilterRecordDto {
   @IsOptional()
   @ApiPropertyOptional({ type: String })
   recordDate: string;
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ type: Boolean })
+  status: boolean;
 }

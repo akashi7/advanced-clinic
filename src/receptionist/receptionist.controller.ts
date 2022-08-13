@@ -68,6 +68,7 @@ export class ReceptionistController {
   }
 
   @ApiOkResponse({ description: 'Patient fetched successfully' })
+  @ApiBody({ type: FilterPatients })
   @Post('filter-patients')
   async filterPatients(@Body() dto: FilterPatients, @GetUser() user: User) {
     const result = await this.receptionist.filterPatients(dto, user);
@@ -173,7 +174,7 @@ export class ReceptionistController {
     const result = await this.receptionist.allNurses(user);
     return new GenericResponse('All nurses fetched successfully', result);
   }
-
+  @ApiOkResponse({ description: 'Laborante ' })
   @Get('all-laborantes')
   async getAllLaborantes(@GetUser() user: User) {
     const result = await this.receptionist.allLaborantes(user);

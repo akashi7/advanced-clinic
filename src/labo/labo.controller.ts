@@ -5,13 +5,17 @@ import {
   HttpCode,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -41,6 +45,7 @@ export class LaboController {
     return new GenericResponse('laborante requests', result);
   }
   @ApiOkResponse({ description: 'Labo one request' })
+  @ApiQuery({ name: 'recordDetailsId', required: true })
   @Get('see-one-request')
   async laboViewRequet(@Query('recordDetailsId', ParseIntPipe) id: number) {
     const result = await this.laboService.laboViewRequet(id);
@@ -49,9 +54,18 @@ export class LaboController {
 
   @ApiOkResponse({ description: 'Labo requests' })
   @HttpCode(200)
+  @ApiBody({ type: conductExamDto })
   @Patch('mark-exams')
   async markExams(@Body() dto: conductExamDto) {
     const result = await this.laboService.markExams(dto);
     return new GenericResponse('marked exams', result);
+  }
+
+  @ApiCreatedResponse({ description: 'record sent to doctor' })
+  @ApiQuery({ name: 'recordId', required: true })
+  @Post('send-to-doc')
+  async sendToDoctor(@Query('recordId', ParseIntPipe) id: number) {
+    const result = await this.laboService.sendToDoctor(id);
+    return new GenericResponse('record sent to doctor', result);
   }
 }

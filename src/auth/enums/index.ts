@@ -14,14 +14,12 @@ export enum ERecords {
   LABORANTE_DESTINATION = 'LABORANTE',
   RECEPTONIST_DESTINATION = 'RECEPTONIST',
   DOCTOR_STATUS = 'DOCTOR_STATUS',
+  EXAM_RESULTS = 'EXAM_RESULTS',
 }
 
 export enum EStatus {
   READ = 'READ',
   UNREAD = 'UNREAD',
   ACTIVE = 'ACTIVE',
-}
-export enum ETypes {
-  ALL_TYPE = 'ALL_TYPE',
-  SOME = 'SOME',
+  FINISHED = 'FINISHED',
 }

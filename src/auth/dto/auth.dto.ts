@@ -73,4 +73,8 @@ export class ExamConductDto {
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   examId: number;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  observation: string;
 }
