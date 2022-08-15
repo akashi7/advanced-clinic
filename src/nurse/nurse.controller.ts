@@ -47,20 +47,14 @@ export class NurseController {
 
   @ApiCreatedResponse({ description: ' vitals registered success' })
   @ApiBody({ type: vitalsDto })
-  @ApiQuery({ name: 'id', type: Number })
   @ApiQuery({ name: 'recordId', type: Number })
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.NURSE)
   @Post('register-vitals')
   async nurseRegisterVitals(
     @Body() dto: vitalsDto,
-    @Query('id', ParseIntPipe) id: number,
     @Query('recordId', ParseIntPipe) recordId: number,
   ) {
-    const result = await this.nurseService.nurseRegisterVitals(
-      dto,
-      id,
-      recordId,
-    );
+    const result = await this.nurseService.nurseRegisterVitals(dto, recordId);
     return new GenericResponse('vitals registered success', result);
   }
 
@@ -73,12 +67,10 @@ export class NurseController {
 
   @ApiCreatedResponse({ description: ' Record sent to doctor' })
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.NURSE)
+  @ApiQuery({ name: 'id', type: Number })
   @Post('send-to-doc')
-  async nurseTransferToDoc(
-    @Query('id', ParseIntPipe) recordId: number,
-    @Query('names') fullName: string,
-  ) {
-    const result = await this.nurseService.nurseSendToDoc(recordId, fullName);
+  async nurseTransferToDoc(@Query('id', ParseIntPipe) recordId: number) {
+    const result = await this.nurseService.nurseSendToDoc(recordId);
     return new GenericResponse('Record sent to doctor', result);
   }
   @HttpCode(200)
