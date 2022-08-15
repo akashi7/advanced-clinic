@@ -46,13 +46,15 @@ export class NurseService {
 
   async nurseRegisterVitals(
     dto: vitalsDto,
-    id: number,
     recordId: number,
   ): Promise<{ message: string }> {
+    const record = await this.prisma.records.findFirst({
+      where: { record_code: recordId },
+    });
     await this.prisma.sign_vital.create({
       data: {
         ...dto,
-        patientId: id,
+        patientId: record.patientId,
         recordId,
       },
     });
@@ -61,10 +63,7 @@ export class NurseService {
     };
   }
 
-  async nurseSendToDoc(
-    recordId: number,
-    fullNames: string,
-  ): Promise<{ message: string }> {
+  async nurseSendToDoc(recordId: number): Promise<{ message: string }> {
     const record = await this.prisma.record_details.findFirst({
       where: {
         id: recordId,
@@ -75,7 +74,7 @@ export class NurseService {
         recordId: record.recordId,
         destination: ERecords.DOCTOR_DESTINATION,
         status: EStatus.UNREAD,
-        fullNames,
+        fullNames: record.fullNames,
         doctor: record.doctor,
       },
     });

@@ -2,10 +2,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString,
 } from 'class-validator';
 import { ExamCreationDto } from 'src/auth/dto/auth.dto';
 
@@ -21,7 +21,7 @@ export class examDto {
 }
 
 export class FilterResult {
-  @IsString()
+  @IsBoolean()
   @IsOptional()
   @ApiProperty({ type: Boolean })
   results: boolean;

@@ -137,7 +137,7 @@ export class FilterRecordDto {
   @IsOptional()
   @ApiPropertyOptional({ type: String })
   recordDate: string;
-  @IsString()
+  @IsBoolean()
   @IsOptional()
   @ApiPropertyOptional({ type: Boolean })
   status: boolean;

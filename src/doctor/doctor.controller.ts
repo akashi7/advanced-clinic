@@ -37,7 +37,7 @@ export class DoctorController {
   constructor(private readonly docService: DoctorService) {}
 
   @ApiOkResponse({ description: 'Doctor requests' })
-  @Get('see-requests')
+  @Post('see-requests')
   @ApiBody({ type: FilterResult })
   async docSeeAllRequets(@GetUser() user: User, @Body() dto: FilterResult) {
     const result = await this.docService.docSeeAllRequets(user, dto);
