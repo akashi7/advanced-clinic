@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { examDto, FilterResult } from './dto';
+import { examDto, FilterResult, ObservationDto } from './dto';
 
 @Injectable()
 export class DoctorService {
@@ -154,13 +154,17 @@ export class DoctorService {
     return { message: 'Record sent to laboratory' };
   }
 
-  async docTerminateRecordProccess(id: number): Promise<{ message: string }> {
+  async docTerminateRecordProccess(
+    id: number,
+    dto: ObservationDto,
+  ): Promise<{ message: string }> {
     await this.prisma.records.update({
       where: {
         record_code: id,
       },
       data: {
         recordStatus: EStatus.FINISHED,
+        observation: dto.observation,
       },
     });
     return { message: '' };

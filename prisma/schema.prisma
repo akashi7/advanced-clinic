@@ -110,6 +110,7 @@ model records {
   status         String           @default("inactive")
   recordStatus   String?          @default("pending")
   nurse          String?
+  observation    String?
   record_details record_details[]
   medication     medication[]
   exam           exam[]

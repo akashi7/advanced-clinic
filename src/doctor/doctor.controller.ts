@@ -24,7 +24,7 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { DoctorService } from './doctor.service';
-import { examDto, FilterResult } from './dto';
+import { examDto, FilterResult, ObservationDto } from './dto';
 
 @Controller('doctor')
 @UseGuards(JwtGuard, RolesGuard)
@@ -67,11 +67,13 @@ export class DoctorController {
 
   @ApiCreatedResponse({ description: 'Sent to labo' })
   @ApiQuery({ name: 'recordId', required: true })
+  @ApiBody({ type: ObservationDto })
   @Post('terminate-record')
   async docTerminateRecordProccess(
     @Query('recordId', ParseIntPipe) id: number,
+    @Body() dto: ObservationDto,
   ) {
-    const result = await this.docService.docTerminateRecordProccess(id);
+    const result = await this.docService.docTerminateRecordProccess(id, dto);
     return new GenericResponse('Terminated record', result);
   }
 }
