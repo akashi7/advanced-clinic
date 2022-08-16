@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 import { ExamCreationDto } from 'src/auth/dto/auth.dto';
 
@@ -25,4 +26,10 @@ export class FilterResult {
   @IsOptional()
   @ApiProperty({ type: Boolean })
   results: boolean;
+}
+export class ObservationDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  observation: string;
 }
