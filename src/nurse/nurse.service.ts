@@ -39,6 +39,9 @@ export class NurseService {
 
     const record = await this.prisma.records.findFirst({
       where: { record_code: recordDetails.recordId },
+      include: {
+        sign_vital: true,
+      },
     });
 
     return record;
