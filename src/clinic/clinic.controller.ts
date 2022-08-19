@@ -172,6 +172,7 @@ export class ClinicController {
     return new GenericResponse('Consultation deleted successfully', result);
   }
 
+  @AllowRoles(ERoles.DOCTOR, ERoles.CLINIC)
   @ApiOkResponse({ description: 'All exams returned successfully' })
   @Get('all-exam')
   async ClinicGetAllExam(@GetUser() user: User) {
