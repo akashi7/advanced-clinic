@@ -93,7 +93,7 @@ export class DoctorService {
           AND: [
             { clinicId: user.clinicId },
             { Type: 'exam' },
-            { itemId: exam.itemId },
+            { id: exam.itemId },
             { insuranceId: invoice.insuranceId },
           ],
         },
