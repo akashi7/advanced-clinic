@@ -89,14 +89,7 @@ export class DoctorService {
 
     dto.exams.forEach(async (exam) => {
       const itemPrice = await this.prisma.priceList.findFirst({
-        where: {
-          AND: [
-            { clinicId: user.clinicId },
-            { Type: 'exam' },
-            { id: exam.itemId },
-            { insuranceId: invoice.insuranceId },
-          ],
-        },
+        where: { id: exam.itemId },
       });
 
       await this.prisma.exam.create({

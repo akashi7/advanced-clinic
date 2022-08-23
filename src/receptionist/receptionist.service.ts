@@ -217,14 +217,7 @@ export class ReceptionistService {
       },
     });
     const itemPrice = await this.prisma.priceList.findFirst({
-      where: {
-        AND: [
-          { clinicId: user.clinicId },
-          { Type: 'consultation' },
-          { id: dto.itemId },
-          { insuranceId: dto.insuranceId },
-        ],
-      },
+      where: { id: dto.itemId },
     });
     priceToPay = itemPrice.price - (itemPrice.price * parseInt(dto.rate)) / 100;
     insuranceRate = 100 - parseInt(dto.rate);
