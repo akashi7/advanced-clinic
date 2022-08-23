@@ -25,6 +25,7 @@ import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { ClinicDto } from 'src/clinic/dto/clinic.dto';
+import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -41,16 +42,18 @@ export class AdminController {
   @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: ClinicDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  RegisterClinic(@Body() dto: ClinicDto) {
-    return this.adminService.RegisterClinic(dto);
+  async RegisterClinic(@Body() dto: ClinicDto) {
+    const result = await this.adminService.RegisterClinic(dto);
+    return new GenericResponse('registered clinic', result);
   }
   @HttpCode(200)
   @Patch('disbale-clinic')
   @ApiOkResponse({ description: 'Clinic updated successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
-  disableClinic(@Query('id', ParseIntPipe) clinicId: number) {
-    return this.adminService.disableClinic(clinicId);
+  async disableClinic(@Query('id', ParseIntPipe) clinicId: number) {
+    const result = await this.adminService.disableClinic(clinicId);
+    return new GenericResponse('disbaled clinic', result);
   }
 
   @HttpCode(200)
@@ -58,15 +61,17 @@ export class AdminController {
   @ApiOkResponse({ description: 'Clinic updated successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
-  enableClinic(@Query('id', ParseIntPipe) clinicId: number) {
-    return this.adminService.enableClinic(clinicId);
+  async enableClinic(@Query('id', ParseIntPipe) clinicId: number) {
+    const result = await this.adminService.enableClinic(clinicId);
+    return new GenericResponse('enabled clinic', result);
   }
 
   @HttpCode(200)
   @Get('all-clinics')
   @ApiOkResponse({ description: 'All clinics received successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  GetAllClinics() {
-    return this.adminService.getAllClinics();
+  async GetAllClinics() {
+    const result = await this.adminService.getAllClinics();
+    return new GenericResponse('All clinics fetched ', result);
   }
 }
