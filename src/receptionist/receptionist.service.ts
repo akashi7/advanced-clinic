@@ -221,7 +221,7 @@ export class ReceptionistService {
         AND: [
           { clinicId: user.clinicId },
           { Type: 'consultation' },
-          { itemId: dto.itemId },
+          { id: dto.itemId },
           { insuranceId: dto.insuranceId },
         ],
       },
