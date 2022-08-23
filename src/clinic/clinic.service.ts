@@ -488,7 +488,7 @@ export class ClinicService {
 
   async getAllExams(user: User): Promise<examList[]> {
     const exam = await this.prisma.examList.findMany({
-      where: { clinicId: user.userId },
+      where: { clinicId: user.clinicId },
     });
     return exam;
   }
