@@ -39,7 +39,9 @@ export class DoctorService {
     return record;
   }
 
-  async docViewRequet(id: number): Promise<records> {
+  async docViewRequet(
+    id: number,
+  ): Promise<{ record: records; exams: unknown }> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
         id,
@@ -50,10 +52,12 @@ export class DoctorService {
         record_code: record_details.recordId,
       },
       include: {
-        exam: true,
         sign_vital: true,
       },
     });
+
+    const examTable = await this.prisma
+      .$queryRaw`SELECT * FROM "exam" LEFT JOIN "examList" ON "exam"."exam"="examList"."id" WHERE "exam"."record_code" = ${record.record_code}`;
 
     await this.prisma.record_details.update({
       where: {
@@ -64,7 +68,7 @@ export class DoctorService {
       },
     });
 
-    return record;
+    return { record: record, exams: examTable };
   }
 
   async docSendToLabo(
@@ -87,9 +91,21 @@ export class DoctorService {
       },
     });
 
+    const insurance = await this.prisma.insurance.findFirst({
+      where: {
+        name: record.insurance,
+      },
+    });
+
     dto.exams.forEach(async (exam) => {
       const itemPrice = await this.prisma.priceList.findFirst({
-        where: { id: exam.itemId },
+        where: {
+          AND: [
+            { itemId: exam.itemId },
+            { Type: 'exam' },
+            { insuranceId: insurance.id },
+          ],
+        },
       });
 
       await this.prisma.exam.create({

@@ -220,32 +220,42 @@ export class ClinicService {
     }
 
     if (isRole === ERoles.LABORANTE) {
-      const isLaborante = await this.prisma.laborante.findFirst({
-        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
-      });
-      if (isLaborante)
-        throw new ConflictException('Laborante already registered');
-      const passwordGenerated = this.makePassword(8);
-      const password = await argon.hash(passwordGenerated);
-      const laborante = await this.prisma.laborante.create({
-        data: {
-          email: dto.email,
-          fullName: dto.fullName,
-          phone: dto.phone,
-          gender: dto.gender,
-          role: ERoles.LABORANTE,
-          clinicId: user.userId,
+      const isThereLabaorante = await this.prisma.laborante.findFirst({
+        where: {
+          AND: [
+            {
+              role: ERoles.LABORANTE,
+            },
+            { clinicId: user.userId },
+          ],
         },
       });
-      return this.RegisterUserToDataBase(
-        ERoles.LABORANTE,
-        dto.email,
-        password,
-        dto.fullName,
-        user.userId,
-        laborante.id,
-        passwordGenerated,
-      );
+
+      if (isThereLabaorante) {
+        throw new ConflictException('Can not have more than 2 laborantes');
+      } else {
+        const passwordGenerated = this.makePassword(8);
+        const password = await argon.hash(passwordGenerated);
+        const laborante = await this.prisma.laborante.create({
+          data: {
+            email: dto.email,
+            fullName: dto.fullName,
+            phone: dto.phone,
+            gender: dto.gender,
+            role: ERoles.LABORANTE,
+            clinicId: user.userId,
+          },
+        });
+        return this.RegisterUserToDataBase(
+          ERoles.LABORANTE,
+          dto.email,
+          password,
+          dto.fullName,
+          user.userId,
+          laborante.id,
+          passwordGenerated,
+        );
+      }
     } else throw new ConflictException('Role not found');
   }
 
@@ -428,7 +438,7 @@ export class ClinicService {
 
   async getAllConsultation(user: User): Promise<consultation[]> {
     const consultation = await this.prisma.consultation.findMany({
-      where: { clinicId: user.userId },
+      where: { clinicId: user.clinicId },
     });
     return consultation;
   }

@@ -131,6 +131,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'All consultations returned successfully' })
   @Get('all-consultation')
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   async ClinicGetAllConsultation(@GetUser() user: User) {
     const result = await this.clinic.getAllConsultation(user);
     return new GenericResponse(
@@ -211,7 +212,6 @@ export class ClinicController {
   }
 
   @ApiOkResponse({ description: 'Consultations price lists returned' })
-  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @Get('consultation-price-list')
   async ClinicGetAllConsultationPriceList(@GetUser() user: User) {
     const result = await this.clinic.getConsultationPriceList(user);
