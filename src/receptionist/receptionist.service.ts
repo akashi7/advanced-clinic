@@ -222,6 +222,7 @@ export class ReceptionistService {
           { itemId: dto.itemId },
           { Type: 'consultation' },
           { insuranceId: dto.insuranceId },
+          { clinicId: user.clinicId },
         ],
       },
     });

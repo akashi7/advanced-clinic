@@ -104,6 +104,7 @@ export class DoctorService {
             { itemId: exam.itemId },
             { Type: 'exam' },
             { insuranceId: insurance.id },
+            { clinicId: user.clinicId },
           ],
         },
       });
