@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -108,6 +108,10 @@ export class DoctorService {
           ],
         },
       });
+
+      if (!itemPrice) {
+        throw new BadRequestException(`Exam not priceList `);
+      }
 
       await this.prisma.exam.create({
         data: {

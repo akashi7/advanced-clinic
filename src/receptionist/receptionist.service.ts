@@ -226,6 +226,9 @@ export class ReceptionistService {
         ],
       },
     });
+    if (!itemPrice) {
+      throw new BadRequestException('consultation not in priceList');
+    }
     priceToPay = itemPrice.price - (itemPrice.price * parseInt(dto.rate)) / 100;
     insuranceRate = 100 - parseInt(dto.rate);
     insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;

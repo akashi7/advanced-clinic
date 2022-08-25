@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
@@ -55,6 +56,7 @@ export class DoctorController {
   @ApiCreatedResponse({ description: 'Sent to labo' })
   @ApiQuery({ name: 'recordid', required: true })
   @ApiBody({ type: examDto })
+  @ApiBadRequestResponse({ description: 'Exam not in PriceList' })
   @Post('send-to-labo')
   async docSendToLabo(
     @Query('recordid', ParseIntPipe) recordId: number,

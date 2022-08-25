@@ -77,6 +77,8 @@ export class ReceptionistController {
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiQuery({ name: 'id', required: true })
+  @ApiBadRequestResponse({ description: 'consultation not in priceList' })
+  @ApiBody({ type: RecordDto })
   @Post('create-record')
   async sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
