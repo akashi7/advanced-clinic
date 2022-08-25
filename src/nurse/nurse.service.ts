@@ -67,14 +67,14 @@ export class NurseService {
   }
 
   async nurseSendToDoc(recordId: number): Promise<{ message: string }> {
-    const record = await this.prisma.record_details.findFirst({
+    const record = await this.prisma.records.findFirst({
       where: {
-        id: recordId,
+        record_code: recordId,
       },
     });
     await this.prisma.record_details.create({
       data: {
-        recordId: record.recordId,
+        recordId: record.record_code,
         destination: ERecords.DOCTOR_DESTINATION,
         status: EStatus.UNREAD,
         fullNames: record.fullNames,
