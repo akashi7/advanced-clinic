@@ -11,13 +11,13 @@ async function bootstrap() {
   app.enableCors();
   const options = new DocumentBuilder()
     .setTitle('advanced-clinic-api')
-    .setDescription('adbvanced-clinic-api')
+    .setDescription('advanced-clinic-api')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api/doc', app, document, {
-    customSiteTitle: 'Kuranga',
+    customSiteTitle: 'advanced clinic',
     customCss: '.swagger-ui .topbar { display: none }',
     swaggerOptions: {
       persistAuthorization: true,

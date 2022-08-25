@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
-import { ERecords, EStatus } from 'src/auth/enums';
+import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { examDto, FilterResult, ObservationDto } from './dto';
 
@@ -145,9 +145,7 @@ export class DoctorService {
     });
 
     const laborante = await this.prisma.user.findFirst({
-      where: {
-        id: dto.laborante,
-      },
+      where: { AND: [{ role: ERoles.LABORANTE }, { clinicId: user.clinicId }] },
     });
 
     await this.prisma.record_details.create({
