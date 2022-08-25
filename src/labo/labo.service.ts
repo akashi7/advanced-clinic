@@ -51,16 +51,10 @@ export class LaboService {
 
   async markExams(dto: conductExamDto): Promise<{ message: string }> {
     let message: string;
+    const conducted = 'yes';
     dto.exams.forEach(async (exam) => {
-      await this.prisma.exam.update({
-        where: {
-          id: exam.examId,
-        },
-        data: {
-          conducted: 'yes',
-          observation: exam.observation,
-        },
-      });
+      await this.prisma
+        .$queryRaw`UPDATE "exam" SET "conducted"=${conducted}, "observation"=${exam.observation} WHERE "exam"."id"=${exam.examId}`;
       message = 'Exams conducted';
     });
     if (message) return { message };
