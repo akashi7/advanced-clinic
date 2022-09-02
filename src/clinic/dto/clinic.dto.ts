@@ -157,3 +157,10 @@ export class UpdatePriceListDto {
   @ApiProperty({ required: true, type: Number })
   price: number;
 }
+
+export class FilterReportDto {
+  @IsString()
+  month: string;
+  @IsString()
+  year: string;
+}

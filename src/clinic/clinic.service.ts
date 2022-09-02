@@ -17,12 +17,13 @@ import {
   User,
 } from '@prisma/client';
 import * as argon from 'argon2';
-import { ERoles } from 'src/auth/enums';
+import { ERoles, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   consultationDto,
   ExamDto,
+  FilterReportDto,
   InsuranceDto,
   insuranceUpdateDto,
   PriceListDto,
@@ -587,5 +588,117 @@ export class ClinicService {
     const prices = await this.prisma
       .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "examList" ON "priceList"."itemId" = "examList"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'exam'`;
     return prices;
+  }
+
+  async ClinicReport(user: User): Promise<{
+    totalUsers: number;
+    totalPatients: number;
+    totalChildren: number;
+    totalAdults: number;
+    totalRecords: number;
+    totalActiveRecords: number;
+    totalPendingrecords: number;
+    totalClosedRecords: number;
+    totalInvoices: number;
+    totalPayments: number;
+    totalPaymentsMade: number;
+  }> {
+    let Record: unknown,
+      ActiveRecord: unknown,
+      PR: unknown,
+      CR: unknown,
+      PY: unknown,
+      INV: unknown,
+      PYS: unknown;
+    // if (month && year) {
+    //   let k = await this.prisma
+    //     .$queryRaw`SELECT EXTRACT(MONTH FROM TIMESTAMP'2001-02-16 20:38:40')`;
+    //   console.log({ k });
+    //   Record = await this.prisma
+    //     .$queryRaw`SELECT COUNT(*) FROM "records" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} `;
+    //   ActiveRecord = await this.prisma
+    //     .$queryRaw`SELECT COUNT(*) FROM "records" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND ("clinicId"=${
+    //     user.clinicId
+    //   } AND "status"=${'active'}) AND  date_part('year',TIMESTAMP'"createdAt"')=${year}`;
+    //   PR = await this.prisma
+    //     .$queryRaw`SELECT  COUNT(*) FROM "records" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} AND("clinicId"=${user.clinicId}AND "recordStatus"=${EStatus.PENDING})`;
+
+    //   CR = await this.prisma
+    //     .$queryRaw`SELECT  COUNT(*) FROM "records" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} AND("clinicId"=${user.clinicId}AND "recordStatus"=${EStatus.FINISHED})`;
+
+    //   INV = await this.prisma
+    //     .$queryRaw`SELECT COUNT(*) FROM "invoice" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} AND"clinicId"=${user.clinicId}`;
+
+    //   PY = await this.prisma
+    //     .$queryRaw`SELECT COUNT(*) FROM "payment" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} AND"clinicId"=${user.clinicId} `;
+
+    //   PYS = await this.prisma
+    //     .$queryRaw`SELECT SUM("amount") AS "amount" WHERE date_part('month',TIMESTAMP'"createdAt"')=${month} AND date_part('year',TIMESTAMP'"createdAt"')=${year} AND"clinicId"=${user.clinicId} `;
+
+    //   console.log({ Record });
+    //   console.log({ ActiveRecord });
+    //   console.log({ PR });
+    //   console.log({ CR });
+    //   console.log({ INV });
+    //   console.log({ PYS });
+    // }
+
+    const allUsers = await this.prisma.user.count({
+      where: { clinicId: user.clinicId },
+    });
+    const patients = await this.prisma.patient.count({
+      where: { clinicId: user.clinicId },
+    });
+    const childrens = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: true }] },
+    });
+    const adutls = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: false }] },
+    });
+    const records = await this.prisma.records.count({
+      where: { clinicId: user.clinicId },
+    });
+    const activeRecords = await this.prisma.records.count({
+      where: { AND: [{ clinicId: user.clinicId }, { status: 'active' }] },
+    });
+    const pendingRecords = await this.prisma.records.count({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { recordStatus: EStatus.PENDING }],
+      },
+    });
+    const closedRecords = await this.prisma.records.count({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { recordStatus: EStatus.FINISHED }],
+      },
+    });
+
+    const invoices = await this.prisma.invoice.count({
+      where: { clinicId: user.clinicId },
+    });
+
+    const payment = await this.prisma.payment.count({
+      where: { clinicId: user.clinicId },
+    });
+
+    const payments = await this.prisma.payment.aggregate({
+      where: { clinicId: user.clinicId },
+      _count: {
+        amount: true,
+      },
+    });
+
+    return {
+      totalUsers: allUsers,
+      totalPatients: patients,
+      totalChildren: childrens,
+      totalAdults: adutls,
+      totalRecords: records,
+      totalActiveRecords: activeRecords,
+      totalPendingrecords: pendingRecords,
+      totalClosedRecords: closedRecords,
+      totalInvoices: invoices,
+      totalPayments: payment,
+      totalPaymentsMade: payments === null ? 0 : payments._count.amount,
+    };
   }
 }

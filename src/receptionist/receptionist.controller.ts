@@ -137,8 +137,9 @@ export class ReceptionistController {
   async CreateRecordPayment(
     @Body() dto: MakePaymentDto,
     @Query('recordId', ParseIntPipe) recordId: number,
+    @GetUser() user: User,
   ) {
-    const result = await this.receptionist.makePayment(recordId, dto);
+    const result = await this.receptionist.makePayment(recordId, dto, user);
     return new GenericResponse('Record payment created successfully', result);
   }
 

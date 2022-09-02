@@ -246,12 +246,17 @@ export class ClinicController {
   }
 
   @ApiOkResponse({ description: 'PriceList deleted successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-rice-list')
   async DeletePriceList(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deletePriceList(id);
     return new GenericResponse('PriceList deleted successfully', result);
+  }
+  @ApiOkResponse({ description: 'Clinic reports' })
+  @Get('clinic-reports')
+  async GetClinicReport(@GetUser() user: User) {
+    const result = await this.clinic.ClinicReport(user);
+    return new GenericResponse('clinic reports', result);
   }
 }

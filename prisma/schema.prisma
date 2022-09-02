@@ -49,6 +49,7 @@ model Clinic {
   consultation consultation[]
   priceList    priceList[]
   invoice      invoice[]
+  payment      payment[]
 }
 
 model User {
@@ -127,10 +128,14 @@ model payment {
   insurancePaid Int
   recordId      Int
   itemId        Int
+  insuranceId   Int?
   type          String
   invoiceId     Int
   invoice       invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
   record        records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+  clinicId    Int
+  clinic      Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  
 }
 
 model record_details {

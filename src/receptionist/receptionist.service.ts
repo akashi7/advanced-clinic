@@ -13,7 +13,7 @@ import {
   records,
   User,
 } from '@prisma/client';
-import { endOfDay, startOfDay } from 'date-fns';
+import { endOfDay, startOfDay, getMonth } from 'date-fns';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -334,7 +334,29 @@ export class ReceptionistService {
         recordId,
       },
     });
-    return payments;
+
+    let payment: any[];
+    let consultations: any[];
+    let exams: any[];
+
+    let xkey = payments.map((obj) => {
+      return obj.type;
+    });
+
+    if (xkey.includes('consultation')) {
+      consultations = await this.prisma
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
+      payment = consultations;
+    }
+    if (xkey.includes('exam')) {
+      exams = await this.prisma
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
+      payment = exams;
+    }
+    if (xkey.includes('exam') && xkey.includes('consultation')) {
+      payment = [...consultations, ...exams];
+    }
+    return payment;
   }
 
   async viewOneRecordPayment(
@@ -343,7 +365,7 @@ export class ReceptionistService {
   ): Promise<unknown> {
     if (type === 'consultation') {
       const payment = await this.prisma
-        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId" = "consultation"."id" WHERE "payment"."id" = ${paymentId}`;
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId" = "consultation"."id" WHERE "payment"."id" = ${paymentId} `;
       return payment;
     }
     if (type === 'exam') {
@@ -391,6 +413,7 @@ export class ReceptionistService {
   async makePayment(
     id: number,
     dto: MakePaymentDto,
+    user: User,
   ): Promise<{ message: string }> {
     let message: string;
     let unpaidAmount: number;
@@ -400,6 +423,10 @@ export class ReceptionistService {
     });
     const invoice = await this.prisma.invoice.findFirst({
       where: { recordId: record.record_code },
+    });
+
+    const insurance = this.prisma.insurance.findFirst({
+      where: { AND: [{ clinicId: user.clinicId }, { name: record.insurance }] },
     });
 
     dto.cart.forEach(async (item) => {
@@ -414,6 +441,8 @@ export class ReceptionistService {
           type: invoice_details.type,
           recordId: record.record_code,
           insurancePaid: invoice.amountPaidByInsurance,
+          insuranceId: (await insurance).id,
+          clinicId: user.clinicId,
         },
       });
       unpaidAmount = invoice.unpaidAmount - item.pricePaid;
@@ -428,7 +457,9 @@ export class ReceptionistService {
         },
       });
       await this.prisma
-        .$queryRaw`UPDATE "invoice_details" SET "hasPaid" = true WHERE "invoiceId" = ${invoice.id} AND "itemId" = ${invoice_details.itemId}`;
+        .$queryRaw`UPDATE "invoice_details" SET "hasPaid" = ${true} WHERE "invoiceId" = ${
+        invoice.id
+      } AND "itemId" = ${invoice_details.itemId}`;
 
       message = 'Payment made successfully';
     });
@@ -455,10 +486,12 @@ export class ReceptionistService {
   }
 
   async viewInvoiceDetails(invoiceId: number): Promise<invoice_details[]> {
-    const invoiceDetails = await this.prisma.invoice_details.findMany({
-      where: { invoiceId },
+    const invoice_details = await this.prisma.invoice_details.findMany({
+      where: {
+        id: invoiceId,
+      },
     });
-    return invoiceDetails;
+    return invoice_details;
   }
 
   async allDoctors(user: User): Promise<User[]> {
@@ -480,5 +513,36 @@ export class ReceptionistService {
       where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.LABORANTE }] },
     });
     return laborantes;
+  }
+
+  async receptionistReport(user: User) {
+    const records = await this.prisma.records.count({
+      where: { clinicId: user.clinicId },
+    });
+    const activeRecords = await this.prisma.records.count({
+      where: { AND: [{ clinicId: user.clinicId }, { status: 'active' }] },
+    });
+    const pendingRecords = await this.prisma.records.count({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { recordStatus: EStatus.PENDING }],
+      },
+    });
+    const patients = await this.prisma.patient.count({
+      where: { clinicId: user.clinicId },
+    });
+    const childrens = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: true }] },
+    });
+    const adutls = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: false }] },
+    });
+
+    const invoices = await this.prisma.invoice.count({
+      where: { clinicId: user.clinicId },
+    });
+    const invoiceAmount = await this.prisma.invoice.aggregate({
+      where: { clinicId: user.clinicId },
+      _count: {},
+    });
   }
 }

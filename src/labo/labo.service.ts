@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable } from '@nestjs/common';
 import { record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
@@ -45,16 +46,23 @@ export class LaboService {
 
     const exams = await this.prisma
       .$queryRaw`SELECT * FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
-
     return exams;
   }
 
   async markExams(dto: conductExamDto): Promise<{ message: string }> {
     let message: string;
     const conducted = 'yes';
+
     dto.exams.forEach(async (exam) => {
-      await this.prisma
-        .$queryRaw`UPDATE "exam" SET "conducted"=${conducted}, "observation"=${exam.observation} WHERE "exam"."id"=${exam.examId}`;
+      await this.prisma.exam.update({
+        data: {
+          conducted,
+          observation: exam.observation,
+        },
+        where: {
+          id: exam.examId,
+        },
+      });
       message = 'Exams conducted';
     });
     if (message) return { message };
