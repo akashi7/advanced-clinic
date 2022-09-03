@@ -269,6 +269,7 @@ export class ClinicController {
     @Query('month') month: number,
     @Query('year') year: number,
   ) {
+    let k;
     const result = await this.clinic.PaymentReport(user, month, year);
     return new GenericResponse('clinic payment reports', result);
   }
