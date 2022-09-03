@@ -22,4 +22,5 @@ export enum EStatus {
   UNREAD = 'UNREAD',
   ACTIVE = 'ACTIVE',
   FINISHED = 'FINISHED',
+  PENDING = 'pending',
 }

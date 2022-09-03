@@ -77,6 +77,8 @@ export class ReceptionistController {
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiQuery({ name: 'id', required: true })
+  @ApiBadRequestResponse({ description: 'consultation not in priceList' })
+  @ApiBody({ type: RecordDto })
   @Post('create-record')
   async sendPatientToNurse(
     @Query('id', ParseIntPipe) id: number,
@@ -135,8 +137,9 @@ export class ReceptionistController {
   async CreateRecordPayment(
     @Body() dto: MakePaymentDto,
     @Query('recordId', ParseIntPipe) recordId: number,
+    @GetUser() user: User,
   ) {
-    const result = await this.receptionist.makePayment(recordId, dto);
+    const result = await this.receptionist.makePayment(recordId, dto, user);
     return new GenericResponse('Record payment created successfully', result);
   }
 
@@ -179,5 +182,12 @@ export class ReceptionistController {
   async getAllLaborantes(@GetUser() user: User) {
     const result = await this.receptionist.allLaborantes(user);
     return new GenericResponse('All laborantes fetched successfully ', result);
+  }
+
+  @ApiOkResponse({ description: 'receptionist reports' })
+  @Get('recptionist-report')
+  async getReceptionistReport(@GetUser() user: User) {
+    const result = await this.receptionist.receptionistReport(user);
+    return new GenericResponse('All receptionist report fetched', result);
   }
 }

@@ -17,7 +17,8 @@ import {
   User,
 } from '@prisma/client';
 import * as argon from 'argon2';
-import { ERoles } from 'src/auth/enums';
+import { getMonth, getYear } from 'date-fns';
+import { ERoles, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -587,5 +588,254 @@ export class ClinicService {
     const prices = await this.prisma
       .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "examList" ON "priceList"."itemId" = "examList"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'exam'`;
     return prices;
+  }
+
+  async ClinicReport(user: User): Promise<{
+    totalUsers: number;
+    totalPatients: number;
+    totalChildren: number;
+    totalAdults: number;
+    totalRecords: number;
+    totalActiveRecords: number;
+    totalPendingrecords: number;
+    totalClosedRecords: number;
+    totalInvoices: number;
+    totalPayments: number;
+    totalPaymentsMade: number;
+  }> {
+    const allUsers = await this.prisma.user.count({
+      where: { clinicId: user.clinicId },
+    });
+    const patients = await this.prisma.patient.count({
+      where: { clinicId: user.clinicId },
+    });
+    const childrens = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: true }] },
+    });
+    const adutls = await this.prisma.patient.count({
+      where: { AND: [{ clinicId: user.clinicId }, { isInfant: false }] },
+    });
+    const records = await this.prisma.records.count({
+      where: { clinicId: user.clinicId },
+    });
+    const activeRecords = await this.prisma.records.count({
+      where: { AND: [{ clinicId: user.clinicId }, { status: 'active' }] },
+    });
+    const pendingRecords = await this.prisma.records.count({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { recordStatus: EStatus.PENDING }],
+      },
+    });
+    const closedRecords = await this.prisma.records.count({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { recordStatus: EStatus.FINISHED }],
+      },
+    });
+
+    const invoices = await this.prisma.invoice.count({
+      where: { clinicId: user.clinicId },
+    });
+
+    const payment = await this.prisma.payment.count({
+      where: { clinicId: user.clinicId },
+    });
+
+    let amountReceveid: any;
+
+    const query: any[] = await this.prisma
+      .$queryRaw`SELECT SUM("amount") AS "amount" FROM "payment" WHERE "clinicId"=${user.clinicId} `;
+
+    query.forEach((obj) => (amountReceveid = obj.amount));
+
+    return {
+      totalUsers: allUsers,
+      totalPatients: patients,
+      totalChildren: childrens,
+      totalAdults: adutls,
+      totalRecords: records,
+      totalActiveRecords: activeRecords,
+      totalPendingrecords: pendingRecords,
+      totalClosedRecords: closedRecords,
+      totalInvoices: invoices,
+      totalPayments: payment,
+      totalPaymentsMade: amountReceveid,
+    };
+  }
+
+  async PaymentReport(user: User, month: number, year: number) {
+    if (month && year) {
+      const payments = await this.prisma.payment.findMany({
+        where: { clinicId: user.clinicId },
+      });
+
+      let payment: any[];
+      let consultations: any[];
+      let exams: any[];
+
+      let xkey = payments.map((obj) => {
+        return obj.type;
+      });
+
+      for (const obj of payments) {
+        if (xkey.includes('consultation')) {
+          consultations = await this.prisma
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${
+            user.clinicId
+          } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
+            obj.createdAt,
+          )}=${year})`;
+          let filteredC = consultations.map((obj) => {
+            return {
+              id: obj.id,
+              createdAt: obj.createdAt,
+              updatedAt: obj.updatedAt,
+              amount: obj.amount,
+              insurancePaid: obj.insurancePaid,
+              insurance: obj.name,
+              rate: obj.rate,
+              name: obj.type,
+              Type: 'consultation',
+            };
+          });
+          payment = filteredC;
+        }
+        if (xkey.includes('exam')) {
+          exams = await this.prisma
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+          let filteredC = exams.map((obj) => {
+            return {
+              id: obj.id,
+              createdAt: obj.createdAt,
+              updatedAt: obj.updatedAt,
+              amount: obj.amount,
+              insurancePaid: obj.insurancePaid,
+              insurance: obj.name,
+              rate: obj.rate,
+              name: obj.Name,
+              Type: 'exam',
+            };
+          });
+          payment = filteredC;
+        }
+        if (xkey.includes('exam') && xkey.includes('consultation')) {
+          consultations = await this.prisma
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+          exams = await this.prisma
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+
+          let E = exams.map((obj) => {
+            return {
+              id: obj.id,
+              createdAt: obj.createdAt,
+              updatedAt: obj.updatedAt,
+              amount: obj.amount,
+              insurancePaid: obj.insurancePaid,
+              insurance: obj.name,
+              rate: obj.rate,
+              name: obj.Name,
+              Type: 'exam',
+            };
+          });
+          let C = consultations.map((obj) => {
+            return {
+              id: obj.id,
+              createdAt: obj.createdAt,
+              updatedAt: obj.updatedAt,
+              amount: obj.amount,
+              insurancePaid: obj.insurancePaid,
+              insurance: obj.name,
+              rate: obj.rate,
+              name: obj.type,
+              Type: 'consultation',
+            };
+          });
+          payment = [...C, ...E];
+        }
+      }
+      return payment;
+    } else {
+      const payments = await this.prisma.payment.findMany({
+        where: { clinicId: user.clinicId },
+      });
+
+      let payment: any[];
+      let consultations: any[];
+      let exams: any[];
+
+      let xkey = payments.map((obj) => {
+        return obj.type;
+      });
+      if (xkey.includes('consultation')) {
+        consultations = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+        let filteredC = consultations.map((obj) => {
+          return {
+            id: obj.id,
+            createdAt: obj.createdAt,
+            updatedAt: obj.updatedAt,
+            amount: obj.amount,
+            insurancePaid: obj.insurancePaid,
+            insurance: obj.name,
+            rate: obj.rate,
+            name: obj.type,
+            Type: 'consultation',
+          };
+        });
+        payment = filteredC;
+      }
+      if (xkey.includes('exam')) {
+        exams = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+        let filteredC = exams.map((obj) => {
+          return {
+            id: obj.id,
+            createdAt: obj.createdAt,
+            updatedAt: obj.updatedAt,
+            amount: obj.amount,
+            insurancePaid: obj.insurancePaid,
+            insurance: obj.name,
+            rate: obj.rate,
+            name: obj.Name,
+            Type: 'exam',
+          };
+        });
+        payment = filteredC;
+      }
+      if (xkey.includes('exam') && xkey.includes('consultation')) {
+        consultations = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+        exams = await this.prisma
+          .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+
+        let E = exams.map((obj) => {
+          return {
+            id: obj.id,
+            createdAt: obj.createdAt,
+            updatedAt: obj.updatedAt,
+            amount: obj.amount,
+            insurancePaid: obj.insurancePaid,
+            insurance: obj.name,
+            rate: obj.rate,
+            name: obj.Name,
+            Type: 'exam',
+          };
+        });
+        let C = consultations.map((obj) => {
+          return {
+            id: obj.id,
+            createdAt: obj.createdAt,
+            updatedAt: obj.updatedAt,
+            amount: obj.amount,
+            insurancePaid: obj.insurancePaid,
+            insurance: obj.name,
+            rate: obj.rate,
+            name: obj.type,
+            Type: 'consultation',
+          };
+        });
+        payment = [...C, ...E];
+      }
+      return payment;
+    }
   }
 }

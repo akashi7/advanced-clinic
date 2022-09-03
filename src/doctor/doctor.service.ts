@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -104,9 +104,14 @@ export class DoctorService {
             { itemId: exam.itemId },
             { Type: 'exam' },
             { insuranceId: insurance.id },
+            { clinicId: user.clinicId },
           ],
         },
       });
+
+      if (!itemPrice) {
+        throw new BadRequestException(`Exam not priceList `);
+      }
 
       await this.prisma.exam.create({
         data: {
@@ -175,5 +180,46 @@ export class DoctorService {
       },
     });
     return { message: '' };
+  }
+
+  async docReport(user: User): Promise<{
+    totalRequets: number;
+    totalUnreadRequests: number;
+    totalReadRequests: number;
+  }> {
+    const requests = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+        ],
+      },
+    });
+
+    const unreadRequests = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+          { status: EStatus.UNREAD },
+        ],
+      },
+    });
+
+    const readRequets = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+          { status: EStatus.READ },
+        ],
+      },
+    });
+
+    return {
+      totalRequets: requests,
+      totalUnreadRequests: unreadRequests,
+      totalReadRequests: readRequets,
+    };
   }
 }
