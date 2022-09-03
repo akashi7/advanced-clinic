@@ -259,4 +259,17 @@ export class ClinicController {
     const result = await this.clinic.ClinicReport(user);
     return new GenericResponse('clinic reports', result);
   }
+
+  @ApiOkResponse({ description: 'Payment reports' })
+  @ApiQuery({ name: 'month', type: Number, required: false })
+  @ApiQuery({ name: 'year', type: Number, required: false })
+  @Get('clinic-payment-reports')
+  async GetPaymentReport(
+    @GetUser() user: User,
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    const result = await this.clinic.PaymentReport(user, month, year);
+    return new GenericResponse('clinic payment reports', result);
+  }
 }

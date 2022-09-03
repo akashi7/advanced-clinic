@@ -183,4 +183,11 @@ export class ReceptionistController {
     const result = await this.receptionist.allLaborantes(user);
     return new GenericResponse('All laborantes fetched successfully ', result);
   }
+
+  @ApiOkResponse({ description: 'receptionist reports' })
+  @Get('recptionist-report')
+  async getReceptionistReport(@GetUser() user: User) {
+    const result = await this.receptionist.receptionistReport(user);
+    return new GenericResponse('All receptionist report fetched', result);
+  }
 }

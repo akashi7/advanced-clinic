@@ -181,4 +181,45 @@ export class DoctorService {
     });
     return { message: '' };
   }
+
+  async docReport(user: User): Promise<{
+    totalRequets: number;
+    totalUnreadRequests: number;
+    totalReadRequests: number;
+  }> {
+    const requests = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+        ],
+      },
+    });
+
+    const unreadRequests = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+          { status: EStatus.UNREAD },
+        ],
+      },
+    });
+
+    const readRequets = await this.prisma.record_details.count({
+      where: {
+        AND: [
+          { destination: ERecords.DOCTOR_DESTINATION },
+          { doctor: user.fullName },
+          { status: EStatus.READ },
+        ],
+      },
+    });
+
+    return {
+      totalRequets: requests,
+      totalUnreadRequests: unreadRequests,
+      totalReadRequests: readRequets,
+    };
+  }
 }

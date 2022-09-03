@@ -159,8 +159,8 @@ export class UpdatePriceListDto {
 }
 
 export class FilterReportDto {
-  @IsString()
-  month: string;
-  @IsString()
-  year: string;
+  @IsNumber()
+  month: number;
+  @IsNumber()
+  year: number;
 }

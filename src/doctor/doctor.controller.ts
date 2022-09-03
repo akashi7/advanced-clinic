@@ -78,4 +78,11 @@ export class DoctorController {
     const result = await this.docService.docTerminateRecordProccess(id, dto);
     return new GenericResponse('Terminated record', result);
   }
+
+  @ApiOkResponse({ description: 'doc report' })
+  @Get('doc-reports')
+  async docseeReport(@GetUser() user: User) {
+    const result = await this.docService.docReport(user);
+    return new GenericResponse('doc report', result);
+  }
 }

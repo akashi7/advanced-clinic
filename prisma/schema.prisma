@@ -133,9 +133,8 @@ model payment {
   invoiceId     Int
   invoice       invoice  @relation(fields: [invoiceId], references: [id], onUpdate: Cascade)
   record        records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-  clinicId    Int
-  clinic      Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  
+  clinicId      Int
+  clinic        Clinic   @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model record_details {

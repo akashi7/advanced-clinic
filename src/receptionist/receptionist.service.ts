@@ -346,15 +346,72 @@ export class ReceptionistService {
     if (xkey.includes('consultation')) {
       consultations = await this.prisma
         .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
-      payment = consultations;
+      let filteredC = consultations.map((obj) => {
+        return {
+          id: obj.id,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          amount: obj.amount,
+          insurancePaid: obj.insurancePaid,
+          insurance: obj.name,
+          rate: obj.rate,
+          name: obj.type,
+          Type: 'consultation',
+        };
+      });
+      payment = filteredC;
     }
     if (xkey.includes('exam')) {
       exams = await this.prisma
         .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
-      payment = exams;
+      let filteredC = exams.map((obj) => {
+        return {
+          id: obj.id,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          amount: obj.amount,
+          insurancePaid: obj.insurancePaid,
+          insurance: obj.name,
+          rate: obj.rate,
+          name: obj.Name,
+          Type: 'exam',
+        };
+      });
+      payment = filteredC;
     }
     if (xkey.includes('exam') && xkey.includes('consultation')) {
-      payment = [...consultations, ...exams];
+      consultations = await this.prisma
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
+      exams = await this.prisma
+        .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
+
+      let E = exams.map((obj) => {
+        return {
+          id: obj.id,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          amount: obj.amount,
+          insurancePaid: obj.insurancePaid,
+          insurance: obj.name,
+          rate: obj.rate,
+          name: obj.Name,
+          Type: 'exam',
+        };
+      });
+      let C = consultations.map((obj) => {
+        return {
+          id: obj.id,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          amount: obj.amount,
+          insurancePaid: obj.insurancePaid,
+          insurance: obj.name,
+          rate: obj.rate,
+          name: obj.type,
+          Type: 'consultation',
+        };
+      });
+      payment = [...C, ...E];
     }
     return payment;
   }
@@ -537,12 +594,13 @@ export class ReceptionistService {
       where: { AND: [{ clinicId: user.clinicId }, { isInfant: false }] },
     });
 
-    const invoices = await this.prisma.invoice.count({
-      where: { clinicId: user.clinicId },
-    });
-    const invoiceAmount = await this.prisma.invoice.aggregate({
-      where: { clinicId: user.clinicId },
-      _count: {},
-    });
+    return {
+      totalRecords: records,
+      totalActiveRecords: activeRecords,
+      totatalPendingRecords: pendingRecords,
+      totalPatients: patients,
+      totalChildrens: childrens,
+      totalAdults: adutls,
+    };
   }
 }
