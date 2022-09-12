@@ -13,7 +13,7 @@ import {
   records,
   User,
 } from '@prisma/client';
-import { endOfDay, startOfDay, getMonth } from 'date-fns';
+import { endOfDay, getYear, startOfDay } from 'date-fns';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -82,36 +82,36 @@ export class ReceptionistService {
       // console.log({ enfant });
     }
 
-    try {
-      const isPatient = await this.prisma.patient.findFirst({
-        where: {
-          AND: [{ clinicId: user.clinicId }, { idNumber: dto.idNumber }],
-        },
-      });
-      if (isPatient)
-        throw new ConflictException(
-          `Patient is arleady registered by the names of ${isPatient.fullName}`,
-        );
-      const patient = await this.prisma.patient.create({
-        data: {
-          fullName: dto.fullName,
-          DOB: dto.DOB,
-          phone: dto.phone,
-          gender: dto.gender,
-          sector: dto.sector,
-          village: dto.village,
-          province: dto.province,
-          district: dto.district,
-          email: dto.email,
-          marital_status: dto.marital_status,
-          clinicId: user.clinicId,
-          idNumber: dto.idNumber,
-        },
-      });
-      return patient;
-    } catch (error) {
-      throw new BadRequestException('Server Error');
-    }
+    const isPatient = await this.prisma.patient.findFirst({
+      where: {
+        AND: [{ clinicId: user.clinicId }, { idNumber: dto.idNumber }],
+      },
+    });
+    if (isPatient)
+      throw new ConflictException(
+        `Patient is arleady registered by the names of ${isPatient.fullName}`,
+      );
+
+    const age: number = getYear(new Date()) - getYear(new Date(dto.DOB));
+
+    const patient = await this.prisma.patient.create({
+      data: {
+        fullName: dto.fullName,
+        DOB: dto.DOB,
+        phone: dto.phone,
+        gender: dto.gender,
+        sector: dto.sector,
+        village: dto.village,
+        province: dto.province,
+        age,
+        district: dto.district,
+        email: dto.email,
+        marital_status: dto.marital_status,
+        clinicId: user.clinicId,
+        idNumber: dto.idNumber,
+      },
+    });
+    return patient;
   }
 
   //see all patients
@@ -283,6 +283,7 @@ export class ReceptionistService {
             ],
           },
         });
+        records.reverse();
         return records;
       }
       const records = await this.prisma.records.findMany({
@@ -295,9 +296,9 @@ export class ReceptionistService {
           ],
         },
       });
+      records.reverse();
       return records;
-    }
-    if (dto.recordDate) {
+    } else if (dto.recordDate) {
       const validate = new RegExp(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!validate.test(dto.recordDate)) {
         throw new BadRequestException(
@@ -314,6 +315,7 @@ export class ReceptionistService {
           ],
         },
       });
+      records.reverse();
       return records;
     }
     const records = await this.prisma.records.findMany({
@@ -325,6 +327,7 @@ export class ReceptionistService {
         ],
       },
     });
+    records.reverse();
     return records;
   }
 
@@ -360,8 +363,7 @@ export class ReceptionistService {
         };
       });
       payment = filteredC;
-    }
-    if (xkey.includes('exam')) {
+    } else if (xkey.includes('exam')) {
       exams = await this.prisma
         .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
       let filteredC = exams.map((obj) => {
@@ -378,8 +380,7 @@ export class ReceptionistService {
         };
       });
       payment = filteredC;
-    }
-    if (xkey.includes('exam') && xkey.includes('consultation')) {
+    } else if (xkey.includes('exam') && xkey.includes('consultation')) {
       consultations = await this.prisma
         .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."recordId"=${recordId}`;
       exams = await this.prisma

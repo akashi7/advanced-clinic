@@ -24,6 +24,7 @@ export class DoctorService {
           ],
         },
       });
+      record.reverse();
       return record;
     }
     const record = await this.prisma.record_details.findMany({
@@ -36,6 +37,7 @@ export class DoctorService {
         ],
       },
     });
+    record.reverse();
     return record;
   }
 
@@ -47,6 +49,7 @@ export class DoctorService {
         id,
       },
     });
+
     const record = await this.prisma.records.findFirst({
       where: {
         record_code: record_details.recordId,
@@ -57,7 +60,7 @@ export class DoctorService {
     });
 
     const examTable = await this.prisma
-      .$queryRaw`SELECT * FROM "exam" LEFT JOIN "examList" ON "exam"."exam"="examList"."id" WHERE "exam"."record_code" = ${record.record_code}`;
+      .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
 
     await this.prisma.record_details.update({
       where: {

@@ -15,11 +15,14 @@ export class LaboService {
         AND: [
           {
             destination: ERecords.LABORANTE_DESTINATION,
+          },
+          {
             laborante: user.fullName,
           },
         ],
       },
     });
+    record.reverse();
     return record;
   }
 
@@ -43,9 +46,8 @@ export class LaboService {
         status: EStatus.READ,
       },
     });
-
     const exams = await this.prisma
-      .$queryRaw`SELECT * FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
+      .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
     return exams;
   }
 
@@ -63,6 +65,8 @@ export class LaboService {
           id: exam.examId,
         },
       });
+      // await this.prisma
+      //   .$queryRaw`UPDATE "exam" SET "conducted"=${conducted}, "observation"=${exam.observation} WHERE "exam"."id"=${exam.examId}`;
       message = 'Exams conducted';
     });
     if (message) return { message };

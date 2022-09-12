@@ -12,6 +12,6 @@ export class MailService {
       text,
     });
     if (emailSent) return { message: 'Email sent successfully' };
-    else throw new Error('Email sending failed');
+    else return { message: 'Email Not sent' };
   }
 }

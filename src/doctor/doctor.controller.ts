@@ -46,9 +46,9 @@ export class DoctorController {
   }
 
   @ApiOkResponse({ description: 'Doctor one request' })
-  @ApiQuery({ name: 'recordId', required: true })
+  @ApiQuery({ name: 'recordIdDetails', required: true })
   @Get('view-request')
-  async docViewRequet(@Query('recordId', ParseIntPipe) id: number) {
+  async docViewRequet(@Query('recordIdDeatails', ParseIntPipe) id: number) {
     const result = await this.docService.docViewRequet(id);
     return new GenericResponse('doctor one request', result);
   }
