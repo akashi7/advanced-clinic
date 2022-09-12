@@ -1,6 +1,13 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
+import { RolesDto } from 'src/auth/dto/auth.dto';
 
 export class ClinicDto {
   @IsString()
@@ -163,4 +170,10 @@ export class FilterReportDto {
   month: number;
   @IsNumber()
   year: number;
+}
+
+export class AsignRoleDto {
+  @IsArray()
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  roles: any[];
 }

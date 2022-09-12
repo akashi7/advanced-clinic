@@ -32,6 +32,7 @@ import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { ClinicService } from './clinic.service';
 import {
+  AsignRoleDto,
   consultationDto,
   ExamDto,
   InsuranceDto,
@@ -269,8 +270,37 @@ export class ClinicController {
     @Query('month') month: number,
     @Query('year') year: number,
   ) {
-    let k;
     const result = await this.clinic.PaymentReport(user, month, year);
     return new GenericResponse('clinic payment reports', result);
+  }
+
+  @ApiOkResponse({ description: 'User info' })
+  @ApiQuery({ name: 'id', type: Number, required: true })
+  @Get('View-One-User')
+  async viewUserTable(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.ViewUser(id);
+    return new GenericResponse('User info', result);
+  }
+
+  @ApiCreatedResponse({ description: 'Assign Roles' })
+  @Post('assign-roles')
+  @ApiBody({ type: AsignRoleDto })
+  async AssignRoles(
+    @Body('') dto: AsignRoleDto,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
+    const result = await this.clinic.asignRolesToUsers(id, dto);
+    return new GenericResponse('User Roles', result);
+  }
+
+  @ApiCreatedResponse({ description: 'Assign Roles' })
+  @Post('update-roles')
+  @ApiBody({ type: AsignRoleDto })
+  async UpdateRoles(
+    @Body('') dto: AsignRoleDto,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
+    const result = await this.clinic.removeRoles(id, dto);
+    return new GenericResponse('User Roles updated', result);
   }
 }

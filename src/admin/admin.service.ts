@@ -70,6 +70,7 @@ export class AdminService {
         role: ERoles.CLINIC,
         clinicId: clinic.id,
         userId: clinic.id,
+        asignedRole: [ERoles.CLINIC],
       },
     });
     try {

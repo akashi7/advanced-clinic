@@ -33,6 +33,7 @@ export class AuthService {
     role: string,
     clinicId: number,
     id: number,
+    roles: string[],
   ): {
     data: {
       userId: number;
@@ -42,6 +43,7 @@ export class AuthService {
       clinicId: number;
       id: number;
     };
+    asignedRoles: string[];
     token: string;
   } {
     const token = this.Jwt.sign(
@@ -57,6 +59,7 @@ export class AuthService {
         clinicId,
         id,
       },
+      asignedRoles: roles,
       token,
     };
   }
@@ -98,6 +101,7 @@ export class AuthService {
           admin.role,
           189,
           278,
+          [ERoles.SUPER_ADMIN],
         );
     } catch (error) {
       if (error.message === 'Admin User not found') {
@@ -129,6 +133,7 @@ export class AuthService {
         user.role,
         user.clinicId,
         user.id,
+        user.asignedRole,
       );
     } catch (error) {
       if (error.message === 'User is disabled') {
