@@ -53,15 +53,16 @@ model Clinic {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  fullName String
-  password String
-  email    String
-  role     String
-  userId   Int
-  clinicId Int
-  clinic   Clinic  @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  isActive Boolean @default(true)
+  id          Int      @id @default(autoincrement())
+  fullName    String
+  password    String
+  email       String
+  role        String
+  asignedRole String[]
+  userId      Int
+  clinicId    Int
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  isActive    Boolean  @default(true)
 }
 
 model patient {

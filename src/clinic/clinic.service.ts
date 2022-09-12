@@ -22,6 +22,7 @@ import { ERoles, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  AsignRoleDto,
   consultationDto,
   ExamDto,
   InsuranceDto,
@@ -71,6 +72,7 @@ export class ClinicService {
         role,
         clinicId,
         userId,
+        asignedRole: [role],
       },
     });
     delete User.password;
@@ -83,7 +85,6 @@ export class ClinicService {
       );
       return User;
     } catch (error) {
-      console.log('Error', error);
       if (role === ERoles.RECEPTIONIST) {
         await this.prisma.receptionist.delete({
           where: { id: userId },
@@ -92,8 +93,7 @@ export class ClinicService {
           where: { id: User.id },
         });
         throw new BadRequestException('Email not sent');
-      }
-      if (role === ERoles.DOCTOR) {
+      } else if (role === ERoles.DOCTOR) {
         await this.prisma.doctor.delete({
           where: { id: userId },
         });
@@ -101,8 +101,7 @@ export class ClinicService {
           where: { id: User.id },
         });
         throw new BadRequestException('Email not sent');
-      }
-      if (role === ERoles.NURSE) {
+      } else if (role === ERoles.NURSE) {
         await this.prisma.nurse.delete({
           where: { id: userId },
         });
@@ -110,8 +109,7 @@ export class ClinicService {
           where: { id: User.id },
         });
         throw new BadRequestException('Email not sent');
-      }
-      if (role === ERoles.LABORANTE) {
+      } else if (role === ERoles.LABORANTE) {
         await this.prisma.laborante.delete({
           where: { id: userId },
         });
@@ -296,6 +294,14 @@ export class ClinicService {
     });
     // users.shift();
     return users;
+  }
+
+  async ViewUser(id: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
+    delete user.password;
+    return user;
   }
 
   async getOneUser(
@@ -847,5 +853,40 @@ export class ClinicService {
       }
       return payment;
     }
+  }
+
+  async asignRolesToUsers(id: number, dto: AsignRoleDto) {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
+
+    const asignedRoles = await this.prisma.user.update({
+      where: { id },
+      data: {
+        asignedRole: [...user.asignedRole, ...dto.roles],
+      },
+    });
+
+    if (asignedRoles) return { message: 'Asigned Roles' };
+  }
+
+  async removeRoles(id: number, dto: AsignRoleDto) {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
+    let newRole: string[] = user.asignedRole;
+    dto.roles.forEach((role) => {
+      let index = newRole.indexOf(role);
+      if (index !== -1) {
+        newRole.splice(index, 1);
+      }
+    });
+    const updatedRoles = await this.prisma.user.update({
+      where: { id },
+      data: {
+        asignedRole: newRole,
+      },
+    });
+    if (updatedRoles) return { message: 'Roles updated' };
   }
 }

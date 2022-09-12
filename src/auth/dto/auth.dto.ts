@@ -78,3 +78,10 @@ export class ExamConductDto {
   @ApiProperty({ type: String, required: true })
   observation: string;
 }
+
+export class RolesDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  role: string;
+}
