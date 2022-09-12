@@ -55,7 +55,7 @@ export class LaboController {
   @ApiOkResponse({ description: 'Labo requests' })
   @HttpCode(200)
   @ApiBody({ type: conductExamDto })
-  @Patch('mark-exams')
+  @Post('mark-exams')
   async markExams(@Body() dto: conductExamDto) {
     const result = await this.laboService.markExams(dto);
     return new GenericResponse('marked exams', result);

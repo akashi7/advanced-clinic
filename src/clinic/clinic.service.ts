@@ -294,7 +294,7 @@ export class ClinicService {
     users.map((user) => {
       delete user.password;
     });
-    users.shift();
+    // users.shift();
     return users;
   }
 
@@ -672,9 +672,7 @@ export class ClinicService {
       let consultations: any[];
       let exams: any[];
 
-      let xkey = payments.map((obj) => {
-        return obj.type;
-      });
+      let xkey = payments.map((obj) => obj.type);
 
       for (const obj of payments) {
         if (xkey.includes('consultation')) {
@@ -701,7 +699,11 @@ export class ClinicService {
         }
         if (xkey.includes('exam')) {
           exams = await this.prisma
-            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${
+            user.clinicId
+          } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
+            obj.createdAt,
+          )}=${year})`;
           let filteredC = exams.map((obj) => {
             return {
               id: obj.id,
@@ -719,9 +721,17 @@ export class ClinicService {
         }
         if (xkey.includes('exam') && xkey.includes('consultation')) {
           consultations = await this.prisma
-            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${
+            user.clinicId
+          } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
+            obj.createdAt,
+          )}=${year})`;
           exams = await this.prisma
-            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
+            .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${
+            user.clinicId
+          } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
+            obj.createdAt,
+          )}=${year})`;
 
           let E = exams.map((obj) => {
             return {

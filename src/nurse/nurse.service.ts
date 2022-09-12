@@ -19,6 +19,7 @@ export class NurseService {
         ],
       },
     });
+    record.reverse();
     return record;
   }
 
