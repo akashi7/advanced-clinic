@@ -7,7 +7,6 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { RolesDto } from 'src/auth/dto/auth.dto';
 
 export class ClinicDto {
   @IsString()
@@ -85,6 +84,10 @@ export class registerEmployee {
   @IsNotEmpty()
   @ApiProperty({ required: true, type: String })
   phone: string;
+  @IsArray()
+  @IsString()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  assignedRoles: string[];
 }
 
 export class UpdatePasswordDto {

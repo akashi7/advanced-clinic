@@ -1,6 +1,12 @@
 /* eslint-disable */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class AuthAdminSignUpDto {
   @IsEmail()
@@ -79,9 +85,9 @@ export class ExamConductDto {
   observation: string;
 }
 
-export class RolesDto {
+export class asignRoleDto {
+  @IsArray()
   @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  role: string;
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  role: string[];
 }

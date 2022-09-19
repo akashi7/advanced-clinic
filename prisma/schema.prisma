@@ -50,6 +50,7 @@ model Clinic {
   priceList    priceList[]
   invoice      invoice[]
   payment      payment[]
+  cashier      cashier[]
 }
 
 model User {
@@ -284,6 +285,20 @@ model nurse {
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
+model cashier {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  phone     String
+  email     String
+  role      String
+  gender    String
+
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
 model doctor {
   id        Int      @id @default(autoincrement())
   fullName  String
@@ -310,6 +325,10 @@ model laborante {
 
   clinicId Int
   clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+}
+
+model medicalHistory {
+  id Int @id @default(autoincrement())
 }
 
 //Model invoice,invoice_details,insurance,examList,PriceList

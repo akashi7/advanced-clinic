@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Query } from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -8,6 +8,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -47,13 +48,24 @@ export class AuthController {
   //user-login
   @ApiOkResponse({ description: 'User logged in successfully' })
   @ApiForbiddenResponse({ description: 'Forbidden User' })
-  @ApiForbiddenResponse({ description: 'Forbidden User' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiBody({ type: userSignInDto })
   @HttpCode(200)
   @Post('user-signin')
   async userLogin(@Body() dto: userSignInDto) {
     const result = await this.authservice.userLogin(dto);
+    return result;
+  }
+
+  @ApiCreatedResponse({ description: 'Changed Role successfully ' })
+  @ApiQuery({ name: 'email', required: true })
+  @ApiQuery({ name: 'role', required: true })
+  @Post('choose-role')
+  async userChooseRole(
+    @Query('email') email: string,
+    @Query('role') role: string,
+  ) {
+    const result = await this.authservice.userChooseRole(email, role);
     return result;
   }
 }
