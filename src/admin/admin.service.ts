@@ -70,7 +70,7 @@ export class AdminService {
         role: ERoles.CLINIC,
         clinicId: clinic.id,
         userId: clinic.id,
-        asignedRole: [ERoles.CLINIC],
+        asignedRole: [],
       },
     });
     try {
@@ -78,7 +78,11 @@ export class AdminService {
         clinic.email,
         `${clinic.name} credentials`,
         '"No Reply" <noreply@kuranga.com>',
-        `${passwordGenerated}`,
+        `
+        Clinic ${clinic.name}  password generated as follow :
+        ${passwordGenerated}
+        please update it once logged in
+        `,
       );
     } catch (error) {
       await this.prisma.clinic.delete({ where: { id: clinic.id } });

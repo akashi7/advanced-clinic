@@ -6,6 +6,7 @@ export enum ERoles {
   DOCTOR = 'DOCTOR',
   NURSE = 'NURSE',
   LABORANTE = 'LABORANTE',
+  CASHIER = 'CASHIER',
 }
 
 export enum ERecords {

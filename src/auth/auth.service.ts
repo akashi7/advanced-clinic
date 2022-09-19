@@ -1,6 +1,5 @@
 /* eslint-disable */
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -42,8 +41,8 @@ export class AuthService {
       role: string;
       clinicId: number;
       id: number;
+      asignedRoles: string[];
     };
-    asignedRoles: string[];
     token: string;
   } {
     const token = this.Jwt.sign(
@@ -58,8 +57,8 @@ export class AuthService {
         role,
         clinicId,
         id,
+        asignedRoles: roles,
       },
-      asignedRoles: roles,
       token,
     };
   }
@@ -86,66 +85,58 @@ export class AuthService {
   }
 
   async adminLogin(dto: AuthAdminSignIn): Promise<{}> {
-    try {
-      const admin = await this.prisma.admin.findFirst({
-        where: { email: dto.email },
-      });
-      if (!admin) throw new NotFoundException('Admin User not found');
-      else if (!(await argon.verify(admin.password, dto.password))) {
-        throw new ForbiddenException('Wrong Admin password');
-      } else
-        return this.generateToken(
-          admin.id,
-          admin.email,
-          admin.contact,
-          admin.role,
-          189,
-          278,
-          [ERoles.SUPER_ADMIN],
-        );
-    } catch (error) {
-      if (error.message === 'Admin User not found') {
-        throw new NotFoundException('Admin User not found');
-      } else if (error.message === 'Wrong Admin password') {
-        throw new ForbiddenException('Wrong Admin password');
-      }
-      throw new BadRequestException('Server down');
-    }
+    const admin = await this.prisma.admin.findFirst({
+      where: { email: dto.email },
+    });
+    if (!admin) throw new NotFoundException('Admin User not found');
+    else if (!(await argon.verify(admin.password, dto.password))) {
+      throw new ForbiddenException('Wrong Admin password');
+    } else
+      return this.generateToken(
+        admin.id,
+        admin.email,
+        admin.contact,
+        admin.role,
+        189,
+        278,
+        [],
+      );
   }
 
   async userLogin(dto: userSignInDto): Promise<{}> {
-    try {
-      const isActive = await this.prisma.user.findFirst({
-        where: { AND: [{ isActive: true }, { email: dto.email }] },
-      });
-      const user = await this.prisma.user.findFirst({
-        where: { email: dto.email },
-      });
-      if (!isActive && user) throw new ForbiddenException('User is disabled');
-      if (!user) throw new NotFoundException('User not found');
-      if (!(await argon.verify(user.password, dto.password))) {
-        throw new ForbiddenException('Wrong password');
-      }
-      return this.generateToken(
-        user.userId,
-        user.email,
-        user.fullName,
-        user.role,
-        user.clinicId,
-        user.id,
-        user.asignedRole,
-      );
-    } catch (error) {
-      if (error.message === 'User is disabled') {
-        throw new ForbiddenException('User is disabled');
-      }
-      if (error.message === 'Wrong password') {
-        throw new ForbiddenException('Wrong password');
-      }
-      if (error.message === 'User not found') {
-        throw new NotFoundException('User not found');
-      }
-      throw new BadRequestException('Server down');
+    const isActive = await this.prisma.user.findFirst({
+      where: { AND: [{ isActive: true }, { email: dto.email }] },
+    });
+    const user = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
+    if (!isActive && user) throw new ForbiddenException('User is disabled');
+    if (!user) throw new NotFoundException('User not found');
+    if (!(await argon.verify(user.password, dto.password))) {
+      throw new ForbiddenException('Wrong password');
     }
+    return this.generateToken(
+      user.userId,
+      user.email,
+      user.fullName,
+      user.role,
+      user.clinicId,
+      user.id,
+      user.asignedRole,
+    );
+  }
+  async userChooseRole(email: string, role: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { email },
+    });
+    return this.generateToken(
+      user.userId,
+      user.email,
+      user.fullName,
+      role,
+      user.clinicId,
+      user.id,
+      user.asignedRole,
+    );
   }
 }

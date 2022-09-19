@@ -51,6 +51,15 @@ export class ClinicService {
     return result;
   }
 
+  async deleteUser(role: string, user: User, userId: number): Promise<void> {
+    await this.prisma[`${role}`]['delete']({
+      where: { id: userId },
+    });
+    await this.prisma.user.delete({
+      where: { id: user.id },
+    });
+  }
+
   async RegisterUserToDataBase(
     role: string,
     email: string,
@@ -59,6 +68,7 @@ export class ClinicService {
     clinicId: number,
     userId: number,
     passwordGenerated: string,
+    assignedRoles: string[] | [],
   ) {
     const isUser = await this.prisma.user.findFirst({
       where: { email },
@@ -72,7 +82,7 @@ export class ClinicService {
         role,
         clinicId,
         userId,
-        asignedRole: [role],
+        asignedRole: assignedRoles.length === 0 ? [] : assignedRoles,
       },
     });
     delete User.password;
@@ -81,43 +91,16 @@ export class ClinicService {
         `${User.email}`,
         `${User.fullName} credentials`,
         '"No Reply" <noreply@kuranga.com>',
-        `${passwordGenerated}`,
+        `
+        Dear ${User.fullName} your password is as follow
+        ${passwordGenerated}
+        Please update your password once loggedIn
+        `,
       );
       return User;
     } catch (error) {
-      if (role === ERoles.RECEPTIONIST) {
-        await this.prisma.receptionist.delete({
-          where: { id: userId },
-        });
-        await this.prisma.user.delete({
-          where: { id: User.id },
-        });
-        throw new BadRequestException('Email not sent');
-      } else if (role === ERoles.DOCTOR) {
-        await this.prisma.doctor.delete({
-          where: { id: userId },
-        });
-        await this.prisma.user.delete({
-          where: { id: User.id },
-        });
-        throw new BadRequestException('Email not sent');
-      } else if (role === ERoles.NURSE) {
-        await this.prisma.nurse.delete({
-          where: { id: userId },
-        });
-        await this.prisma.user.delete({
-          where: { id: User.id },
-        });
-        throw new BadRequestException('Email not sent');
-      } else if (role === ERoles.LABORANTE) {
-        await this.prisma.laborante.delete({
-          where: { id: userId },
-        });
-        await this.prisma.user.delete({
-          where: { id: User.id },
-        });
-        throw new BadRequestException('Email not sent');
-      }
+      this.deleteUser(role, User, userId);
+      throw new BadRequestException('Email not sent');
     }
   }
 
@@ -130,6 +113,8 @@ export class ClinicService {
       ? (isRole = ERoles.DOCTOR)
       : dto.role === 'nurse'
       ? (isRole = ERoles.NURSE)
+      : dto.role === 'cashier'
+      ? (isRole = ERoles.CASHIER)
       : (isRole = ERoles.LABORANTE);
 
     if (isRole === ERoles.RECEPTIONIST) {
@@ -158,6 +143,7 @@ export class ClinicService {
         user.userId,
         receptionist.id,
         passwordGenerated,
+        dto.assignedRoles.length === 0 ? [] : dto.assignedRoles,
       );
     }
 
@@ -187,6 +173,7 @@ export class ClinicService {
         user.userId,
         doctor.id,
         passwordGenerated,
+        dto.assignedRoles.length === 0 ? [] : dto.assignedRoles,
       );
     }
 
@@ -215,6 +202,7 @@ export class ClinicService {
         user.userId,
         nurse.id,
         passwordGenerated,
+        dto.assignedRoles.length === 0 ? [] : dto.assignedRoles,
       );
     }
 
@@ -253,8 +241,37 @@ export class ClinicService {
           user.userId,
           laborante.id,
           passwordGenerated,
+          dto.assignedRoles.length === 0 ? [] : dto.assignedRoles,
         );
       }
+    }
+    if (isRole === ERoles.CASHIER) {
+      const isCashier = await this.prisma.cashier.findFirst({
+        where: { AND: [{ clinicId: user.clinicId }, { email: dto.email }] },
+      });
+      if (isCashier) throw new ConflictException('Cahier already registered');
+      const passwordGenerated = this.makePassword(8);
+      const password = await argon.hash(passwordGenerated);
+      const cashier = await this.prisma.cashier.create({
+        data: {
+          email: dto.email,
+          fullName: dto.fullName,
+          phone: dto.phone,
+          gender: dto.gender,
+          role: ERoles.CASHIER,
+          clinicId: user.userId,
+        },
+      });
+      return this.RegisterUserToDataBase(
+        ERoles.CASHIER,
+        dto.email,
+        password,
+        dto.fullName,
+        user.userId,
+        cashier.id,
+        passwordGenerated,
+        dto.assignedRoles.length === 0 ? [] : dto.assignedRoles,
+      );
     } else throw new ConflictException('Role not found');
   }
 
