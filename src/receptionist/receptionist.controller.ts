@@ -171,12 +171,12 @@ export class ReceptionistController {
   //   return new GenericResponse('All doctors fetched successfully', result);
   // }
 
-  // @ApiOkResponse({ description: 'Nurses ' })
-  // @Get('all-nurses')
-  // async getAllNurses(@GetUser() user: User) {
-  //   const result = await this.receptionist.allNurses(user);
-  //   return new GenericResponse('All nurses fetched successfully', result);
-  // }
+  @ApiOkResponse({ description: 'Nurses ' })
+  @Get('all-nurses')
+  async getAllNurses(@GetUser() user: User) {
+    const result = await this.receptionist.allNurses(user);
+    return new GenericResponse('All nurses fetched successfully', result);
+  }
   // @ApiOkResponse({ description: 'Laborante ' })
   // @Get('all-laborantes')
   // async getAllLaborantes(@GetUser() user: User) {

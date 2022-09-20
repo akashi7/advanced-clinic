@@ -87,7 +87,6 @@ export class ExamConductDto {
 
 export class asignRoleDto {
   @IsArray()
-  @IsString()
   @ApiProperty({ isArray: true, required: true, type: Array })
   role: string[];
 }

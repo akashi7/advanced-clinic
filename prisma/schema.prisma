@@ -124,6 +124,8 @@ model records {
   sign_vital     sign_vital[]
   payment        payment[]
   medicalHistory medicalHistory[]
+  symptoms       symptoms[]
+  chronicDesease chronicDesease[]
 }
 
 model payment {
@@ -331,15 +333,31 @@ model laborante {
 }
 
 model medicalHistory {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  observation String
+  firstAid    String
+  recordId    Int
+  record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+}
+
+model chronicDesease {
   id             Int      @id @default(autoincrement())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  symptoms       String
-  observation    String
   chronicDesease String
-  firstAid       String
   recordId       Int
   record         records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+}
+
+model symptoms {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  symptom   String
+  recordId  Int
+  record    records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 //Model invoice,invoice_details,insurance,examList,PriceList

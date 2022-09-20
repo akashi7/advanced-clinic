@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
-import { ERecords, EStatus } from 'src/auth/enums';
+import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { vitalsDto } from './dto';
+import { medicalHistoryDto, ReommendConsultationDto, vitalsDto } from './dto';
 
 @Injectable()
 export class NurseService {
@@ -42,6 +42,9 @@ export class NurseService {
       where: { record_code: recordDetails.recordId },
       include: {
         sign_vital: true,
+        medicalHistory: true,
+        symptoms: true,
+        chronicDesease: true,
       },
     });
 
@@ -67,19 +70,59 @@ export class NurseService {
     };
   }
 
-  async nurseSendToDoc(recordId: number): Promise<{ message: string }> {
+  async nurseRgisterMedicalInformation(
+    recordId: number,
+    dto: medicalHistoryDto,
+  ): Promise<{ message: string }> {
+    await this.prisma.medicalHistory.create({
+      data: {
+        firstAid: dto.firstAid,
+        observation: dto.observation,
+        recordId,
+      },
+    });
+    dto.symptoms.forEach(async (symptom) => {
+      await this.prisma.symptoms.create({
+        data: {
+          symptom,
+          recordId,
+        },
+      });
+    });
+    dto.diseases.forEach(async (disease) => {
+      await this.prisma.chronicDesease.create({
+        data: {
+          chronicDesease: disease,
+          recordId,
+        },
+      });
+    });
+    return { message: 'registered succesfully' };
+  }
+
+  async nurseSendToDoc(
+    recordId: number,
+    doctorId: number,
+  ): Promise<{ message: string }> {
     const record = await this.prisma.records.findFirst({
       where: {
         record_code: recordId,
       },
     });
+
+    const doctor = await this.prisma.user.findFirst({
+      where: {
+        id: doctorId,
+      },
+    });
+
     await this.prisma.record_details.create({
       data: {
         recordId: record.record_code,
+        fullNames: record.fullNames,
         destination: ERecords.DOCTOR_DESTINATION,
         status: EStatus.UNREAD,
-        fullNames: record.fullNames,
-        doctor: record.doctor,
+        doctor: doctor.fullName,
       },
     });
     return {
@@ -99,6 +142,67 @@ export class NurseService {
     });
     return {
       message: 'Updated success',
+    };
+  }
+
+  async allDoctors(user: User): Promise<User[]> {
+    const doctors = await this.prisma.user.findMany({
+      where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.DOCTOR }] },
+    });
+    return doctors;
+  }
+
+  async recomendConsultation(
+    dto: ReommendConsultationDto,
+    user: User,
+    recordId: number,
+  ): Promise<{ message: string }> {
+    const record = await this.prisma.records.findFirst({
+      where: {
+        record_code: recordId,
+      },
+    });
+
+    const itemPrice = await this.prisma.priceList.findFirst({
+      where: {
+        AND: [
+          { itemId: dto.itemId },
+          { Type: 'consultation' },
+          { insuranceId: dto.insuranceId },
+          { clinicId: user.clinicId },
+        ],
+      },
+    });
+    if (!itemPrice) {
+      throw new BadRequestException('consultation not in priceList');
+    }
+    const invoice = await this.prisma.invoice.create({
+      data: {
+        patientId: record.patientId,
+        recordId,
+        rating: dto.rate,
+        insuranceId: dto.insuranceId,
+        clinicId: user.clinicId,
+        amountPaid: 0,
+        amountToBePaid: itemPrice.price,
+        unpaidAmount: itemPrice.price,
+        amountPaidByInsurance: 0,
+      },
+    });
+
+    await this.prisma.invoice_details.create({
+      data: {
+        invoiceId: invoice.id,
+        itemId: dto.itemId,
+        type: 'consultation',
+        price: itemPrice.price,
+        priceToPay: itemPrice.price,
+        insurancePaid: 0,
+      },
+    });
+
+    return {
+      message: 'Consultation added success',
     };
   }
 }
