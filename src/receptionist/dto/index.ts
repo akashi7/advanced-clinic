@@ -102,8 +102,8 @@ export class RecordDto {
   @ApiProperty({ type: Number, required: true })
   doctor: number;
   @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({ type: String })
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
   nurse: string;
   @IsNumber()
   @IsNotEmpty()

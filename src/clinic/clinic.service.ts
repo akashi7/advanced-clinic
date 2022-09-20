@@ -106,6 +106,7 @@ export class ClinicService {
 
   //Register-user
   async RegisterUser(dto: registerEmployee, user: User): Promise<User> {
+    console.log(dto.assignedRoles);
     let isRole: string;
     dto.role === 'receptionist'
       ? (isRole = ERoles.RECEPTIONIST)

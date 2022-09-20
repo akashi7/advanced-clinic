@@ -85,7 +85,6 @@ export class registerEmployee {
   @ApiProperty({ required: true, type: String })
   phone: string;
   @IsArray()
-  @IsString()
   @ApiProperty({ isArray: true, required: false, type: Array })
   assignedRoles: string[];
 }

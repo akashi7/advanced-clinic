@@ -106,21 +106,24 @@ model records {
   updatedAt      DateTime         @updatedAt
   patientId      Int
   fullNames      String
-  insurance      String
+  insurance      String?
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  doctor         String
+  doctor         String?
   status         String           @default("inactive")
   recordStatus   String?          @default("pending")
   nurse          String?
   observation    String?
+  newCase        String?
+  disease        String?
   record_details record_details[]
   medication     medication[]
   exam           exam[]
   invoice        invoice[]
   sign_vital     sign_vital[]
   payment        payment[]
+  medicalHistory medicalHistory[]
 }
 
 model payment {
@@ -328,7 +331,15 @@ model laborante {
 }
 
 model medicalHistory {
-  id Int @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  symptoms       String
+  observation    String
+  chronicDesease String
+  firstAid       String
+  recordId       Int
+  record         records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
 //Model invoice,invoice_details,insurance,examList,PriceList

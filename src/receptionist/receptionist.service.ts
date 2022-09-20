@@ -168,93 +168,87 @@ export class ReceptionistService {
     Dto.amountPaidByInsurance = 0;
     let priceToPay: number;
     let insurancePaid: number;
-    let nurse: string;
     let insuranceRate: number;
-
-    const insurance = await this.prisma.insurance.findFirst({
-      where: { AND: [{ clinicId: user.clinicId }, { id: dto.insuranceId }] },
-    });
-
-    const doctor = await this.prisma.user.findFirst({
-      where: { id: dto.doctor },
-    });
 
     const patient = await this.prisma.patient.findFirst({
       where: { id: pId },
     });
 
-    if (dto.nurse) {
-      const Nurse = await this.prisma.user.findFirst({
-        where: { id: parseInt(dto.nurse) },
-      });
-      nurse = Nurse.fullName;
-    }
-    if (!dto.nurse) {
-      nurse = '';
-    }
+    const Nurse = await this.prisma.user.findFirst({
+      where: { id: parseInt(dto.nurse) },
+    });
 
     const record = await this.prisma.records.create({
       data: {
         patientId: pId,
         clinicId: user.clinicId,
         fullNames: patient.fullName,
-        insurance: insurance.name,
-        doctor: doctor.fullName,
-        nurse,
+        nurse: Nurse.fullName,
+        status: EStatus.ACTIVE,
       },
     });
-    const invoice = await this.prisma.invoice.create({
+    await this.prisma.record_details.create({
       data: {
-        patientId: pId,
         recordId: record.record_code,
-        rating: dto.rate,
-        insuranceId: dto.insuranceId,
-        clinicId: user.clinicId,
-        amountPaid: Dto.amountPaid,
-        amountToBePaid: Dto.amountToBePaid,
-        unpaidAmount: Dto.unpaidAmount,
-        amountPaidByInsurance: Dto.amountPaidByInsurance,
-      },
-    });
-    const itemPrice = await this.prisma.priceList.findFirst({
-      where: {
-        AND: [
-          { itemId: dto.itemId },
-          { Type: 'consultation' },
-          { insuranceId: dto.insuranceId },
-          { clinicId: user.clinicId },
-        ],
-      },
-    });
-    if (!itemPrice) {
-      throw new BadRequestException('consultation not in priceList');
-    }
-    priceToPay = itemPrice.price - (itemPrice.price * parseInt(dto.rate)) / 100;
-    insuranceRate = 100 - parseInt(dto.rate);
-    insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
-
-    await this.prisma.invoice_details.create({
-      data: {
-        invoiceId: invoice.id,
-        itemId: dto.itemId,
-        type: 'consultation',
-        price: itemPrice.price,
-        priceToPay,
-        insurancePaid,
+        fullNames: record.fullNames,
+        destination: ERecords.NURSE_DESTINATION,
+        status: EStatus.UNREAD,
+        nurse: record.nurse,
       },
     });
 
-    await this.prisma.invoice.update({
-      data: {
-        amountPaid: 0,
-        amountPaidByInsurance: insurancePaid,
-        amountToBePaid: priceToPay,
-        unpaidAmount: priceToPay,
-      },
-      where: {
-        id: invoice.id,
-      },
-    });
+    // const invoice = await this.prisma.invoice.create({
+    //   data: {
+    //     patientId: pId,
+    //     recordId: record.record_code,
+    //     rating: dto.rate,
+    //     insuranceId: dto.insuranceId,
+    //     clinicId: user.clinicId,
+    //     amountPaid: Dto.amountPaid,
+    //     amountToBePaid: Dto.amountToBePaid,
+    //     unpaidAmount: Dto.unpaidAmount,
+    //     amountPaidByInsurance: Dto.amountPaidByInsurance,
+    //   },
+    // });
+    // const itemPrice = await this.prisma.priceList.findFirst({
+    //   where: {
+    //     AND: [
+    //       { itemId: dto.itemId },
+    //       { Type: 'consultation' },
+    //       { insuranceId: dto.insuranceId },
+    //       { clinicId: user.clinicId },
+    //     ],
+    //   },
+    // });
+    // if (!itemPrice) {
+    //   throw new BadRequestException('consultation not in priceList');
+    // }
+    // priceToPay = itemPrice.price - (itemPrice.price * parseInt(dto.rate)) / 100;
+    // insuranceRate = 100 - parseInt(dto.rate);
+    // insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+
+    // await this.prisma.invoice_details.create({
+    //   data: {
+    //     invoiceId: invoice.id,
+    //     itemId: dto.itemId,
+    //     type: 'consultation',
+    //     price: itemPrice.price,
+    //     priceToPay,
+    //     insurancePaid,
+    //   },
+    // });
+
+    // await this.prisma.invoice.update({
+    //   data: {
+    //     amountPaid: 0,
+    //     amountPaidByInsurance: insurancePaid,
+    //     amountToBePaid: priceToPay,
+    //     unpaidAmount: priceToPay,
+    //   },
+    //   where: {
+    //     id: invoice.id,
+    //   },
+    // });
 
     return { message: 'Record created successfully' };
   }
