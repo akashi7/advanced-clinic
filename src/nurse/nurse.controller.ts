@@ -2,14 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
+  // HttpCode,
   ParseIntPipe,
-  Patch,
+  // Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
@@ -25,7 +26,7 @@ import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
-import { vitalsDto } from './dto';
+import { medicalHistoryDto, ReommendConsultationDto, vitalsDto } from './dto';
 import { NurseService } from './nurse.service';
 
 @Controller('nurse')
@@ -48,7 +49,7 @@ export class NurseController {
   @ApiCreatedResponse({ description: ' vitals registered success' })
   @ApiBody({ type: vitalsDto })
   @ApiQuery({ name: 'recordId', type: Number })
-  @AllowRoles(ERoles.RECEPTIONIST, ERoles.NURSE)
+  @AllowRoles(ERoles.NURSE)
   @Post('register-vitals')
   async nurseRegisterVitals(
     @Body() dto: vitalsDto,
@@ -66,21 +67,60 @@ export class NurseController {
   }
 
   @ApiCreatedResponse({ description: ' Record sent to doctor' })
-  @AllowRoles(ERoles.RECEPTIONIST, ERoles.NURSE)
-  @ApiQuery({ name: 'id', type: Number })
+  @ApiQuery({ name: 'recordId', type: Number })
+  @ApiQuery({ name: 'doctorId', type: Number })
   @Post('send-to-doc')
-  async nurseTransferToDoc(@Query('id', ParseIntPipe) recordId: number) {
-    const result = await this.nurseService.nurseSendToDoc(recordId);
+  async nurseTransferToDoc(
+    @Query('recordId', ParseIntPipe) recordId: number,
+    @Query('id', ParseIntPipe) doctorId: number,
+  ) {
+    const result = await this.nurseService.nurseSendToDoc(recordId, doctorId);
     return new GenericResponse('Record sent to doctor', result);
   }
-  @HttpCode(200)
-  @ApiOkResponse({ description: ' Vitals updated Succesfully' })
-  @Patch('update-vitals')
-  async updateSignVitals(
-    @Query('id', ParseIntPipe) id: number,
-    @Body() dto: vitalsDto,
+  // @HttpCode(200)
+  // @ApiOkResponse({ description: ' Vitals updated Succesfully' })
+  // @Patch('update-vitals')
+  // async updateSignVitals(
+  //   @Query('id', ParseIntPipe) id: number,
+  //   @Body() dto: vitalsDto,
+  // ) {
+  //   const result = await this.nurseService.updateSignVitals(id, dto);
+  //   return new GenericResponse('Vitals updated Succesfully', result);
+  // }
+  @ApiCreatedResponse({ description: 'Consultation success' })
+  @ApiQuery({ name: 'recordId', type: Number })
+  @ApiBadRequestResponse({ description: 'consultation not in priceList' })
+  @Post('recommend-consultation')
+  async RecommendCons(
+    @Body('') dto: ReommendConsultationDto,
+    @Query('recordId', ParseIntPipe) recordId: number,
+    @GetUser() user: User,
   ) {
-    const result = await this.nurseService.updateSignVitals(id, dto);
-    return new GenericResponse('Vitals updated Succesfully', result);
+    const result = await this.nurseService.recomendConsultation(
+      dto,
+      user,
+      recordId,
+    );
+    return new GenericResponse('Consultation success', result);
+  }
+
+  @ApiCreatedResponse({ description: 'medical info success' })
+  @ApiQuery({ name: 'recordId', type: Number })
+  @Post('register-m-info')
+  async RegisterMedicalInfo(
+    @Body('') dto: medicalHistoryDto,
+    @Query('recordId', ParseIntPipe) recordId: number,
+  ) {
+    const result = await this.nurseService.nurseRgisterMedicalInformation(
+      recordId,
+      dto,
+    );
+    return new GenericResponse('registered success', result);
+  }
+  @ApiOkResponse({ description: 'Doctors ' })
+  @Get('all-doctors')
+  async getAllDoctors(@GetUser() user: User) {
+    const result = await this.nurseService.allDoctors(user);
+    return new GenericResponse('All doctors fetched successfully', result);
   }
 }
