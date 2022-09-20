@@ -126,9 +126,16 @@ export class AuthService {
     );
   }
   async userChooseRole(email: string, role: string) {
+    let newRole: string[];
+    let uniqueArray: string[];
+
     const user = await this.prisma.user.findFirst({
       where: { email },
     });
+
+    newRole = [...user.asignedRole, user.role];
+    uniqueArray = [...new Set(newRole)];
+
     return this.generateToken(
       user.userId,
       user.email,
@@ -136,7 +143,7 @@ export class AuthService {
       role,
       user.clinicId,
       user.id,
-      user.asignedRole,
+      uniqueArray,
     );
   }
 }
