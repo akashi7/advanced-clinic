@@ -30,6 +30,8 @@ export class ReceptionistService {
 
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
+    let code: string;
+
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
         where: {
@@ -52,11 +54,58 @@ export class ReceptionistService {
         },
       });
       if (isInfants) throw new ConflictException('Infant already exists');
+
+      const patients = await this.prisma.patient.findMany({
+        where: {
+          clinicId: user.clinicId,
+        },
+      });
+
+      const clinic = await this.prisma.clinic.findFirst({
+        where: {
+          id: user.clinicId,
+        },
+      });
+
+      if (!patients) {
+        code = `${clinic.name.substring(0, 2)}0001`;
+      }
+      if (patients) {
+        let Obj = patients[patients.length - 1];
+        let previousCode = Obj.code.replace(
+          `${clinic.name.substring(0, 2)}`,
+          '',
+        );
+
+        if (parseInt(previousCode) <= 9) {
+          code = `${clinic.name.substring(0, 2)}000${
+            parseInt(previousCode) + 1
+          }`;
+        }
+
+        if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
+          code = `${clinic.name.substring(0, 2)}00${
+            parseInt(previousCode) + 1
+          }`;
+        } else if (
+          parseInt(previousCode) >= 99 &&
+          parseInt(previousCode) < 999
+        ) {
+          code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
+        } else {
+          code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
+        }
+      }
+
+      const age: number = getYear(new Date()) - getYear(new Date(dto.DOB));
+
       const Infant = await this.prisma.patient.create({
         data: {
           fullName: dto.fullName,
           DOB: dto.DOB,
           phone: dto.phone,
+          age,
+          code,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,
@@ -87,10 +136,42 @@ export class ReceptionistService {
         AND: [{ clinicId: user.clinicId }, { idNumber: dto.idNumber }],
       },
     });
-    if (isPatient)
+    if (isPatient) {
       throw new ConflictException(
         `Patient is arleady registered by the names of ${isPatient.fullName}`,
       );
+    }
+    const patients = await this.prisma.patient.findMany({
+      where: {
+        clinicId: user.clinicId,
+      },
+    });
+
+    const clinic = await this.prisma.clinic.findFirst({
+      where: {
+        id: user.clinicId,
+      },
+    });
+
+    if (!patients) {
+      code = `${clinic.name.substring(0, 2)}0001`;
+    }
+    if (patients) {
+      let Obj = patients[patients.length - 1];
+      let previousCode = Obj.code.replace(`${clinic.name.substring(0, 2)}`, '');
+
+      if (parseInt(previousCode) <= 9) {
+        code = `${clinic.name.substring(0, 2)}000${parseInt(previousCode) + 1}`;
+      }
+
+      if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
+        code = `${clinic.name.substring(0, 2)}00${parseInt(previousCode) + 1}`;
+      } else if (parseInt(previousCode) >= 99 && parseInt(previousCode) < 999) {
+        code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
+      } else {
+        code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
+      }
+    }
 
     const age: number = getYear(new Date()) - getYear(new Date(dto.DOB));
 
@@ -104,6 +185,7 @@ export class ReceptionistService {
         village: dto.village,
         province: dto.province,
         age,
+        code,
         district: dto.district,
         email: dto.email,
         marital_status: dto.marital_status,
@@ -138,8 +220,7 @@ export class ReceptionistService {
         },
       });
       return patients;
-    }
-    if (dto.idNumber) {
+    } else if (dto.idNumber) {
       const patients = await this.prisma.patient.findMany({
         where: {
           AND: [{ clinicId: user.clinicId }],
@@ -148,6 +229,21 @@ export class ReceptionistService {
             { FatherIdnumber: dto.idNumber },
             { MotherIdnumber: dto.idNumber },
             { GuardianIdNumber: dto.idNumber },
+          ],
+        },
+      });
+      return patients;
+    } else if (dto.code) {
+      const patients = await this.prisma.patient.findMany({
+        where: {
+          AND: [
+            { clinicId: user.clinicId },
+            {
+              code: {
+                mode: 'insensitive',
+                contains: dto.code,
+              },
+            },
           ],
         },
       });

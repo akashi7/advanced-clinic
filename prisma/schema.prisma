@@ -75,6 +75,7 @@ model patient {
   DOB              String
   gender           String
   age              Int?
+  code             String
   email            String?
   province         String
   district         String
@@ -356,6 +357,7 @@ model appointement {
   patientCode Int
   reason      String
   serviceId   Int
+  doctorId    Int
   Date        DateTime
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
