@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Body, Controller, HttpCode, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -57,10 +57,10 @@ export class AuthController {
     return result;
   }
 
-  @ApiCreatedResponse({ description: 'Changed Role successfully ' })
+  @ApiOkResponse({ description: 'Changed Role successfully ' })
   @ApiQuery({ name: 'email', required: true })
   @ApiQuery({ name: 'role', required: true })
-  @Post('choose-role')
+  @Get('choose-role')
   async userChooseRole(
     @Query('email') email: string,
     @Query('role') role: string,

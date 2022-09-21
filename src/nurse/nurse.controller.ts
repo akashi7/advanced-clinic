@@ -12,7 +12,6 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -26,7 +25,7 @@ import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
-import { medicalHistoryDto, ReommendConsultationDto, vitalsDto } from './dto';
+import { medicalHistoryDto, ReommendConsultationDto } from './dto';
 import { NurseService } from './nurse.service';
 
 @Controller('nurse')
@@ -44,19 +43,6 @@ export class NurseController {
   async nurseSeeRequest(@GetUser() user: User) {
     const result = await this.nurseService.nurseSeeAllRequets(user);
     return new GenericResponse('requests fetched sucessfully', result);
-  }
-
-  @ApiCreatedResponse({ description: ' vitals registered success' })
-  @ApiBody({ type: vitalsDto })
-  @ApiQuery({ name: 'recordId', type: Number })
-  @AllowRoles(ERoles.NURSE)
-  @Post('register-vitals')
-  async nurseRegisterVitals(
-    @Body() dto: vitalsDto,
-    @Query('recordId', ParseIntPipe) recordId: number,
-  ) {
-    const result = await this.nurseService.nurseRegisterVitals(dto, recordId);
-    return new GenericResponse('vitals registered success', result);
   }
 
   @ApiOkResponse({ description: ' one record fetched succesfully' })

@@ -123,6 +123,10 @@ export class FilterPatients {
   @IsString()
   @ApiProperty({ type: String, required: true })
   idNumber: string;
+
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  code: string;
 }
 
 export class MakePaymentDto {
