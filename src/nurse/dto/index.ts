@@ -1,6 +1,12 @@
 /*eslint-disable*/
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class vitalsDto {
   @IsString()
@@ -32,14 +38,49 @@ export class medicalHistoryDto {
   observation: string;
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  firstAid: string;
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  firstAid: string[];
   @IsArray()
   @ApiProperty({ isArray: true, required: true, type: Array })
   diseases: string[];
   @IsArray()
   @ApiProperty({ isArray: true, required: true, type: Array })
   symptoms: string[];
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  weight: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  height: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  temperature: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  BP: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  pulse: string;
+  @IsBoolean()
+  @IsNotEmpty()
+  @ApiProperty({ type: Boolean, required: true })
+  medications: boolean;
+  @IsArray()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  medicationType: string[];
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  HowLong: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  case: string;
 }
 
 export class ReommendConsultationDto {

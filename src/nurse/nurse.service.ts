@@ -51,12 +51,34 @@ export class NurseService {
     return record;
   }
 
-  async nurseRegisterVitals(
-    dto: vitalsDto,
+  async nurseRgisterMedicalInformation(
     recordId: number,
+    dto: medicalHistoryDto,
   ): Promise<{ message: string }> {
     const record = await this.prisma.records.findFirst({
       where: { record_code: recordId },
+    });
+
+    await this.prisma.records.update({
+      where: {
+        record_code: record.record_code,
+      },
+      data: {
+        newCase: dto.case,
+      },
+    });
+
+    await this.prisma.medicalHistory.create({
+      data: {
+        firstAid: dto.firstAid,
+        observation: dto.observation,
+        recordId,
+        symptoms: dto.symptoms,
+        chronicDesease: dto.diseases,
+        medications: dto.medications,
+        medicationType: dto.medications ? dto.medicationType : [],
+        HowLong: dto.HowLong,
+      },
     });
     await this.prisma.sign_vital.create({
       data: {
@@ -64,38 +86,6 @@ export class NurseService {
         patientId: record.patientId,
         recordId,
       },
-    });
-    return {
-      message: 'Vitals registered',
-    };
-  }
-
-  async nurseRgisterMedicalInformation(
-    recordId: number,
-    dto: medicalHistoryDto,
-  ): Promise<{ message: string }> {
-    await this.prisma.medicalHistory.create({
-      data: {
-        firstAid: dto.firstAid,
-        observation: dto.observation,
-        recordId,
-      },
-    });
-    dto.symptoms.forEach(async (symptom) => {
-      await this.prisma.symptoms.create({
-        data: {
-          symptom,
-          recordId,
-        },
-      });
-    });
-    dto.diseases.forEach(async (disease) => {
-      await this.prisma.chronicDesease.create({
-        data: {
-          chronicDesease: disease,
-          recordId,
-        },
-      });
     });
     return { message: 'registered succesfully' };
   }

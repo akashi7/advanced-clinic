@@ -126,6 +126,7 @@ model records {
   medicalHistory medicalHistory[]
   symptoms       symptoms[]
   chronicDesease chronicDesease[]
+  appointement   appointement[]
 }
 
 model payment {
@@ -333,12 +334,29 @@ model laborante {
 }
 
 model medicalHistory {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  observation    String
+  firstAid       String[]
+  recordId       Int
+  chronicDesease String[]
+  symptoms       String[]
+  medications    Boolean  @default(false)
+  medicationType String[]
+  HowLong        String
+  record         records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+}
+
+model appointement {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  observation String
-  firstAid    String
   recordId    Int
+  patientCode Int
+  reason      String
+  serviceId   Int
+  Date        DateTime
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
