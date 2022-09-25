@@ -1,8 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { records, record_details, User } from '@prisma/client';
+import { appointement, records, record_details, User } from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { examDto, FilterResult, ObservationDto } from './dto';
+import {
+  AppointmentDto,
+  examDto,
+  FilterAppointments,
+  FilterResult,
+  ObservationDto,
+} from './dto';
 
 @Injectable()
 export class DoctorService {
@@ -55,6 +61,7 @@ export class DoctorService {
         record_code: record_details.recordId,
       },
       include: {
+        medicalHistory: true,
         sign_vital: true,
       },
     });
@@ -81,7 +88,7 @@ export class DoctorService {
   ): Promise<{ message: string }> {
     let priceToPay: number;
     let insurancePaid: number;
-    let insuranceRate: number;
+    // let insuranceRate: number;
 
     const record = await this.prisma.records.findFirst({
       where: {
@@ -94,19 +101,13 @@ export class DoctorService {
       },
     });
 
-    const insurance = await this.prisma.insurance.findFirst({
-      where: {
-        name: record.insurance,
-      },
-    });
-
     dto.exams.forEach(async (exam) => {
       const itemPrice = await this.prisma.priceList.findFirst({
         where: {
           AND: [
             { itemId: exam.itemId },
             { Type: 'exam' },
-            { insuranceId: insurance.id },
+            { private: true },
             { clinicId: user.clinicId },
           ],
         },
@@ -123,10 +124,10 @@ export class DoctorService {
         },
       });
 
-      priceToPay =
-        itemPrice.price - (itemPrice.price * parseInt(invoice.rating)) / 100;
-      insuranceRate = 100 - parseInt(invoice.rating);
-      insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+      // priceToPay =
+      //   itemPrice.price - (itemPrice.price * parseInt(invoice.rating)) / 100;
+      // insuranceRate = 100 - parseInt(invoice.rating);
+      // insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
 
       await this.prisma.invoice_details.create({
         data: {
@@ -134,8 +135,8 @@ export class DoctorService {
           itemId: exam.itemId,
           type: 'exam',
           price: itemPrice.price,
-          priceToPay,
-          insurancePaid,
+          priceToPay: itemPrice.price,
+          insurancePaid: 0,
         },
       });
 
@@ -169,6 +170,43 @@ export class DoctorService {
     return { message: 'Record sent to laboratory' };
   }
 
+  async makeAppointment(
+    recordId: number,
+    dto: AppointmentDto,
+    patientCode: string,
+    user: User,
+  ) {
+    const date = new Date(dto.Date).toLocaleDateString();
+    await this.prisma.appointement.create({
+      data: {
+        recordId,
+        patientCode,
+        reason: dto.reason,
+        serviceId: dto.serviceId,
+        doctorId: user.id,
+        Date: date,
+      },
+    });
+  }
+
+  async seeAppointnments(
+    user: User,
+    dto: FilterAppointments,
+  ): Promise<appointement[]> {
+    const today = new Date().toLocaleDateString();
+    if (dto.date) {
+      const date = new Date(dto.date).toLocaleDateString();
+      const appointements = await this.prisma.appointement.findMany({
+        where: { AND: [{ doctorId: user.id }, { Date: date }] },
+      });
+      return appointements;
+    }
+    const appointements = await this.prisma.appointement.findMany({
+      where: { AND: [{ doctorId: user.id }, { Date: today }] },
+    });
+    return appointements;
+  }
+
   async docTerminateRecordProccess(
     id: number,
     dto: ObservationDto,
@@ -180,6 +218,7 @@ export class DoctorService {
       data: {
         recordStatus: EStatus.FINISHED,
         observation: dto.observation,
+        disease: dto.disease,
       },
     });
     return { message: '' };

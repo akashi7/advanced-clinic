@@ -158,7 +158,7 @@ export class NurseService {
         AND: [
           { itemId: dto.itemId },
           { Type: 'consultation' },
-          { insuranceId: dto.insuranceId },
+          { private: true },
           { clinicId: user.clinicId },
         ],
       },
@@ -170,8 +170,6 @@ export class NurseService {
       data: {
         patientId: record.patientId,
         recordId,
-        rating: dto.rate,
-        insuranceId: dto.insuranceId,
         clinicId: user.clinicId,
         amountPaid: 0,
         amountToBePaid: itemPrice.price,

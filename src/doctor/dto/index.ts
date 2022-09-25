@@ -28,4 +28,29 @@ export class ObservationDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   observation: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  disease: string;
+}
+
+export class AppointmentDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  reason: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  Date: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  serviceId: number;
+}
+
+export class FilterAppointments {
+  @IsString()
+  @ApiProperty({ type: String, required: false })
+  date: string;
 }
