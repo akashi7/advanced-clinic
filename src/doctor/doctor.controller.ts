@@ -25,7 +25,13 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import { DoctorService } from './doctor.service';
-import { examDto, FilterResult, ObservationDto } from './dto';
+import {
+  AppointmentDto,
+  examDto,
+  FilterAppointments,
+  FilterResult,
+  ObservationDto,
+} from './dto';
 
 @Controller('doctor')
 @UseGuards(JwtGuard, RolesGuard)
@@ -67,22 +73,48 @@ export class DoctorController {
     return new GenericResponse('sent to labo', result);
   }
 
-  @ApiCreatedResponse({ description: 'Sent to labo' })
+  @ApiCreatedResponse({ description: 'Diognosis' })
   @ApiQuery({ name: 'recordId', required: true })
   @ApiBody({ type: ObservationDto })
-  @Post('terminate-record')
+  @Post('diognosis')
   async docTerminateRecordProccess(
     @Query('recordId', ParseIntPipe) id: number,
     @Body() dto: ObservationDto,
   ) {
     const result = await this.docService.docTerminateRecordProccess(id, dto);
-    return new GenericResponse('Terminated record', result);
+    return new GenericResponse('Diognosis', result);
   }
 
-  @ApiOkResponse({ description: 'doc report' })
-  @Get('doc-reports')
-  async docseeReport(@GetUser() user: User) {
-    const result = await this.docService.docReport(user);
-    return new GenericResponse('doc report', result);
+  @ApiCreatedResponse({ description: 'Appointment' })
+  @ApiQuery({ name: 'recordId', required: true })
+  @ApiQuery({ name: 'patientCode', required: true })
+  @ApiBody({ type: AppointmentDto })
+  @Post('make-appointment')
+  async docMakeAppointment(
+    @Query('recordId', ParseIntPipe) id: number,
+    @Query('patientCode') pCode: string,
+    @Body() dto: AppointmentDto,
+    @GetUser() user: User,
+  ) {
+    const result = await this.docService.makeAppointment(id, dto, pCode, user);
+    return new GenericResponse('Appointment', result);
   }
+
+  @ApiCreatedResponse({ description: 'See Appointment' })
+  @ApiBody({ type: FilterAppointments })
+  @Post('see-appointments')
+  async docSeeAppointments(
+    @GetUser() user: User,
+    @Body() dto: FilterAppointments,
+  ) {
+    const result = await this.docService.seeAppointnments(user, dto);
+    return new GenericResponse('See Appointments', result);
+  }
+
+  // @ApiOkResponse({ description: 'doc report' })
+  // @Get('doc-reports')
+  // async docseeReport(@GetUser() user: User) {
+  //   const result = await this.docService.docReport(user);
+  //   return new GenericResponse('doc report', result);
+  // }
 }

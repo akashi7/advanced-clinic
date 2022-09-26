@@ -31,6 +31,7 @@ export class ReceptionistService {
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
     let code: string;
+    let k;
 
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
@@ -69,6 +70,7 @@ export class ReceptionistService {
 
       if (!patients) {
         code = `${clinic.name.substring(0, 2)}0001`;
+        k = code;
       }
       if (patients) {
         let Obj = patients[patients.length - 1];
@@ -81,19 +83,23 @@ export class ReceptionistService {
           code = `${clinic.name.substring(0, 2)}000${
             parseInt(previousCode) + 1
           }`;
+          k = code;
         }
 
         if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
           code = `${clinic.name.substring(0, 2)}00${
             parseInt(previousCode) + 1
           }`;
+          k = code;
         } else if (
           parseInt(previousCode) >= 99 &&
           parseInt(previousCode) < 999
         ) {
           code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
+          k = code;
         } else {
           code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
+          k = code;
         }
       }
 
@@ -105,7 +111,7 @@ export class ReceptionistService {
           DOB: dto.DOB,
           phone: dto.phone,
           age,
-          code,
+          code: k,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,
@@ -153,26 +159,30 @@ export class ReceptionistService {
       },
     });
 
-    if (!patients) {
+    if (patients.length < 1) {
       code = `${clinic.name.substring(0, 2)}0001`;
-    }
-    if (patients) {
+      k = code;
+    } else if (patients.length > 0) {
       let Obj = patients[patients.length - 1];
       let previousCode = Obj.code.replace(`${clinic.name.substring(0, 2)}`, '');
+      console.log({ previousCode });
 
       if (parseInt(previousCode) <= 9) {
         code = `${clinic.name.substring(0, 2)}000${parseInt(previousCode) + 1}`;
+        k = code;
       }
 
       if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
         code = `${clinic.name.substring(0, 2)}00${parseInt(previousCode) + 1}`;
+        k = code;
       } else if (parseInt(previousCode) >= 99 && parseInt(previousCode) < 999) {
         code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
+        k = code;
       } else {
         code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
+        k = code;
       }
     }
-
     const age: number = getYear(new Date()) - getYear(new Date(dto.DOB));
 
     const patient = await this.prisma.patient.create({
@@ -185,7 +195,7 @@ export class ReceptionistService {
         village: dto.village,
         province: dto.province,
         age,
-        code,
+        code: k,
         district: dto.district,
         email: dto.email,
         marital_status: dto.marital_status,
@@ -256,6 +266,7 @@ export class ReceptionistService {
     pId: number,
     user: User,
     dto: RecordDto,
+    pCode: string,
   ): Promise<{ message: string }> {
     let Dto = new RecordDto();
     Dto.amountToBePaid = 0;
@@ -281,6 +292,9 @@ export class ReceptionistService {
         fullNames: patient.fullName,
         nurse: Nurse.fullName,
         status: EStatus.ACTIVE,
+        insurance: dto.insuranceId,
+        rate: dto.rate,
+        patientCode: pCode,
       },
     });
     await this.prisma.record_details.create({
@@ -574,7 +588,7 @@ export class ReceptionistService {
     });
 
     const insurance = this.prisma.insurance.findFirst({
-      where: { AND: [{ clinicId: user.clinicId }, { name: record.insurance }] },
+      where: { AND: [{ clinicId: user.clinicId }, { id: record.insurance }] },
     });
 
     dto.cart.forEach(async (item) => {

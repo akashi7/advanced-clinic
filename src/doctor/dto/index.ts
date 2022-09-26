@@ -24,8 +24,39 @@ export class FilterResult {
   results: boolean;
 }
 export class ObservationDto {
+  @IsArray()
+  @IsNotEmpty()
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  medecines: string[];
+  @IsArray()
+  @IsNotEmpty()
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  disease: string[];
+}
+
+export class AppointmentDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
-  observation: string;
+  reason: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  Date: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  serviceId: number;
+  @IsArray()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  medecines: string[];
+  @IsArray()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  disease: string[];
+}
+
+export class FilterAppointments {
+  @IsString()
+  @ApiProperty({ type: String, required: false })
+  date: string;
 }

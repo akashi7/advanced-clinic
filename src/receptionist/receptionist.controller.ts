@@ -77,6 +77,7 @@ export class ReceptionistController {
 
   @ApiCreatedResponse({ description: 'Record created successfully' })
   @ApiQuery({ name: 'id', required: true })
+  @ApiQuery({ name: 'pCode', required: true })
   @ApiBadRequestResponse({ description: 'consultation not in priceList' })
   @ApiBody({ type: RecordDto })
   @Post('create-record')
@@ -84,8 +85,9 @@ export class ReceptionistController {
     @Query('id', ParseIntPipe) id: number,
     @GetUser() user: User,
     @Body() dto: RecordDto,
+    @Query('pCode') pCode: string,
   ) {
-    const result = await this.receptionist.CreateRecord(id, user, dto);
+    const result = await this.receptionist.CreateRecord(id, user, dto, pCode);
     return new GenericResponse('Record created successfully', result);
   }
 

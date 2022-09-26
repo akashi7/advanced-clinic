@@ -54,6 +54,7 @@ export class NurseService {
   async nurseRgisterMedicalInformation(
     recordId: number,
     dto: medicalHistoryDto,
+    user: User,
   ): Promise<{ message: string }> {
     const record = await this.prisma.records.findFirst({
       where: { record_code: recordId },
@@ -87,7 +88,10 @@ export class NurseService {
         recordId,
       },
     });
-    return { message: 'registered succesfully' };
+    const message = await this.recomendConsultation(dto, user, recordId);
+    if (message) {
+      return { message: 'registered succesfully' };
+    }
   }
 
   async nurseSendToDoc(
@@ -158,7 +162,7 @@ export class NurseService {
         AND: [
           { itemId: dto.itemId },
           { Type: 'consultation' },
-          { insuranceId: dto.insuranceId },
+          { insuranceId: record.insurance },
           { clinicId: user.clinicId },
         ],
       },
@@ -166,17 +170,22 @@ export class NurseService {
     if (!itemPrice) {
       throw new BadRequestException('consultation not in priceList');
     }
+
+    const priceToPay: number =
+      itemPrice.price - (itemPrice.price * record.rate) / 100;
+    const insuranceRate: number = 100 - record.rate;
+    const insurancePaid: number =
+      itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+
     const invoice = await this.prisma.invoice.create({
       data: {
         patientId: record.patientId,
         recordId,
-        rating: dto.rate,
-        insuranceId: dto.insuranceId,
         clinicId: user.clinicId,
         amountPaid: 0,
-        amountToBePaid: itemPrice.price,
-        unpaidAmount: itemPrice.price,
-        amountPaidByInsurance: 0,
+        amountToBePaid: priceToPay,
+        unpaidAmount: priceToPay,
+        amountPaidByInsurance: insurancePaid,
       },
     });
 
@@ -186,8 +195,8 @@ export class NurseService {
         itemId: dto.itemId,
         type: 'consultation',
         price: itemPrice.price,
-        priceToPay: itemPrice.price,
-        insurancePaid: 0,
+        priceToPay,
+        insurancePaid: insurancePaid,
       },
     });
 

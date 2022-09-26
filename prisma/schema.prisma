@@ -107,7 +107,9 @@ model records {
   updatedAt      DateTime         @updatedAt
   patientId      Int
   fullNames      String
-  insurance      String?
+  insurance      Int?
+  rate           Int?
+  patientCode    String
   patient        patient          @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   clinicId       Int
   clinic         Clinic           @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
@@ -115,9 +117,9 @@ model records {
   status         String           @default("inactive")
   recordStatus   String?          @default("pending")
   nurse          String?
-  observation    String?
+  medecines      String[]
   newCase        String?
-  disease        String?
+  disease        String[]
   record_details record_details[]
   medication     medication[]
   exam           exam[]
@@ -213,23 +215,22 @@ model consultation {
 }
 
 model priceList {
-  id          Int       @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   itemId      Int
   price       Int
   insuranceId Int
   clinicId    Int
   Type        String
-  insurance   insurance @relation(fields: [insuranceId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  clinic      Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
+  private     Boolean @default(false)
+  clinic      Clinic  @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model insurance {
-  id        Int         @id @default(autoincrement())
-  name      String
-  rate      Int
-  clinicId  Int
-  clinic    Clinic      @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
-  priceList priceList[]
+  id       Int    @id @default(autoincrement())
+  name     String
+  rate     Int
+  clinicId Int
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
 }
 
 model invoice {
@@ -240,8 +241,8 @@ model invoice {
   patient               patient           @relation(fields: [patientId], references: [id], onUpdate: Cascade)
   recordId              Int
   record                records           @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-  rating                String
-  insuranceId           Int
+  rating                String?
+  insuranceId           Int?
   clinicId              Int
   amountToBePaid        Int
   amountPaid            Int
@@ -354,10 +355,12 @@ model appointement {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   recordId    Int
-  patientCode Int
+  patientCode String
   reason      String
   serviceId   Int
   doctorId    Int
+  medecines   String[]
+  Diseases    String[]
   Date        DateTime
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }

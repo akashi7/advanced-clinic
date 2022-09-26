@@ -1,8 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { records, record_details, User } from '@prisma/client';
+import {
+  appointement,
+  patient,
+  records,
+  record_details,
+  User,
+} from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { examDto, FilterResult, ObservationDto } from './dto';
+import {
+  AppointmentDto,
+  examDto,
+  FilterAppointments,
+  FilterResult,
+  ObservationDto,
+} from './dto';
 
 @Injectable()
 export class DoctorService {
@@ -43,7 +55,7 @@ export class DoctorService {
 
   async docViewRequet(
     id: number,
-  ): Promise<{ record: records; exams: unknown }> {
+  ): Promise<{ record: records; exams: unknown; patient: patient }> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
         id,
@@ -55,7 +67,13 @@ export class DoctorService {
         record_code: record_details.recordId,
       },
       include: {
+        medicalHistory: true,
         sign_vital: true,
+      },
+    });
+    const patient = await this.prisma.patient.findFirst({
+      where: {
+        id: record.patientId,
       },
     });
 
@@ -71,7 +89,7 @@ export class DoctorService {
       },
     });
 
-    return { record: record, exams: examTable };
+    return { record: record, exams: examTable, patient: patient };
   }
 
   async docSendToLabo(
@@ -94,19 +112,13 @@ export class DoctorService {
       },
     });
 
-    const insurance = await this.prisma.insurance.findFirst({
-      where: {
-        name: record.insurance,
-      },
-    });
-
     dto.exams.forEach(async (exam) => {
       const itemPrice = await this.prisma.priceList.findFirst({
         where: {
           AND: [
             { itemId: exam.itemId },
             { Type: 'exam' },
-            { insuranceId: insurance.id },
+            { private: true },
             { clinicId: user.clinicId },
           ],
         },
@@ -123,9 +135,8 @@ export class DoctorService {
         },
       });
 
-      priceToPay =
-        itemPrice.price - (itemPrice.price * parseInt(invoice.rating)) / 100;
-      insuranceRate = 100 - parseInt(invoice.rating);
+      priceToPay = itemPrice.price - (itemPrice.price * record.rate) / 100;
+      insuranceRate = 100 - record.rate;
       insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
 
       await this.prisma.invoice_details.create({
@@ -135,7 +146,7 @@ export class DoctorService {
           type: 'exam',
           price: itemPrice.price,
           priceToPay,
-          insurancePaid,
+          insurancePaid: insurancePaid,
         },
       });
 
@@ -169,6 +180,45 @@ export class DoctorService {
     return { message: 'Record sent to laboratory' };
   }
 
+  async makeAppointment(
+    recordId: number,
+    dto: AppointmentDto,
+    patientCode: string,
+    user: User,
+  ) {
+    const date = new Date(dto.Date).toLocaleDateString();
+    await this.prisma.appointement.create({
+      data: {
+        recordId,
+        patientCode,
+        reason: dto.reason,
+        serviceId: dto.serviceId,
+        doctorId: user.id,
+        Date: date,
+        medecines: dto.medecines.length > 0 ? dto.medecines : [],
+        Diseases: dto.disease.length > 0 ? dto.disease : [],
+      },
+    });
+  }
+
+  async seeAppointnments(
+    user: User,
+    dto: FilterAppointments,
+  ): Promise<appointement[]> {
+    const today = new Date().toLocaleDateString();
+    if (dto.date) {
+      const date = new Date(dto.date).toLocaleDateString();
+      const appointements = await this.prisma.appointement.findMany({
+        where: { AND: [{ doctorId: user.id }, { Date: date }] },
+      });
+      return appointements;
+    }
+    const appointements = await this.prisma.appointement.findMany({
+      where: { AND: [{ doctorId: user.id }, { Date: today }] },
+    });
+    return appointements;
+  }
+
   async docTerminateRecordProccess(
     id: number,
     dto: ObservationDto,
@@ -178,8 +228,8 @@ export class DoctorService {
         record_code: id,
       },
       data: {
-        recordStatus: EStatus.FINISHED,
-        observation: dto.observation,
+        medecines: dto.medecines,
+        disease: dto.disease,
       },
     });
     return { message: '' };
