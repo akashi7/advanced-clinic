@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -25,7 +25,7 @@ import { ERoles } from 'src/auth/enums';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
-import { medicalHistoryDto, ReommendConsultationDto } from './dto';
+import { medicalHistoryDto } from './dto';
 import { NurseService } from './nurse.service';
 
 @Controller('nurse')
@@ -73,33 +73,36 @@ export class NurseController {
   //   const result = await this.nurseService.updateSignVitals(id, dto);
   //   return new GenericResponse('Vitals updated Succesfully', result);
   // }
-  @ApiCreatedResponse({ description: 'Consultation success' })
-  @ApiQuery({ name: 'recordId', type: Number })
-  @ApiBadRequestResponse({ description: 'consultation not in priceList' })
-  @Post('recommend-consultation')
-  async RecommendCons(
-    @Body('') dto: ReommendConsultationDto,
-    @Query('recordId', ParseIntPipe) recordId: number,
-    @GetUser() user: User,
-  ) {
-    const result = await this.nurseService.recomendConsultation(
-      dto,
-      user,
-      recordId,
-    );
-    return new GenericResponse('Consultation success', result);
-  }
+  // @ApiCreatedResponse({ description: 'Consultation success' })
+  // @ApiQuery({ name: 'recordId', type: Number })
+  // @ApiBadRequestResponse({ description: 'consultation not in priceList' })
+  // @Post('recommend-consultation')
+  // async RecommendCons(
+  //   @Body('') dto: ReommendConsultationDto,
+  //   @Query('recordId', ParseIntPipe) recordId: number,
+  //   @GetUser() user: User,
+  // ) {
+  //   const result = await this.nurseService.recomendConsultation(
+  //     dto,
+  //     user,
+  //     recordId,
+  //   );
+  //   return new GenericResponse('Consultation success', result);
+  // }
 
   @ApiCreatedResponse({ description: 'medical info success' })
   @ApiQuery({ name: 'recordId', type: Number })
+  @ApiBody({ type: medicalHistoryDto })
   @Post('register-m-info')
   async RegisterMedicalInfo(
     @Body('') dto: medicalHistoryDto,
     @Query('recordId', ParseIntPipe) recordId: number,
+    @GetUser() user: User,
   ) {
     const result = await this.nurseService.nurseRgisterMedicalInformation(
       recordId,
       dto,
+      user,
     );
     return new GenericResponse('registered success', result);
   }

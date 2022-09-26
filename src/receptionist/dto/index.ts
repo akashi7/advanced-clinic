@@ -89,10 +89,10 @@ export class searchField {
 }
 
 export class RecordDto {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  rate: string;
+  @ApiProperty({ type: Number, required: true })
+  rate: number;
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
@@ -105,6 +105,9 @@ export class RecordDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   nurse: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })

@@ -1,5 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { appointement, records, record_details, User } from '@prisma/client';
+import {
+  appointement,
+  patient,
+  records,
+  record_details,
+  User,
+} from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -49,7 +55,7 @@ export class DoctorService {
 
   async docViewRequet(
     id: number,
-  ): Promise<{ record: records; exams: unknown }> {
+  ): Promise<{ record: records; exams: unknown; patient: patient }> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
         id,
@@ -65,6 +71,11 @@ export class DoctorService {
         sign_vital: true,
       },
     });
+    const patient = await this.prisma.patient.findFirst({
+      where: {
+        id: record.patientId,
+      },
+    });
 
     const examTable = await this.prisma
       .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
@@ -78,7 +89,7 @@ export class DoctorService {
       },
     });
 
-    return { record: record, exams: examTable };
+    return { record: record, exams: examTable, patient: patient };
   }
 
   async docSendToLabo(
@@ -88,7 +99,7 @@ export class DoctorService {
   ): Promise<{ message: string }> {
     let priceToPay: number;
     let insurancePaid: number;
-    // let insuranceRate: number;
+    let insuranceRate: number;
 
     const record = await this.prisma.records.findFirst({
       where: {
@@ -124,10 +135,9 @@ export class DoctorService {
         },
       });
 
-      // priceToPay =
-      //   itemPrice.price - (itemPrice.price * parseInt(invoice.rating)) / 100;
-      // insuranceRate = 100 - parseInt(invoice.rating);
-      // insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+      priceToPay = itemPrice.price - (itemPrice.price * record.rate) / 100;
+      insuranceRate = 100 - record.rate;
+      insurancePaid = itemPrice.price - (itemPrice.price * insuranceRate) / 100;
 
       await this.prisma.invoice_details.create({
         data: {
@@ -135,8 +145,8 @@ export class DoctorService {
           itemId: exam.itemId,
           type: 'exam',
           price: itemPrice.price,
-          priceToPay: itemPrice.price,
-          insurancePaid: 0,
+          priceToPay,
+          insurancePaid: insurancePaid,
         },
       });
 
@@ -185,6 +195,8 @@ export class DoctorService {
         serviceId: dto.serviceId,
         doctorId: user.id,
         Date: date,
+        medecines: dto.medecines.length > 0 ? dto.medecines : [],
+        Diseases: dto.disease.length > 0 ? dto.disease : [],
       },
     });
   }
@@ -216,8 +228,7 @@ export class DoctorService {
         record_code: id,
       },
       data: {
-        recordStatus: EStatus.FINISHED,
-        observation: dto.observation,
+        medecines: dto.medecines,
         disease: dto.disease,
       },
     });

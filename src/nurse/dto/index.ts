@@ -81,6 +81,22 @@ export class medicalHistoryDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   case: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  itemId: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  insuranceId: number;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  rate: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  doctorId: number;
 }
 
 export class ReommendConsultationDto {

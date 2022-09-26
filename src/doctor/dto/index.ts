@@ -24,14 +24,14 @@ export class FilterResult {
   results: boolean;
 }
 export class ObservationDto {
-  @IsString()
+  @IsArray()
   @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  observation: string;
-  @IsString()
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  medecines: string[];
+  @IsArray()
   @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  disease: string;
+  @ApiProperty({ isArray: true, required: true, type: Array })
+  disease: string[];
 }
 
 export class AppointmentDto {
@@ -47,6 +47,12 @@ export class AppointmentDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   serviceId: number;
+  @IsArray()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  medecines: string[];
+  @IsArray()
+  @ApiProperty({ isArray: true, required: false, type: Array })
+  disease: string[];
 }
 
 export class FilterAppointments {
