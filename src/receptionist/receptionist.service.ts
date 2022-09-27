@@ -31,7 +31,6 @@ export class ReceptionistService {
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
     let code: string;
-    let k;
 
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
@@ -68,11 +67,10 @@ export class ReceptionistService {
         },
       });
 
-      if (!patients) {
+      if (patients.length < 1) {
         code = `${clinic.name.substring(0, 2)}0001`;
-        k = code;
       }
-      if (patients) {
+      if (patients.length > 0) {
         let Obj = patients[patients.length - 1];
         let previousCode = Obj.code.replace(
           `${clinic.name.substring(0, 2)}`,
@@ -83,23 +81,19 @@ export class ReceptionistService {
           code = `${clinic.name.substring(0, 2)}000${
             parseInt(previousCode) + 1
           }`;
-          k = code;
         }
 
         if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
           code = `${clinic.name.substring(0, 2)}00${
             parseInt(previousCode) + 1
           }`;
-          k = code;
         } else if (
           parseInt(previousCode) >= 99 &&
           parseInt(previousCode) < 999
         ) {
           code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
-          k = code;
         } else {
           code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
-          k = code;
         }
       }
 
@@ -111,7 +105,7 @@ export class ReceptionistService {
           DOB: dto.DOB,
           phone: dto.phone,
           age,
-          code: k,
+          code,
           gender: dto.gender,
           sector: dto.sector,
           village: dto.village,
@@ -161,7 +155,6 @@ export class ReceptionistService {
 
     if (patients.length < 1) {
       code = `${clinic.name.substring(0, 2)}0001`;
-      k = code;
     } else if (patients.length > 0) {
       let Obj = patients[patients.length - 1];
       let previousCode = Obj.code.replace(`${clinic.name.substring(0, 2)}`, '');
@@ -169,18 +162,14 @@ export class ReceptionistService {
 
       if (parseInt(previousCode) <= 9) {
         code = `${clinic.name.substring(0, 2)}000${parseInt(previousCode) + 1}`;
-        k = code;
       }
 
       if (parseInt(previousCode) > 9 && parseInt(previousCode) < 99) {
         code = `${clinic.name.substring(0, 2)}00${parseInt(previousCode) + 1}`;
-        k = code;
       } else if (parseInt(previousCode) >= 99 && parseInt(previousCode) < 999) {
         code = `${clinic.name.substring(0, 2)}0${parseInt(previousCode) + 1}`;
-        k = code;
       } else {
         code = `${clinic.name.substring(0, 2)}${parseInt(previousCode) + 1}`;
-        k = code;
       }
     }
     const age: number = getYear(new Date()) - getYear(new Date(dto.DOB));
@@ -195,7 +184,7 @@ export class ReceptionistService {
         village: dto.village,
         province: dto.province,
         age,
-        code: k,
+        code,
         district: dto.district,
         email: dto.email,
         marital_status: dto.marital_status,

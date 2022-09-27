@@ -13,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ReceptionistModule } from './receptionist/receptionist.module';
 import { UserModule } from './user/user.module';
 import { GlobalExceptionFilter } from './__shared__/filters/global-exception.filter';
+import { CashierModule } from './cashier/cashier.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { GlobalExceptionFilter } from './__shared__/filters/global-exception.fil
     LaboModule,
     MailModule,
     UserModule,
+    CashierModule,
   ],
   providers: [
     {
