@@ -147,7 +147,7 @@ export class NurseService {
   }
 
   async recomendConsultation(
-    dto: ReommendConsultationDto,
+    dto: medicalHistoryDto,
     user: User,
     recordId: number,
   ): Promise<{ message: string }> {
