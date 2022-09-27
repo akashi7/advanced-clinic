@@ -3,7 +3,7 @@ import {
   Body,
   Controller,
   Get,
-  // HttpCode,
+  HttpCode,
   ParseIntPipe,
   Post,
   Query,
@@ -30,7 +30,7 @@ import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { GenericResponse } from 'src/__shared__/dto/generic-response.dto';
 import {
   FilterPatients,
-  // FilterRecordDto,
+  FilterRecordDto,
   // MakePaymentDto,
   RecordDto,
   registerPatientDto,
@@ -91,17 +91,17 @@ export class ReceptionistController {
     return new GenericResponse('Record created successfully', result);
   }
 
-  // @ApiOkResponse({ description: 'Records for receptionist fetched ' })
-  // @ApiBadRequestResponse({
-  //   description: 'Invalid date format , format must be YYYY-MM-DD',
-  // })
-  // @Post('recept-data')
-  // @HttpCode(200)
-  // @ApiBody({ type: FilterRecordDto })
-  // async seeRecords(@Body() dto: FilterRecordDto, @GetUser() user: User) {
-  //   const result = await this.receptionist.seeRecords(dto, user);
-  //   return new GenericResponse('Records fetched successfully', result);
-  // }
+  @ApiOkResponse({ description: 'Records for receptionist fetched ' })
+  @ApiBadRequestResponse({
+    description: 'Invalid date format , format must be YYYY-MM-DD',
+  })
+  @Post('recept-data')
+  @HttpCode(200)
+  @ApiBody({ type: FilterRecordDto })
+  async seeRecords(@Body() dto: FilterRecordDto, @GetUser() user: User) {
+    const result = await this.receptionist.seeRecords(dto, user);
+    return new GenericResponse('Records fetched successfully', result);
+  }
 
   // @ApiCreatedResponse({ description: 'Record activated ' })
   // @ApiNotFoundResponse({ description: 'Record not found' })
