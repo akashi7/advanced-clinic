@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { medicalHistoryDto, ReommendConsultationDto, vitalsDto } from './dto';
+import { medicalHistoryDto, vitalsDto } from './dto';
 
 @Injectable()
 export class NurseService {
@@ -83,7 +83,11 @@ export class NurseService {
     });
     await this.prisma.sign_vital.create({
       data: {
-        ...dto,
+        weight: dto.weight,
+        height: dto.height,
+        temperature: dto.temperature,
+        BP: dto.BP,
+        pulse: dto.pulse,
         patientId: record.patientId,
         recordId,
       },
