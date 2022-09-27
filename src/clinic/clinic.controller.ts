@@ -92,7 +92,7 @@ export class ClinicController {
     return new GenericResponse('Password updated successfully', result);
   }
 
-  @AllowRoles(ERoles.CASHIER, ERoles.CLINIC)
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
   @ApiOkResponse({ description: 'All insurances returned successfully' })
   @Get('all-insurance')
   async ClinicGetAllInsurance(@GetUser() user: User) {
@@ -132,7 +132,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'All consultations returned successfully' })
   @Get('all-consultation')
-  @AllowRoles(ERoles.NURSE, ERoles.CLINIC)
+  @AllowRoles(ERoles.NURSE, ERoles.CLINIC, ERoles.DOCTOR)
   async ClinicGetAllConsultation(@GetUser() user: User) {
     const result = await this.clinic.getAllConsultation(user);
     return new GenericResponse(
