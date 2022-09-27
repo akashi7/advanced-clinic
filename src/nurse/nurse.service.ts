@@ -94,7 +94,8 @@ export class NurseService {
     });
     const message = await this.recomendConsultation(dto, user, recordId);
     if (message) {
-      return { message: 'registered succesfully' };
+      const k = await this.nurseSendToDoc(recordId, dto.doctorId);
+      return k;
     }
   }
 
