@@ -64,7 +64,7 @@ export class ClinicController {
   }
 
   @ApiOkResponse({ description: 'Users fecthed successfully' })
-  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC)
+  @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC, ERoles.NURSE)
   @Get('get-all-users')
   async GetAllUsers(@GetUser() user: User) {
     const result = await this.clinic.getAllUsers(user);
