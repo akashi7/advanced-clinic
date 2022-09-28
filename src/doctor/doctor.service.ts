@@ -118,7 +118,7 @@ export class DoctorService {
           AND: [
             { itemId: exam.itemId },
             { Type: 'exam' },
-            { private: true },
+            { insuranceId: record.insurance },
             { clinicId: user.clinicId },
           ],
         },
