@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { invoice, patient, payment, User } from '@prisma/client';
+import { endOfDay, startOfDay } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MakePaymentDto } from 'src/receptionist/dto';
 import { cashierDto } from './dto';
@@ -13,55 +14,79 @@ export class CashierService {
     user: User,
   ): Promise<{ Invoice: invoice; Patient: patient }> {
     if (dto.date) {
+      const today = new Date(dto.date);
       const record = await this.prisma.records.findFirst({
         where: {
           AND: [
             { clinicId: user.clinicId },
             { patientCode },
-            { createdAt: new Date(dto.date) },
+            { createdAt: { gte: startOfDay(today) } },
+            { createdAt: { lte: endOfDay(today) } },
           ],
         },
       });
-      const invoice = await this.prisma.invoice.findFirst({
-        where: {
-          recordId: record.record_code,
-        },
-        include: {
-          invoice_details: true,
-        },
-      });
+      if (record) {
+        const invoice = await this.prisma.invoice.findFirst({
+          where: {
+            recordId: record.record_code,
+          },
+          include: {
+            invoice_details: true,
+          },
+        });
 
-      const patient = await this.prisma.patient.findFirst({
-        where: {
-          id: record.patientId,
-        },
-      });
-      return { Invoice: invoice, Patient: patient };
+        const patient = await this.prisma.patient.findFirst({
+          where: {
+            id: record.patientId,
+          },
+        });
+        return { Invoice: invoice, Patient: patient };
+      }
+      if (!record) {
+        const patient = await this.prisma.patient.findFirst({
+          where: {
+            id: record.patientId,
+          },
+        });
+        return { Invoice: undefined, Patient: patient };
+      }
     } else {
+      const today = new Date();
       const record = await this.prisma.records.findFirst({
         where: {
           AND: [
             { clinicId: user.clinicId },
             { patientCode },
-            { createdAt: new Date() },
+            { createdAt: { gte: startOfDay(today) } },
+            { createdAt: { lte: endOfDay(today) } },
           ],
         },
       });
-      const invoice = await this.prisma.invoice.findFirst({
-        where: {
-          recordId: record.record_code,
-        },
-        include: {
-          invoice_details: true,
-        },
-      });
+      if (record) {
+        const invoice = await this.prisma.invoice.findFirst({
+          where: {
+            recordId: record.record_code,
+          },
+          include: {
+            invoice_details: true,
+          },
+        });
 
-      const patient = await this.prisma.patient.findFirst({
-        where: {
-          id: record.patientId,
-        },
-      });
-      return { Invoice: invoice, Patient: patient };
+        const patient = await this.prisma.patient.findFirst({
+          where: {
+            id: record.patientId,
+          },
+        });
+        return { Invoice: invoice, Patient: patient };
+      }
+      if (!record) {
+        const patient = await this.prisma.patient.findFirst({
+          where: {
+            id: record.patientId,
+          },
+        });
+        return { Invoice: undefined, Patient: patient };
+      }
     }
   }
 
