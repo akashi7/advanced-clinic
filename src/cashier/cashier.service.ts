@@ -12,7 +12,7 @@ export class CashierService {
     patientCode: string,
     dto: cashierDto,
     user: User,
-  ): Promise<{ Invoice: invoice; Patient: patient }> {
+  ): Promise<{ Invoice: invoice | string; Patient: patient }> {
     if (dto.date) {
       const today = new Date(dto.date);
       const record = await this.prisma.records.findFirst({
@@ -45,10 +45,10 @@ export class CashierService {
       if (!record) {
         const patient = await this.prisma.patient.findFirst({
           where: {
-            id: record.patientId,
+            code: patientCode,
           },
         });
-        return { Invoice: undefined, Patient: patient };
+        return { Invoice: 'No invoice for this patient', Patient: patient };
       }
     } else {
       const today = new Date();
@@ -82,10 +82,10 @@ export class CashierService {
       if (!record) {
         const patient = await this.prisma.patient.findFirst({
           where: {
-            id: record.patientId,
+            code: patientCode,
           },
         });
-        return { Invoice: undefined, Patient: patient };
+        return { Invoice: 'No invoice for this patient', Patient: patient };
       }
     }
   }
