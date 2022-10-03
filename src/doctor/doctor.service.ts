@@ -186,7 +186,7 @@ export class DoctorService {
     patientCode: string,
     user: User,
   ) {
-    const date = new Date(dto.Date).toLocaleDateString();
+    const date = new Date(dto.Date);
     await this.prisma.appointement.create({
       data: {
         recordId,
@@ -205,9 +205,9 @@ export class DoctorService {
     user: User,
     dto: FilterAppointments,
   ): Promise<appointement[]> {
-    const today = new Date().toLocaleDateString();
+    const today = new Date();
     if (dto.date) {
-      const date = new Date(dto.date).toLocaleDateString();
+      const date = new Date(dto.date);
       const appointements = await this.prisma.appointement.findMany({
         where: { AND: [{ doctorId: user.id }, { Date: date }] },
       });
