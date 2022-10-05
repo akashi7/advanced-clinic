@@ -87,12 +87,12 @@ export class DoctorController {
 
   @ApiCreatedResponse({ description: 'Appointment' })
   @ApiQuery({ name: 'recordId', required: true })
-  @ApiQuery({ name: 'patientCode', required: true })
+  @ApiQuery({ name: 'Code', required: true })
   @ApiBody({ type: AppointmentDto })
   @Post('make-appointment')
   async docMakeAppointment(
     @Query('recordId', ParseIntPipe) id: number,
-    @Query('patientCode', ParseIntPipe) pCode: number,
+    @Query('Code') pCode: string,
     @Body() dto: AppointmentDto,
     @GetUser() user: User,
   ) {
