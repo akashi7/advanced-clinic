@@ -45,7 +45,7 @@ export class AppointmentDto {
   Date: string;
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: Number, required: true })
   serviceId: number;
   @IsArray()
   @ApiProperty({ isArray: true, required: false, type: Array })
