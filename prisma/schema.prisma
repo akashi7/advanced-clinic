@@ -246,6 +246,7 @@ model invoice {
   clinicId              Int
   amountToBePaid        Int
   amountPaid            Int
+  hasPayed              Boolean           @default(false)
   unpaidAmount          Int
   amountPaidByInsurance Int
   clinic                Clinic            @relation(fields: [clinicId], references: [id], onUpdate: Cascade)
