@@ -92,7 +92,7 @@ export class DoctorController {
   @Post('make-appointment')
   async docMakeAppointment(
     @Query('recordId', ParseIntPipe) id: number,
-    @Query('patientCode') pCode: string,
+    @Query('patientCode', ParseIntPipe) pCode: number,
     @Body() dto: AppointmentDto,
     @GetUser() user: User,
   ) {

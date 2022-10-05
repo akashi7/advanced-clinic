@@ -183,18 +183,17 @@ export class DoctorService {
   async makeAppointment(
     recordId: number,
     dto: AppointmentDto,
-    patientCode: string,
+    patientCode: number,
     user: User,
   ) {
-    const date = new Date(dto.Date);
     await this.prisma.appointement.create({
       data: {
         recordId,
-        patientCode,
+        patientCode: patientCode.toString(),
         reason: dto.reason,
         serviceId: dto.serviceId,
         doctorId: user.id,
-        Date: date,
+        Date: dto.Date,
         medecines: dto.medecines.length > 0 ? dto.medecines : [],
         Diseases: dto.disease.length > 0 ? dto.disease : [],
       },
