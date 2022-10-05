@@ -53,9 +53,12 @@ export class DoctorService {
     return record;
   }
 
-  async docViewRequet(
-    id: number,
-  ): Promise<{ record: records; exams: unknown; patient: patient }> {
+  async docViewRequet(id: number): Promise<{
+    record: records;
+    exams: unknown;
+    patient: patient;
+    insurance: string;
+  }> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
         id,
@@ -89,7 +92,18 @@ export class DoctorService {
       },
     });
 
-    return { record: record, exams: examTable, patient: patient };
+    const insurance = await this.prisma.insurance.findFirst({
+      where: {
+        id: record.insurance,
+      },
+    });
+
+    return {
+      record: record,
+      exams: examTable,
+      patient: patient,
+      insurance: insurance.name,
+    };
   }
 
   async docSendToLabo(
