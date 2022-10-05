@@ -51,15 +51,9 @@ export class CashierService {
         return { Invoice: {}, Patient: patient };
       }
     } else {
-      const today = new Date();
       const record = await this.prisma.records.findFirst({
         where: {
-          AND: [
-            { clinicId: user.clinicId },
-            { patientCode },
-            { createdAt: { gte: startOfDay(today) } },
-            { createdAt: { lte: endOfDay(today) } },
-          ],
+          AND: [{ clinicId: user.clinicId }, { patientCode }],
         },
       });
       if (record) {
@@ -98,6 +92,7 @@ export class CashierService {
     let message: string;
     let unpaidAmount: number;
     let amountPaid: number;
+    let hasPayed: boolean;
     const record = await this.prisma.records.findFirst({
       where: { record_code: id },
     });
@@ -127,10 +122,14 @@ export class CashierService {
       });
       unpaidAmount = invoice.unpaidAmount - item.pricePaid;
       amountPaid = invoice.amountPaid + item.pricePaid;
+      amountPaid < invoice.amountToBePaid
+        ? (hasPayed = false)
+        : (hasPayed = true);
       await this.prisma.invoice.update({
         data: {
           unpaidAmount,
           amountPaid,
+          hasPayed,
         },
         where: {
           id: invoice.id,
