@@ -654,8 +654,15 @@ export class ReceptionistService {
 
   async allNurses(user: User): Promise<User[]> {
     const nurses = await this.prisma.user.findMany({
-      where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.NURSE }] },
+      where: {
+        AND: [
+          { clinicId: user.clinicId },
+          { role: ERoles.NURSE },
+          { asignedRole: { has: ERoles.NURSE } },
+        ],
+      },
     });
+
     return nurses;
   }
 
