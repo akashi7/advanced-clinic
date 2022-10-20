@@ -34,6 +34,7 @@ import { ClinicService } from './clinic.service';
 import {
   AsignRoleDto,
   consultationDto,
+  createStockDto,
   ExamDto,
   InsuranceDto,
   insuranceUpdateDto,
@@ -302,5 +303,50 @@ export class ClinicController {
   ) {
     const result = await this.clinic.removeRoles(id, dto);
     return new GenericResponse('User Roles updated', result);
+  }
+
+  @ApiCreatedResponse({ description: 'item added to stock' })
+  @ApiConflictResponse({ description: 'Medcine name arleady registered' })
+  @ApiBody({ type: createStockDto })
+  @Post('add-item-to-stock')
+  async createStock(@Body() dto: createStockDto, @GetUser() user: User) {
+    const result = await this.clinic.createStock(dto, user);
+    return new GenericResponse('item added to stock', result);
+  }
+  @ApiOkResponse({ description: 'All stock returned stock' })
+  @Get('all-stock')
+  async allStockItem(@GetUser() user: User) {
+    const result = await this.clinic.allStock(user);
+    return new GenericResponse('all Stock', result);
+  }
+
+  @ApiOkResponse({ description: 'stock item returned ' })
+  @ApiQuery({ name: 'id', required: true })
+  @Get('view-one-stock-item')
+  async viewOneItem(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.viewOneStock(id);
+    return new GenericResponse('one item stock', result);
+  }
+
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'stock item updated success' })
+  @Patch('update-stock-item')
+  @ApiBody({ type: createStockDto })
+  @ApiQuery({ name: 'id', required: true })
+  async updateItem(
+    @Query('id', ParseIntPipe) id: number,
+    @Body() dto: createStockDto,
+  ) {
+    const result = await this.clinic.updateStock(id, dto);
+    return new GenericResponse('Updated item success', result);
+  }
+
+  @Delete('delete-stock-item')
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'stock item deleted success' })
+  @ApiQuery({ name: 'id', required: true })
+  async removeItem(@Query('id', ParseIntPipe) id: number) {
+    const result = await this.clinic.deleteStock(id);
+    return new GenericResponse('Deleted stock item', result);
   }
 }

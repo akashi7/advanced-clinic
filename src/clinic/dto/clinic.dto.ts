@@ -179,3 +179,22 @@ export class AsignRoleDto {
   @ApiProperty({ isArray: true, required: true, type: Array })
   roles: any[];
 }
+
+export class createStockDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  item: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true })
+  expirationDate: string;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  quantity: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  priceTag: number;
+}

@@ -51,6 +51,7 @@ model Clinic {
   invoice      invoice[]
   payment      payment[]
   cashier      cashier[]
+  stock        stock[]
 }
 
 model User {
@@ -382,6 +383,18 @@ model symptoms {
   symptom   String
   recordId  Int
   record    records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
+}
+
+model stock {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  clinicId       Int
+  item           String
+  expirationDate DateTime
+  quantity       Int
+  priceTag       Int
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 //Model invoice,invoice_details,insurance,examList,PriceList

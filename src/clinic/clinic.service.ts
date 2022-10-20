@@ -1,4 +1,3 @@
-/* eslint-disable */
 import {
   BadRequestException,
   ConflictException,
@@ -14,6 +13,7 @@ import {
   laborante,
   nurse,
   receptionist,
+  stock,
   User,
 } from '@prisma/client';
 import * as argon from 'argon2';
@@ -24,6 +24,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AsignRoleDto,
   consultationDto,
+  createStockDto,
   ExamDto,
   InsuranceDto,
   insuranceUpdateDto,
@@ -905,5 +906,79 @@ export class ClinicService {
       },
     });
     if (updatedRoles) return { message: 'Roles updated' };
+  }
+
+  async createStock(dto: createStockDto, user: User): Promise<stock> {
+    const obj: any = new createStockDto();
+    obj.expirationDate = new Date(dto.expirationDate);
+    obj.item = dto.item;
+    obj.quantity = dto.quantity;
+    obj.priceTag = dto.priceTag;
+    const isMedecine = await this.prisma.stock.findFirst({
+      where: {
+        AND: [
+          { clinicId: user.clinicId },
+          {
+            item: {
+              contains: dto.item,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+    if (isMedecine)
+      throw new ConflictException('Medcine name arleady registered');
+    const medecine = await this.prisma.stock.create({
+      data: {
+        ...obj,
+        clinicId: user.clinicId,
+      },
+    });
+    return medecine;
+  }
+
+  async allStock(user: User): Promise<stock[]> {
+    const allStock = await this.prisma.stock.findMany({
+      where: {
+        clinicId: user.clinicId,
+      },
+    });
+    return allStock;
+  }
+
+  async viewOneStock(id: number): Promise<stock> {
+    const item = await this.prisma.stock.findFirst({
+      where: {
+        id,
+      },
+    });
+    return item;
+  }
+
+  async updateStock(id: number, dto: createStockDto): Promise<string> {
+    const obj: any = new createStockDto();
+    obj.expirationDate = new Date(dto.expirationDate);
+    obj.item = dto.item;
+    obj.quantity = dto.quantity;
+    obj.priceTag = dto.priceTag;
+    const updated = await this.prisma.stock.update({
+      where: {
+        id,
+      },
+      data: {
+        ...obj,
+      },
+    });
+    if (updated) return 'stock item updated';
+  }
+
+  async deleteStock(id: number) {
+    const deleted = await this.prisma.stock.delete({
+      where: {
+        id,
+      },
+    });
+    if (deleted) return 'stock item deleted';
   }
 }
