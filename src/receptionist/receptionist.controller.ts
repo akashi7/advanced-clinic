@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -178,6 +179,17 @@ export class ReceptionistController {
   async getAllNurses(@GetUser() user: User) {
     const result = await this.receptionist.allNurses(user);
     return new GenericResponse('All nurses fetched successfully', result);
+  }
+
+  @HttpCode(200)
+  @Patch('update-patient-info')
+  @ApiOkResponse({ description: 'patient updated ' })
+  async updatePatientInfo(
+    @Body() dto: registerPatientDto,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
+    const result = await this.receptionist.updatePatient(dto, id);
+    return new GenericResponse('Patient updated', result);
   }
   // @ApiOkResponse({ description: 'Laborante ' })
   // @Get('all-laborantes')

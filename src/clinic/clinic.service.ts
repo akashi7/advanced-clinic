@@ -18,7 +18,7 @@ import {
 } from '@prisma/client';
 import * as argon from 'argon2';
 import { getMonth, getYear } from 'date-fns';
-import { ERoles, EStatus } from 'src/auth/enums';
+import { ECategory, ERoles, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -326,30 +326,34 @@ export class ClinicService {
     id: number,
     role: string,
   ): Promise<receptionist | doctor | nurse | laborante> {
-    if (role === ERoles.RECEPTIONIST) {
-      const user = await this.prisma.receptionist.findFirst({
-        where: { id },
-      });
-      return user;
-    }
-    if (role === ERoles.DOCTOR) {
-      const user = await this.prisma.doctor.findFirst({
-        where: { id },
-      });
-      return user;
-    }
-    if (role === ERoles.NURSE) {
-      const user = await this.prisma.nurse.findFirst({
-        where: { id },
-      });
-      return user;
-    }
-    if (role === ERoles.LABORANTE) {
-      const user = await this.prisma.laborante.findFirst({
-        where: { id },
-      });
-      return user;
-    }
+    const user = await this.prisma[`${role}`]['findFirst']({
+      where: { id },
+    });
+    return user;
+    // if (role === ERoles.RECEPTIONIST) {
+    //   const user = await this.prisma.receptionist.findFirst({
+    //     where: { id },
+    //   });
+    //   return user;
+    // }
+    // if (role === ERoles.DOCTOR) {
+    //   const user = await this.prisma.doctor.findFirst({
+    //     where: { id },
+    //   });
+    //   return user;
+    // }
+    // if (role === ERoles.NURSE) {
+    //   const user = await this.prisma.nurse.findFirst({
+    //     where: { id },
+    //   });
+    //   return user;
+    // }
+    // if (role === ERoles.LABORANTE) {
+    //   const user = await this.prisma.laborante.findFirst({
+    //     where: { id },
+    //   });
+    //   return user;
+    // }
   }
 
   async registerInsurance(dto: InsuranceDto, user: User) {
@@ -533,7 +537,11 @@ export class ClinicService {
     user: User,
   ): Promise<{ message: string }> {
     let type: string;
-    if (dto.type !== 'consultation' && dto.type !== 'exam') {
+    if (
+      dto.type !== 'consultation' &&
+      dto.type !== 'exam' &&
+      dto.type !== 'stock'
+    ) {
       throw new BadRequestException('Invalid type');
     }
     if (dto.type === 'consultation') {
@@ -550,6 +558,14 @@ export class ClinicService {
       });
       if (!isExam) throw new BadRequestException('Exam not registered');
       else type = 'exam';
+    }
+
+    if (dto.type === 'stock') {
+      const isExam = await this.prisma.stock.findFirst({
+        where: { id: dto.itemId },
+      });
+      if (!isExam) throw new BadRequestException('Stock not registered');
+      else type = 'stock';
     }
 
     const isPriceList = await this.prisma.priceList.findFirst({
@@ -611,6 +627,12 @@ export class ClinicService {
   async getExamPriceList(user: User): Promise<unknown> {
     const prices = await this.prisma
       .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "examList" ON "priceList"."itemId" = "examList"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'exam'`;
+    return prices;
+  }
+
+  async getStockPriceList(user: User): Promise<unknown> {
+    const prices = await this.prisma
+      .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "stock" ON "priceList"."itemId" = "stock"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'stock'`;
     return prices;
   }
 
@@ -913,7 +935,11 @@ export class ClinicService {
     obj.expirationDate = new Date(dto.expirationDate);
     obj.item = dto.item;
     obj.quantity = dto.quantity;
-    obj.priceTag = dto.priceTag;
+    obj.category =
+      dto.category.trim() === 'medicalEquipment'
+        ? ECategory.MEDICAL_EQUIPMENT
+        : ECategory.MEDECINES;
+
     const isMedecine = await this.prisma.stock.findFirst({
       where: {
         AND: [
@@ -961,7 +987,7 @@ export class ClinicService {
     obj.expirationDate = new Date(dto.expirationDate);
     obj.item = dto.item;
     obj.quantity = dto.quantity;
-    obj.priceTag = dto.priceTag;
+    obj.category = dto.category;
     const updated = await this.prisma.stock.update({
       where: {
         id,

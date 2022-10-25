@@ -97,6 +97,10 @@ export class medicalHistoryDto {
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   doctorId: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  stockId: number;
 }
 
 export class ReommendConsultationDto {

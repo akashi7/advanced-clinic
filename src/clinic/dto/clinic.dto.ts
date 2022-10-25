@@ -193,8 +193,8 @@ export class createStockDto {
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
   quantity: number;
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true })
-  priceTag: number;
+  @ApiProperty({ type: String, required: true })
+  category: string;
 }
