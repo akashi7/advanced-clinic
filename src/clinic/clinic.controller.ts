@@ -349,4 +349,12 @@ export class ClinicController {
     const result = await this.clinic.deleteStock(id);
     return new GenericResponse('Deleted stock item', result);
   }
+
+  @Get('stock-priceList')
+  @AllowRoles(ERoles.NURSE, ERoles.CLINIC)
+  @ApiOkResponse({ description: 'stock pricelist' })
+  async getStockPriceList(@GetUser() user: User) {
+    const result = await this.clinic.getStockPriceList(user);
+    return new GenericResponse('stock priceList', result);
+  }
 }

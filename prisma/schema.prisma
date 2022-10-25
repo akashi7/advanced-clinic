@@ -128,8 +128,6 @@ model records {
   sign_vital     sign_vital[]
   payment        payment[]
   medicalHistory medicalHistory[]
-  symptoms       symptoms[]
-  chronicDesease chronicDesease[]
   appointement   appointement[]
 }
 
@@ -367,24 +365,6 @@ model appointement {
   record      records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
 }
 
-model chronicDesease {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  chronicDesease String
-  recordId       Int
-  record         records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-}
-
-model symptoms {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  symptom   String
-  recordId  Int
-  record    records  @relation(fields: [recordId], references: [record_code], onUpdate: Cascade)
-}
-
 model stock {
   id             Int      @id @default(autoincrement())
   createdAt      DateTime @default(now())
@@ -393,7 +373,7 @@ model stock {
   item           String
   expirationDate DateTime
   quantity       Int
-  priceTag       Int
+  category       String
   clinic         Clinic   @relation(fields: [clinicId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 

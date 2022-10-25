@@ -25,3 +25,8 @@ export enum EStatus {
   FINISHED = 'FINISHED',
   PENDING = 'pending',
 }
+
+export enum ECategory {
+  MEDICAL_EQUIPMENT = 'MEDICAL_EQUIPMENT',
+  MEDECINES = 'MEDECINES',
+}

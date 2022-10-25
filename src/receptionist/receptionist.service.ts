@@ -704,4 +704,15 @@ export class ReceptionistService {
       totalAdults: adutls,
     };
   }
+
+  async updatePatient(dto: registerPatientDto, id: number) {
+    await this.prisma.patient.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
+  }
 }

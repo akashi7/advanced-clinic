@@ -43,8 +43,6 @@ export class NurseService {
       include: {
         sign_vital: true,
         medicalHistory: true,
-        symptoms: true,
-        chronicDesease: true,
       },
     });
 
@@ -92,7 +90,12 @@ export class NurseService {
         recordId,
       },
     });
-    const message = await this.recomendConsultation(dto, user, recordId);
+    const message = await this.recomendConsultation(
+      dto,
+      user,
+      recordId,
+      dto.firstAid ? dto.firstAid : [],
+    );
     if (message) {
       const k = await this.nurseSendToDoc(recordId, dto.doctorId);
       return k;
@@ -155,6 +158,7 @@ export class NurseService {
     dto: medicalHistoryDto,
     user: User,
     recordId: number,
+    firstAid: string[],
   ): Promise<{ message: string }> {
     const record = await this.prisma.records.findFirst({
       where: {
@@ -162,51 +166,131 @@ export class NurseService {
       },
     });
 
-    const itemPrice = await this.prisma.priceList.findFirst({
-      where: {
-        AND: [
-          { itemId: dto.itemId },
-          { Type: 'consultation' },
-          { insuranceId: record.insurance },
-          { clinicId: user.clinicId },
-        ],
-      },
-    });
-    if (!itemPrice) {
-      throw new BadRequestException('consultation not in priceList');
+    if (firstAid.length > 1) {
+      firstAid.forEach(async (id) => {
+        const stockItemPrice = await this.prisma.priceList.findFirst({
+          where: {
+            AND: [
+              { itemId: parseInt(id) },
+              { Type: 'stock' },
+              { insuranceId: record.insurance },
+              { clinicId: user.clinicId },
+            ],
+          },
+        });
+        if (!stockItemPrice) {
+          throw new BadRequestException('stock not in priceList');
+        }
+        const itemPrice = await this.prisma.priceList.findFirst({
+          where: {
+            AND: [
+              { itemId: dto.itemId },
+              { Type: 'consultation' },
+              { insuranceId: record.insurance },
+              { clinicId: user.clinicId },
+            ],
+          },
+        });
+        if (!itemPrice) {
+          throw new BadRequestException('consultation not in priceList');
+        }
+
+        const priceToPay: number =
+          itemPrice.price - (itemPrice.price * record.rate) / 100;
+        const insuranceRate: number = 100 - record.rate;
+        const insurancePaid: number =
+          itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+
+        const priceToPayStock: number =
+          stockItemPrice.price - (stockItemPrice.price * record.rate) / 100;
+        const insurancePaidStock: number =
+          stockItemPrice.price - (stockItemPrice.price * insuranceRate) / 100;
+
+        const invoice = await this.prisma.invoice.create({
+          data: {
+            patientId: record.patientId,
+            recordId,
+            clinicId: user.clinicId,
+            amountPaid: 0,
+            amountToBePaid: priceToPay + priceToPayStock,
+            unpaidAmount: priceToPay + priceToPayStock,
+            amountPaidByInsurance: insurancePaid + insurancePaidStock,
+          },
+        });
+
+        await this.prisma.invoice_details.create({
+          data: {
+            invoiceId: invoice.id,
+            itemId: dto.itemId,
+            type: 'consultation',
+            price: itemPrice.price,
+            priceToPay,
+            insurancePaid: insurancePaid,
+          },
+        });
+
+        await this.prisma.invoice_details.create({
+          data: {
+            invoiceId: invoice.id,
+            itemId: parseInt(id),
+            type: 'stock',
+            price: priceToPayStock,
+            priceToPay: priceToPayStock,
+            insurancePaid: insurancePaidStock,
+          },
+        });
+
+        return {
+          message: 'Consultation added success',
+        };
+      });
+    } else {
+      const itemPrice = await this.prisma.priceList.findFirst({
+        where: {
+          AND: [
+            { itemId: dto.itemId },
+            { Type: 'consultation' },
+            { insuranceId: record.insurance },
+            { clinicId: user.clinicId },
+          ],
+        },
+      });
+      if (!itemPrice) {
+        throw new BadRequestException('consultation not in priceList');
+      }
+
+      const priceToPay: number =
+        itemPrice.price - (itemPrice.price * record.rate) / 100;
+      const insuranceRate: number = 100 - record.rate;
+      const insurancePaid: number =
+        itemPrice.price - (itemPrice.price * insuranceRate) / 100;
+
+      const invoice = await this.prisma.invoice.create({
+        data: {
+          patientId: record.patientId,
+          recordId,
+          clinicId: user.clinicId,
+          amountPaid: 0,
+          amountToBePaid: priceToPay,
+          unpaidAmount: priceToPay,
+          amountPaidByInsurance: insurancePaid,
+        },
+      });
+
+      await this.prisma.invoice_details.create({
+        data: {
+          invoiceId: invoice.id,
+          itemId: dto.itemId,
+          type: 'consultation',
+          price: itemPrice.price,
+          priceToPay,
+          insurancePaid: insurancePaid,
+        },
+      });
+
+      return {
+        message: 'Consultation added success',
+      };
     }
-
-    const priceToPay: number =
-      itemPrice.price - (itemPrice.price * record.rate) / 100;
-    const insuranceRate: number = 100 - record.rate;
-    const insurancePaid: number =
-      itemPrice.price - (itemPrice.price * insuranceRate) / 100;
-
-    const invoice = await this.prisma.invoice.create({
-      data: {
-        patientId: record.patientId,
-        recordId,
-        clinicId: user.clinicId,
-        amountPaid: 0,
-        amountToBePaid: priceToPay,
-        unpaidAmount: priceToPay,
-        amountPaidByInsurance: insurancePaid,
-      },
-    });
-
-    await this.prisma.invoice_details.create({
-      data: {
-        invoiceId: invoice.id,
-        itemId: dto.itemId,
-        type: 'consultation',
-        price: itemPrice.price,
-        priceToPay,
-        insurancePaid: insurancePaid,
-      },
-    });
-
-    return {
-      message: 'Consultation added success',
-    };
   }
 }
