@@ -12,12 +12,13 @@ import {
   insurance,
   laborante,
   nurse,
+  patient,
   receptionist,
   stock,
   User,
 } from '@prisma/client';
 import * as argon from 'argon2';
-import { getMonth, getYear } from 'date-fns';
+import { endOfDay, getMonth, getYear, startOfDay } from 'date-fns';
 import { ECategory, ERoles, EStatus } from 'src/auth/enums';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -26,6 +27,7 @@ import {
   consultationDto,
   createStockDto,
   ExamDto,
+  filterclinicReports,
   InsuranceDto,
   insuranceUpdateDto,
   PriceListDto,
@@ -1006,5 +1008,281 @@ export class ClinicService {
       },
     });
     if (deleted) return 'stock item deleted';
+  }
+
+  async clinicViewReport(user: User, dto: filterclinicReports) {
+    const clinic = await this.prisma.clinic.findFirst({
+      where: { id: user.clinicId },
+    });
+
+    if (dto.case) {
+      const report = await this.prisma.records.count({
+        where: {
+          AND: [
+            { newCase: dto.case },
+            { clinicId: user.clinicId },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      return report;
+    }
+    if (dto.disease) {
+      const report = await this.prisma.records.count({
+        where: {
+          clinicId: user.clinicId,
+          AND: [
+            { newCase: dto.case },
+            { clinicId: user.clinicId },
+            { disease: { has: dto.disease } },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      return report;
+    } else if (dto.case && dto.age) {
+      let newReport = [];
+      let patients: patient[];
+      const report = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { newCase: dto.case },
+            { clinicId: user.clinicId },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      dto.age <= 5
+        ? (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { lte: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }))
+        : (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { gt: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }));
+
+      const allPa = patients.map((pat) => {
+        return {
+          p_id: pat.id,
+        };
+      });
+      const allRec = report.map((item) => {
+        return {
+          p_id: item.patientId,
+        };
+      });
+
+      newReport = allRec.filter((el) => {
+        return allPa.find((element) => {
+          return element.p_id === el.p_id;
+        });
+      });
+
+      return newReport.length;
+    } else if (dto.disease && dto.age) {
+      let newReport = [];
+      let patients: patient[];
+      const report = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { clinicId: user.clinicId },
+            { disease: { has: dto.disease } },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+
+      dto.age <= 5
+        ? (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { lte: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }))
+        : (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { gt: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }));
+
+      const allPa = patients.map((pat) => {
+        return {
+          p_id: pat.id,
+        };
+      });
+
+      const allRec = report.map((item) => {
+        return {
+          p_id: item.patientId,
+        };
+      });
+      newReport = allRec.filter((el) => {
+        return allPa.find((element) => {
+          return element.p_id === el.p_id;
+        });
+      });
+      return newReport.length;
+    } else if (dto.case && dto.disease) {
+      const report = await this.prisma.records.count({
+        where: {
+          AND: [
+            { newCase: dto.case },
+            { clinicId: user.clinicId },
+            { disease: { has: dto.disease } },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      return report;
+    } else if (dto.case && dto.disease && dto.age) {
+      let newReport = [];
+      let patients: patient[];
+      const report = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { newCase: dto.case },
+            { clinicId: user.clinicId },
+            { disease: { has: dto.disease } },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+
+      dto.age <= 5
+        ? (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { lte: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }))
+        : (patients = await this.prisma.patient.findMany({
+            where: {
+              AND: [{ age: { gt: dto.age } }, { clinicId: user.clinicId }],
+            },
+          }));
+
+      const allPa = patients.map((pat) => {
+        return {
+          p_id: pat.id,
+        };
+      });
+
+      const allRec = report.map((item) => {
+        return {
+          p_id: item.patientId,
+        };
+      });
+
+      newReport = allRec.filter((el) => {
+        return allPa.find((element) => {
+          return element.p_id === el.p_id;
+        });
+      });
+      return newReport.length;
+    }
+
+    if (dto.horZone) {
+      let newReport: patient[];
+      const report = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { clinicId: user.clinicId },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      const patients = await this.prisma.patient.findMany({
+        where: {
+          AND: [{ clinicId: user.clinicId }],
+        },
+      });
+
+      const allRec = report.map((item) => {
+        return {
+          p_id: item.patientId,
+        };
+      });
+
+      newReport = patients.filter((el) => {
+        return allRec.find((element) => {
+          return element.p_id === el.id;
+        });
+      });
+
+      let generated = newReport.filter((item) => {
+        return item.sector !== clinic.sector;
+      });
+
+      let sectors = {};
+
+      generated.forEach((item) => {
+        if (sectors[item.sector]) {
+          sectors[item.sector] += 1;
+        } else {
+          sectors[item.sector] = 1;
+        }
+      });
+
+      return {
+        horsZonePatients: generated.length,
+        status: sectors,
+      };
+    } else if (dto.horZone && dto.case) {
+      let newReport: patient[];
+      const report = await this.prisma.records.findMany({
+        where: {
+          AND: [
+            { clinicId: user.clinicId },
+            { newCase: dto.case },
+            { createdAt: { gte: startOfDay(new Date(dto.startDate)) } },
+            { createdAt: { lte: endOfDay(new Date(dto.endDate)) } },
+          ],
+        },
+      });
+      const patients = await this.prisma.patient.findMany({
+        where: {
+          AND: [{ clinicId: user.clinicId }],
+        },
+      });
+
+      const allRec = report.map((item) => {
+        return {
+          p_id: item.patientId,
+        };
+      });
+
+      newReport = patients.filter((el) => {
+        return allRec.find((element) => {
+          return element.p_id === el.id;
+        });
+      });
+
+      let generated = newReport.filter((item) => {
+        return item.sector !== clinic.sector;
+      });
+
+      let sectors = {};
+
+      generated.forEach((item) => {
+        if (sectors[item.sector]) {
+          sectors[item.sector] += 1;
+        } else {
+          sectors[item.sector] = 1;
+        }
+      });
+
+      return {
+        horsZonePatients: generated.length,
+        status: sectors,
+      };
+    }
   }
 }
