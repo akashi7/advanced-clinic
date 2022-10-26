@@ -198,3 +198,13 @@ export class createStockDto {
   @ApiProperty({ type: String, required: true })
   category: string;
 }
+
+export class filterclinicReports {
+  case: string;
+  disease: string;
+  age: number;
+  oustide: boolean;
+  startDate: string;
+  endDate: string;
+  horZone: boolean;
+}
