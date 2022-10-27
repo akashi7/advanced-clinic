@@ -36,6 +36,7 @@ import {
   consultationDto,
   createStockDto,
   ExamDto,
+  filterclinicReports,
   InsuranceDto,
   insuranceUpdateDto,
   PriceListDto,
@@ -356,5 +357,14 @@ export class ClinicController {
   async getStockPriceList(@GetUser() user: User) {
     const result = await this.clinic.getStockPriceList(user);
     return new GenericResponse('stock priceList', result);
+  }
+
+  @Post('report-generate')
+  async generateReport(
+    @Body() dto: filterclinicReports,
+    @GetUser() user: User,
+  ) {
+    const result = this.clinic.clinicViewReport(user, dto);
+    return new GenericResponse('filtered reports', result);
   }
 }

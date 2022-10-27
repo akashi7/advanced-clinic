@@ -121,6 +121,7 @@ model records {
   medecines      String[]
   newCase        String?
   disease        String[]
+  services       String[]
   record_details record_details[]
   medication     medication[]
   exam           exam[]
@@ -366,15 +367,15 @@ model appointement {
 }
 
 model stock {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   clinicId       Int
   item           String
-  expirationDate DateTime
+  expirationDate DateTime?
   quantity       Int
   category       String
-  clinic         Clinic   @relation(fields: [clinicId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  clinic         Clinic    @relation(fields: [clinicId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 //Model invoice,invoice_details,insurance,examList,PriceList

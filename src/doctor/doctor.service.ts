@@ -58,6 +58,7 @@ export class DoctorService {
     exams: unknown;
     patient: patient;
     insurance: string;
+    givenFistAid: { itemName: string }[];
   }> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
@@ -79,6 +80,25 @@ export class DoctorService {
         id: record.patientId,
       },
     });
+
+    const history = record.medicalHistory.map((item) => {
+      // item.firstAid.push('2', '3', '4');
+      return item.firstAid.toString();
+    });
+
+    let fltered = history.toString();
+    let newArray = fltered.replace(/[,]+/g, '').trim().split('');
+
+    const itemsF = await Promise.all(
+      newArray.map(async (id) => {
+        const stock = await this.prisma.stock.findFirst({
+          where: { id: parseInt(id) },
+        });
+        return {
+          itemName: stock.item,
+        };
+      }),
+    );
 
     const examTable = await this.prisma
       .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
@@ -103,6 +123,7 @@ export class DoctorService {
       exams: examTable,
       patient: patient,
       insurance: insurance.name,
+      givenFistAid: itemsF,
     };
   }
 
