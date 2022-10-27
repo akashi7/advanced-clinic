@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { records, record_details, User } from '@prisma/client';
-import { ERecords, ERoles, EStatus } from 'src/auth/enums';
+import { ECases, ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { medicalHistoryDto, vitalsDto } from './dto';
 
@@ -63,7 +63,7 @@ export class NurseService {
         record_code: record.record_code,
       },
       data: {
-        newCase: dto.case,
+        newCase: dto.case ? ECases.NEW_CASE : '',
       },
     });
 
@@ -149,7 +149,10 @@ export class NurseService {
 
   async allDoctors(user: User): Promise<User[]> {
     const doctors = await this.prisma.user.findMany({
-      where: { AND: [{ clinicId: user.clinicId }, { role: ERoles.DOCTOR }] },
+      where: {
+        AND: [{ clinicId: user.clinicId }],
+        OR: [{ role: ERoles.DOCTOR }, { asignedRole: { has: ERoles.DOCTOR } }],
+      },
     });
     return doctors;
   }
@@ -165,8 +168,7 @@ export class NurseService {
         record_code: recordId,
       },
     });
-
-    if (firstAid.length > 1) {
+    if (firstAid.length > 0) {
       firstAid.forEach(async (id) => {
         const stockItemPrice = await this.prisma.priceList.findFirst({
           where: {
@@ -234,17 +236,46 @@ export class NurseService {
             invoiceId: invoice.id,
             itemId: parseInt(id),
             type: 'stock',
-            price: priceToPayStock,
+            price: stockItemPrice.price,
             priceToPay: priceToPayStock,
             insurancePaid: insurancePaidStock,
           },
         });
 
-        return {
-          message: 'Consultation added success',
-        };
+        const items = await this.prisma.stock.findFirst({
+          where: {
+            id: parseInt(id),
+          },
+        });
+
+        const consultations = await this.prisma.consultation.findFirst({
+          where: {
+            id: dto.itemId,
+          },
+        });
+
+        await this.prisma.records.update({
+          where: {
+            record_code: record.record_code,
+          },
+          data: {
+            services: [
+              ...record.services,
+              ...[items.item],
+              ...[consultations.type],
+            ],
+          },
+        });
       });
+      return {
+        message: 'Consultation and stock added success',
+      };
     } else {
+      const consultations = await this.prisma.consultation.findFirst({
+        where: {
+          id: dto.itemId,
+        },
+      });
       const itemPrice = await this.prisma.priceList.findFirst({
         where: {
           AND: [
@@ -288,6 +319,14 @@ export class NurseService {
         },
       });
 
+      await this.prisma.records.update({
+        where: {
+          record_code: record.record_code,
+        },
+        data: {
+          services: [...record.services, ...[consultations.type]],
+        },
+      });
       return {
         message: 'Consultation added success',
       };

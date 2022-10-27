@@ -30,3 +30,7 @@ export enum ECategory {
   MEDICAL_EQUIPMENT = 'MEDICAL_EQUIPMENT',
   MEDECINES = 'MEDECINES',
 }
+
+export enum ECases {
+  NEW_CASE = 'NEW_CASE',
+}

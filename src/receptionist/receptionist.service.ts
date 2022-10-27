@@ -284,6 +284,7 @@ export class ReceptionistService {
         insurance: dto.insuranceId,
         rate: dto.rate,
         patientCode: pCode,
+        services: [],
       },
     });
     await this.prisma.record_details.create({
@@ -655,11 +656,8 @@ export class ReceptionistService {
   async allNurses(user: User): Promise<User[]> {
     const nurses = await this.prisma.user.findMany({
       where: {
-        AND: [
-          { clinicId: user.clinicId },
-          { role: ERoles.NURSE },
-          { asignedRole: { has: ERoles.NURSE } },
-        ],
+        AND: [{ clinicId: user.clinicId }],
+        OR: [{ role: ERoles.NURSE }, { asignedRole: { has: ERoles.NURSE } }],
       },
     });
 

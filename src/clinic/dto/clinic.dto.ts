@@ -2,6 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -186,7 +187,6 @@ export class createStockDto {
   @ApiProperty({ type: String, required: true })
   item: string;
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   expirationDate: string;
   @IsNumber()
@@ -200,11 +200,22 @@ export class createStockDto {
 }
 
 export class filterclinicReports {
+  @IsString()
+  @ApiProperty({ type: String, required: false })
   case: string;
+  @IsString()
+  @ApiProperty({ type: String, required: false })
   disease: string;
+  @IsNumber()
+  @ApiProperty({ type: Number, required: false })
   age: number;
-  oustide: boolean;
+  @IsString()
+  @ApiProperty({ type: String, required: false })
   startDate: string;
+  @IsString()
+  @ApiProperty({ type: String, required: false })
   endDate: string;
+  @IsBoolean()
+  @ApiProperty({ type: Boolean, required: false })
   horZone: boolean;
 }

@@ -36,7 +36,7 @@ export class medicalHistoryDto {
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true })
   observation: string;
-  @IsString()
+  @IsArray()
   @IsNotEmpty()
   @ApiProperty({ isArray: true, required: true, type: Array })
   firstAid: string[];
@@ -88,19 +88,7 @@ export class medicalHistoryDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true })
-  insuranceId: number;
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, required: true })
-  rate: string;
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true })
   doctorId: number;
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true })
-  stockId: number;
 }
 
 export class ReommendConsultationDto {
