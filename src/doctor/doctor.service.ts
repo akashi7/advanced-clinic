@@ -81,16 +81,16 @@ export class DoctorService {
       },
     });
 
-    const history = record.medicalHistory.map((item) => {
-      // item.firstAid.push('2', '3', '4');
-      return item.firstAid.toString();
-    });
-
-    let fltered = history.toString();
-    let newArray = fltered.replace(/[,]+/g, '').trim().split('');
+    const stocks = record.medicalHistory
+      .map((x) => {
+        return x.firstAid;
+      })
+      .reduce((x, y) => {
+        return x.concat(y);
+      });
 
     const itemsF = await Promise.all(
-      newArray.map(async (id) => {
+      stocks.map(async (id) => {
         const stock = await this.prisma.stock.findFirst({
           where: { id: parseInt(id) },
         });

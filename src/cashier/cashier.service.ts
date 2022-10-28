@@ -180,9 +180,9 @@ export class CashierService {
 
     let payment = [];
     xkey.forEach((e) => {
-      let valueTime = j.find((ee) => ee.Id === e.id);
-      if (valueTime) {
-        payment.push({ ...e, Name: valueTime.Name });
+      let obj = j.find((ee) => ee.Id === e.id);
+      if (obj) {
+        payment.push({ ...e, Name: obj.Name });
       } else {
         payment.push({ ...e });
       }

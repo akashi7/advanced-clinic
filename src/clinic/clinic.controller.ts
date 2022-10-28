@@ -364,7 +364,21 @@ export class ClinicController {
     @Body() dto: filterclinicReports,
     @GetUser() user: User,
   ) {
-    const result = this.clinic.clinicViewReport(user, dto);
+    const result = await this.clinic.clinicViewReport(user, dto);
     return new GenericResponse('filtered reports', result);
+  }
+
+  @ApiOkResponse({ description: 'Diseases found' })
+  @Get('all-diseases-found')
+  async seeDeases(@GetUser() user: User) {
+    const result = await this.clinic.totalDiseaseFound(user);
+    return new GenericResponse('Diseases', result);
+  }
+
+  @ApiOkResponse({ description: 'Services offered' })
+  @Get('all-services-offered')
+  async seeServices(@GetUser() user: User) {
+    const result = await this.clinic.servicesOffered(user);
+    return new GenericResponse('Services', result);
   }
 }
