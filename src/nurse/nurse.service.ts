@@ -259,11 +259,7 @@ export class NurseService {
             record_code: record.record_code,
           },
           data: {
-            services: [
-              ...record.services,
-              ...[items.item],
-              ...[consultations.type],
-            ],
+            services: [...[items.item], ...[consultations.type]],
           },
         });
       });

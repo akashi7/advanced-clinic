@@ -14,7 +14,7 @@ import {
   User,
 } from '@prisma/client';
 import { endOfDay, getYear, startOfDay } from 'date-fns';
-import { ERecords, ERoles, EStatus } from 'src/auth/enums';
+import { EGender, ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   FilterPatients,
@@ -31,6 +31,10 @@ export class ReceptionistService {
   //register patient
   async RegisterPatient(dto: registerPatientDto, user: User): Promise<patient> {
     let code: string;
+
+    let gender: string;
+
+    dto.gender === 'male' ? (gender = EGender.MALE) : (gender = EGender.FEMALE);
 
     if (dto.isInfant && dto.isInfant === true) {
       const isInfants = await this.prisma.patient.findFirst({
@@ -106,7 +110,7 @@ export class ReceptionistService {
           phone: dto.phone,
           age,
           code,
-          gender: dto.gender,
+          gender,
           sector: dto.sector,
           village: dto.village,
           province: dto.province,
@@ -179,7 +183,7 @@ export class ReceptionistService {
         fullName: dto.fullName,
         DOB: dto.DOB,
         phone: dto.phone,
-        gender: dto.gender,
+        gender,
         sector: dto.sector,
         village: dto.village,
         province: dto.province,

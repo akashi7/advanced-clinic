@@ -34,3 +34,8 @@ export enum ECategory {
 export enum ECases {
   NEW_CASE = 'NEW_CASE',
 }
+
+export enum EGender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}

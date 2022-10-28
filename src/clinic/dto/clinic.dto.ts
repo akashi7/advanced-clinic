@@ -1,11 +1,12 @@
 /* eslint-disable */
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -201,21 +202,30 @@ export class createStockDto {
 
 export class filterclinicReports {
   @IsString()
-  @ApiProperty({ type: String, required: false })
+  @IsOptional()
+  @ApiPropertyOptional({ type: String, required: false })
   case: string;
   @IsString()
-  @ApiProperty({ type: String, required: false })
+  @ApiPropertyOptional({ type: String, required: false })
   disease: string;
   @IsNumber()
-  @ApiProperty({ type: Number, required: false })
+  @IsOptional()
+  @ApiPropertyOptional({ type: Number, required: false })
   age: number;
   @IsString()
-  @ApiProperty({ type: String, required: false })
+  @IsOptional()
+  @ApiPropertyOptional({ type: String, required: false })
   startDate: string;
   @IsString()
-  @ApiProperty({ type: String, required: false })
+  @IsOptional()
+  @ApiPropertyOptional({ type: String, required: false })
   endDate: string;
   @IsBoolean()
-  @ApiProperty({ type: Boolean, required: false })
+  @IsOptional()
+  @ApiPropertyOptional({ type: Boolean, required: false })
   horZone: boolean;
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ type: String, required: false })
+  service: string;
 }
