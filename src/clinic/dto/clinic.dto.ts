@@ -118,10 +118,10 @@ export class InsuranceDto {
 }
 
 export class insuranceUpdateDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  @ApiProperty({ required: true, type: Number })
-  rate: number;
+  @ApiProperty({ required: true, type: String })
+  name: string;
 }
 
 export class consultationDto {

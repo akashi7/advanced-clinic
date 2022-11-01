@@ -239,12 +239,19 @@ export class ClinicController {
   }
 
   @ApiOkResponse({ description: 'Pricelist updated successfully' })
-  @ApiQuery({ name: 'id', type: Number })
+  @ApiQuery({ name: 'itemId', type: Number, required: true })
+  @ApiQuery({ name: 'type', type: String, required: true })
+  @ApiQuery({ name: 'insId', type: Number, required: true })
   @ApiBody({ type: UpdatePriceListDto })
   @HttpCode(200)
   @Patch('update-pricelist')
-  async UpdatePriceList(@Body() dto: UpdatePriceListDto, id: number) {
-    const result = await this.clinic.updatePriceList(dto, id);
+  async UpdatePriceList(
+    @Body() dto: UpdatePriceListDto,
+    @Query('itemId', ParseIntPipe) itemId: number,
+    @Query('type') type: string,
+    @Query('insId', ParseIntPipe) insId: number,
+  ) {
+    const result = await this.clinic.updatePriceList(dto, itemId, type, insId);
     return new GenericResponse('Pricelist updated successfully', result);
   }
 

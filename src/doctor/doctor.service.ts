@@ -7,6 +7,7 @@ import {
   User,
 } from '@prisma/client';
 import { ERecords, ERoles, EStatus } from 'src/auth/enums';
+import { examListInterface } from 'src/labo/interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AppointmentDto,
@@ -100,7 +101,7 @@ export class DoctorService {
       }),
     );
 
-    const examTable = await this.prisma
+    const examTable: examListInterface[] = await this.prisma
       .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
 
     await this.prisma.record_details.update({
@@ -120,7 +121,7 @@ export class DoctorService {
 
     return {
       record: record,
-      exams: examTable,
+      exams: examTable.sort((a, b) => a.Id - b.Id),
       patient: patient,
       insurance: insurance.name,
       givenFistAid: itemsF,
