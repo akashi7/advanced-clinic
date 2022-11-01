@@ -36,6 +36,11 @@ import {
   UpdatePasswordDto,
   UpdatePriceListDto,
 } from './dto/clinic.dto';
+import {
+  consultationPriceListInterface,
+  examPriceListInterface,
+  stockPriceListInterface,
+} from './interfaces';
 
 @Injectable()
 export class ClinicService {
@@ -382,7 +387,7 @@ export class ClinicService {
     await this.prisma.insurance.update({
       where: { id },
       data: {
-        rate: dto.rate,
+        name: dto.name,
       },
     });
     return {
@@ -472,7 +477,7 @@ export class ClinicService {
     const consultation = await this.prisma.consultation.findMany({
       where: { clinicId: user.clinicId },
     });
-    return consultation;
+    return consultation.sort((a, b) => a.id - b.id);
   }
 
   async registerExams(dto: ExamDto, user: User): Promise<{ message: string }> {
@@ -532,7 +537,7 @@ export class ClinicService {
     const exam = await this.prisma.examList.findMany({
       where: { clinicId: user.clinicId },
     });
-    return exam;
+    return exam.sort((a, b) => a.id - b.id);
   }
 
   async createPriceList(
@@ -601,13 +606,12 @@ export class ClinicService {
   async updatePriceList(
     dto: UpdatePriceListDto,
     id: number,
+    type: string,
+    insId: number,
   ): Promise<{ message: string }> {
-    await this.prisma.priceList.update({
-      where: { id },
-      data: {
-        price: dto.price,
-      },
-    });
+    await this.prisma
+      .$queryRaw`UPDATE "priceList" SET "price" =${dto.price} WHERE "itemId"=${id} AND ("Type"=${type} AND "insuranceId"=${insId}) `;
+
     return {
       message: 'PriceList updated',
     };
@@ -621,22 +625,24 @@ export class ClinicService {
     };
   }
 
-  async getConsultationPriceList(user: User): Promise<unknown> {
-    const prices = await this.prisma
+  async getConsultationPriceList(
+    user: User,
+  ): Promise<consultationPriceListInterface[]> {
+    const prices: consultationPriceListInterface[] = await this.prisma
       .$queryRaw`SELECT * FROM "priceList" LEFT JOIN "consultation" ON "priceList"."itemId" = "consultation"."id"  LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'consultation'`;
-    return prices;
+    return prices.sort((a, b) => a.id - b.id);
   }
 
-  async getExamPriceList(user: User): Promise<unknown> {
-    const prices = await this.prisma
+  async getExamPriceList(user: User): Promise<examPriceListInterface[]> {
+    const prices: examPriceListInterface[] = await this.prisma
       .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "examList" ON "priceList"."itemId" = "examList"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'exam'`;
-    return prices;
+    return prices.sort((a, b) => a.id - b.id);
   }
 
-  async getStockPriceList(user: User): Promise<unknown> {
-    const prices = await this.prisma
+  async getStockPriceList(user: User): Promise<stockPriceListInterface[]> {
+    const prices: stockPriceListInterface[] = await this.prisma
       .$queryRaw`SELECT * FROM "priceList"  LEFT JOIN "stock" ON "priceList"."itemId" = "stock"."id" LEFT JOIN "insurance" ON "priceList"."insuranceId"="insurance"."id"  WHERE "priceList"."clinicId" = ${user.userId} AND "priceList"."Type" = 'stock'`;
-    return prices;
+    return prices.sort((a, b) => a.id - b.id);
   }
 
   async ClinicReport(user: User): Promise<{

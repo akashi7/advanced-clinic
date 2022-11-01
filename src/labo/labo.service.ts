@@ -4,6 +4,7 @@ import { record_details, User } from '@prisma/client';
 import { ERecords, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { conductExamDto } from './dto';
+import { examListInterface } from './interface';
 
 @Injectable()
 export class LaboService {
@@ -26,7 +27,7 @@ export class LaboService {
     return record;
   }
 
-  async laboViewRequet(id: number): Promise<unknown> {
+  async laboViewRequet(id: number): Promise<examListInterface[]> {
     const record_details = await this.prisma.record_details.findFirst({
       where: {
         id,
@@ -46,9 +47,9 @@ export class LaboService {
         status: EStatus.READ,
       },
     });
-    const exams = await this.prisma
+    const exams: examListInterface[] = await this.prisma
       .$queryRaw`SELECT "exam"."id" AS "Id", "Code","Name","clinicId","conducted","description","exam","observation","record_code"   FROM "exam" LEFT JOIN "examList" ON "exam"."exam" = "examList"."id" WHERE "exam"."record_code"=${record.record_code}`;
-    return exams;
+    return exams.sort((a, b) => a.Id - b.Id);
   }
 
   async markExams(dto: conductExamDto): Promise<{ message: string }> {
