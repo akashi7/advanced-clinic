@@ -1,7 +1,10 @@
 /* eslint-disable */
-import { createParamDecorator, ExecutionContext, SetMetadata } from "@nestjs/common";
-import { ERoles } from "src/auth/enums";
-
+import {
+  createParamDecorator,
+  ExecutionContext,
+  SetMetadata,
+} from '@nestjs/common';
+import { ERoles } from 'src/auth/enums';
 
 export const AllowRoles = (...roles: ERoles[]) => SetMetadata('roles', roles);
 
