@@ -37,7 +37,7 @@ export class AdminService {
     if (clinicExist)
       throw new ConflictException('Email clinic arleady registered');
     const passwordGenerated = this.makePassword(8);
-    const password = await argon.hash(passwordGenerated);
+    const password = await argon.hash('Password@123');
     const clinic = await this.prisma.clinic.create({
       data: {
         name: dto.name,

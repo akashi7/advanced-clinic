@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  User,
   consultation,
   doctor,
   examList,
@@ -16,7 +17,6 @@ import {
   receptionist,
   records,
   stock,
-  User,
 } from '@prisma/client';
 import * as argon from 'argon2';
 import { endOfDay, getMonth, getYear, startOfDay } from 'date-fns';
@@ -25,16 +25,16 @@ import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AsignRoleDto,
-  consultationDto,
-  createStockDto,
   ExamDto,
-  filterclinicReports,
   InsuranceDto,
-  insuranceUpdateDto,
   PriceListDto,
-  registerEmployee,
   UpdatePasswordDto,
   UpdatePriceListDto,
+  consultationDto,
+  createStockDto,
+  filterclinicReports,
+  insuranceUpdateDto,
+  registerEmployee,
 } from './dto/clinic.dto';
 import {
   consultationPriceListInterface,
@@ -96,16 +96,17 @@ export class ClinicService {
     });
     delete User.password;
     try {
-      await this.mail.sendMail(
-        `${User.email}`,
-        `${User.fullName} credentials`,
-        '"No Reply" <noreply@kuranga.com>',
-        `
-        Dear ${User.fullName} your password is as follow
-        ${passwordGenerated}
-        Please update your password once loggedIn
-        `,
-      );
+      // await this.mail.sendMail(
+      //   `${User.email}`,
+      //   `${User.fullName} credentials`,
+      //   '"No Reply" <noreply@kuranga.com>',
+      //   `
+      //   Dear ${User.fullName} your password is as follow
+      //   ${passwordGenerated}
+      //   Please update your password once loggedIn
+      //   `,
+      // );
+      // return User;
       return User;
     } catch (error) {
       this.deleteUser(role, User, userId);
@@ -133,7 +134,7 @@ export class ClinicService {
       if (isReceptionist)
         throw new ConflictException('Receptionist already registered');
       const passwordGenerated = this.makePassword(8);
-      const password = await argon.hash(passwordGenerated);
+      const password = await argon.hash('Password@123');
       const receptionist = await this.prisma.receptionist.create({
         data: {
           email: dto.email,
@@ -162,7 +163,7 @@ export class ClinicService {
       });
       if (isDoctor) throw new ConflictException('Doctor already registered');
       const passwordGenerated = this.makePassword(8);
-      const password = await argon.hash(passwordGenerated);
+      const password = await argon.hash('Password@123');
       const doctor = await this.prisma.doctor.create({
         data: {
           email: dto.email,
@@ -192,7 +193,7 @@ export class ClinicService {
       });
       if (isNurse) throw new ConflictException('Nurse already registered');
       const passwordGenerated = this.makePassword(8);
-      const password = await argon.hash(passwordGenerated);
+      const password = await argon.hash('Password@123');
       const nurse = await this.prisma.nurse.create({
         data: {
           email: dto.email,
@@ -231,7 +232,7 @@ export class ClinicService {
         throw new ConflictException('Can not have more than 2 laborantes');
       } else {
         const passwordGenerated = this.makePassword(8);
-        const password = await argon.hash(passwordGenerated);
+        const password = await argon.hash('Password@123');
         const laborante = await this.prisma.laborante.create({
           data: {
             email: dto.email,
@@ -260,7 +261,7 @@ export class ClinicService {
       });
       if (isCashier) throw new ConflictException('Cahier already registered');
       const passwordGenerated = this.makePassword(8);
-      const password = await argon.hash(passwordGenerated);
+      const password = await argon.hash('Password@123');
       const cashier = await this.prisma.cashier.create({
         data: {
           email: dto.email,
@@ -727,7 +728,7 @@ export class ClinicService {
       let consultations: any[];
       let exams: any[];
 
-      let xkey = payments.map((obj) => obj.type);
+      const xkey = payments.map((obj) => obj.type);
 
       for (const obj of payments) {
         if (xkey.includes('consultation')) {
@@ -737,7 +738,7 @@ export class ClinicService {
           } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
             obj.createdAt,
           )}=${year})`;
-          let filteredC = consultations.map((obj) => {
+          const filteredC = consultations.map((obj) => {
             return {
               id: obj.id,
               createdAt: obj.createdAt,
@@ -759,7 +760,7 @@ export class ClinicService {
           } AND (${getMonth(obj.createdAt)}=${month} AND ${getYear(
             obj.createdAt,
           )}=${year})`;
-          let filteredC = exams.map((obj) => {
+          const filteredC = exams.map((obj) => {
             return {
               id: obj.id,
               createdAt: obj.createdAt,
@@ -788,7 +789,7 @@ export class ClinicService {
             obj.createdAt,
           )}=${year})`;
 
-          let E = exams.map((obj) => {
+          const E = exams.map((obj) => {
             return {
               id: obj.id,
               createdAt: obj.createdAt,
@@ -801,7 +802,7 @@ export class ClinicService {
               Type: 'exam',
             };
           });
-          let C = consultations.map((obj) => {
+          const C = consultations.map((obj) => {
             return {
               id: obj.id,
               createdAt: obj.createdAt,
@@ -827,13 +828,13 @@ export class ClinicService {
       let consultations: any[];
       let exams: any[];
 
-      let xkey = payments.map((obj) => {
+      const xkey = payments.map((obj) => {
         return obj.type;
       });
       if (xkey.includes('consultation')) {
         consultations = await this.prisma
           .$queryRaw`SELECT * FROM "payment" LEFT JOIN "consultation" ON "payment"."itemId"="consultation"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
-        let filteredC = consultations.map((obj) => {
+        const filteredC = consultations.map((obj) => {
           return {
             id: obj.id,
             createdAt: obj.createdAt,
@@ -851,7 +852,7 @@ export class ClinicService {
       if (xkey.includes('exam')) {
         exams = await this.prisma
           .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
-        let filteredC = exams.map((obj) => {
+        const filteredC = exams.map((obj) => {
           return {
             id: obj.id,
             createdAt: obj.createdAt,
@@ -872,7 +873,7 @@ export class ClinicService {
         exams = await this.prisma
           .$queryRaw`SELECT * FROM "payment" LEFT JOIN "examList" ON "payment"."itemId"="examList"."id" LEFT JOIN "insurance" ON "payment"."insuranceId"="insurance"."id" WHERE "payment"."clinicId"=${user.clinicId}`;
 
-        let E = exams.map((obj) => {
+        const E = exams.map((obj) => {
           return {
             id: obj.id,
             createdAt: obj.createdAt,
@@ -885,7 +886,7 @@ export class ClinicService {
             Type: 'exam',
           };
         });
-        let C = consultations.map((obj) => {
+        const C = consultations.map((obj) => {
           return {
             id: obj.id,
             createdAt: obj.createdAt,
@@ -905,7 +906,7 @@ export class ClinicService {
   }
 
   async asignRolesToUsers(id: number, dto: AsignRoleDto) {
-    let newRoles = dto.roles.map((role) => {
+    const newRoles = dto.roles.map((role) => {
       if (role === 'receptionist') {
         role = ERoles.RECEPTIONIST;
       }
@@ -944,9 +945,9 @@ export class ClinicService {
     const user = await this.prisma.user.findFirst({
       where: { id },
     });
-    let newRole: string[] = user.asignedRole;
+    const newRole: string[] = user.asignedRole;
     dto.roles.forEach((role) => {
-      let index = newRole.indexOf(role);
+      const index = newRole.indexOf(role);
       if (index !== -1) {
         newRole.splice(index, 1);
       }
@@ -1232,7 +1233,6 @@ export class ClinicService {
     }
 
     if (dto.horZone) {
-      let newReport: patient[];
       const report = await this.prisma.records.findMany({
         where: {
           AND: [
@@ -1254,17 +1254,17 @@ export class ClinicService {
         };
       });
 
-      newReport = patients.filter((el) => {
+      const newReport = patients.filter((el) => {
         return allRec.find((element) => {
           return element.p_id === el.id;
         });
       });
 
-      let generated = newReport.filter((item) => {
+      const generated = newReport.filter((item) => {
         return item.sector !== clinic.sector;
       });
 
-      let sectors = {};
+      const sectors = {};
 
       generated.forEach((item) => {
         if (sectors[item.sector]) {
@@ -1279,7 +1279,6 @@ export class ClinicService {
         status: sectors,
       };
     } else if (dto.horZone && dto.case) {
-      let newReport: patient[];
       const report = await this.prisma.records.findMany({
         where: {
           AND: [
@@ -1302,17 +1301,17 @@ export class ClinicService {
         };
       });
 
-      newReport = patients.filter((el) => {
+      const newReport = patients.filter((el) => {
         return allRec.find((element) => {
           return element.p_id === el.id;
         });
       });
 
-      let generated = newReport.filter((item) => {
+      const generated = newReport.filter((item) => {
         return item.sector !== clinic.sector;
       });
 
-      let sectors = {};
+      const sectors = {};
 
       generated.forEach((item) => {
         if (sectors[item.sector]) {
