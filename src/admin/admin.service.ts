@@ -74,16 +74,7 @@ export class AdminService {
       },
     });
     try {
-      return this.mail.sendMail(
-        clinic.email,
-        `${clinic.name} credentials`,
-        '"No Reply" <noreply@kuranga.com>',
-        `
-        Clinic ${clinic.name}  password generated as follow :
-        ${passwordGenerated}
-        please update it once logged in
-        `,
-      );
+      return User;
     } catch (error) {
       await this.prisma.clinic.delete({ where: { id: clinic.id } });
       await this.prisma.user.delete({ where: { id: User.id } });
