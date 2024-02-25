@@ -47,7 +47,6 @@ import {
 
 @Controller('clinic')
 @UseGuards(JwtGuard, RolesGuard)
-@AllowRoles(ERoles.CLINIC)
 @ApiBearerAuth()
 @ApiTags('clinic')
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -59,6 +58,7 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'User already exists' })
   @ApiBadRequestResponse({ description: 'Bad request Email not sent' })
   @ApiBody({ type: registerEmployee })
+  @AllowRoles(ERoles.CLINIC)
   @Post('register-user')
   async RegisterUser(@Body() dto: registerEmployee, @GetUser() clinic: User) {
     const result = await this.clinic.RegisterUser(dto, clinic);
@@ -67,6 +67,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Users fecthed successfully' })
   @AllowRoles(ERoles.RECEPTIONIST, ERoles.CLINIC, ERoles.NURSE)
+  @AllowRoles(ERoles.CLINIC)
   @Get('get-all-users')
   async GetAllUsers(@GetUser() user: User) {
     const result = await this.clinic.getAllUsers(user);
@@ -77,6 +78,7 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @ApiQuery({ name: 'role', type: String })
   @Get('view-user')
+  @AllowRoles(ERoles.CLINIC)
   async GetOneUser(
     @Query('id', ParseIntPipe) id: number,
     @Query('role') role: string,
@@ -88,6 +90,7 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'Clinic password reset failed' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiBody({ type: UpdatePasswordDto })
+  @AllowRoles(ERoles.CLINIC)
   @Patch('update-clinic')
   async UpdatePassword(@Body() dto: UpdatePasswordDto, @GetUser() user: User) {
     const result = await this.clinic.updatePassword(dto, user);
@@ -105,6 +108,7 @@ export class ClinicController {
   @ApiCreatedResponse({ description: 'Insurance created successfully' })
   @ApiConflictResponse({ description: 'Insurance already exists' })
   @ApiBody({ type: InsuranceDto })
+  @AllowRoles(ERoles.CLINIC)
   @Post('register-insurance')
   async RegisterInsurance(@Body() dto: InsuranceDto, @GetUser() user: User) {
     const result = await this.clinic.registerInsurance(dto, user);
@@ -115,6 +119,7 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: insuranceUpdateDto })
   @HttpCode(200)
+  @AllowRoles(ERoles.CLINIC)
   @Patch('update-insurance')
   async UpdateInsurance(
     @Body() dto: insuranceUpdateDto,
@@ -126,6 +131,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Insurance removed successfully' })
   @ApiQuery({ name: 'id', type: Number })
+  @AllowRoles(ERoles.CLINIC)
   @Delete('delete-insurance')
   async DeleteInsurance(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deleteInsurance(id);
@@ -147,6 +153,7 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'Consultation already exists' })
   @ApiBody({ type: consultationDto })
   @Post('register-consultation')
+  @AllowRoles(ERoles.CLINIC)
   async RegisterConsultation(
     @Body() dto: consultationDto,
     @GetUser() user: User,
@@ -159,6 +166,7 @@ export class ClinicController {
   @ApiBody({ type: consultationDto })
   @HttpCode(200)
   @Patch('update-consultation')
+  @AllowRoles(ERoles.CLINIC)
   async UpdateConsultation(
     @Body() dto: consultationDto,
     @Query('id', ParseIntPipe) id: number,
@@ -171,6 +179,7 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-consultation')
+  @AllowRoles(ERoles.CLINIC)
   async DeleteConsultation(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deleteConsultation(id);
     return new GenericResponse('Consultation deleted successfully', result);
@@ -186,6 +195,7 @@ export class ClinicController {
 
   @ApiCreatedResponse({ description: 'Exam added successfully' })
   @ApiConflictResponse({ description: 'Exam already exists' })
+  @AllowRoles(ERoles.CLINIC)
   @Post('register-exam')
   async RegisterExaminations(@Body() dto: ExamDto, @GetUser() user: User) {
     const result = await this.clinic.registerExams(dto, user);
@@ -196,6 +206,7 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @ApiBody({ type: ExamDto })
   @HttpCode(200)
+  @AllowRoles(ERoles.CLINIC)
   @Patch('update-exam')
   async UpdateExam(
     @Body() dto: ExamDto,
@@ -208,6 +219,7 @@ export class ClinicController {
   @ApiOkResponse({ description: 'Exam deleted successfully' })
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
+  @AllowRoles(ERoles.CLINIC)
   @Delete('delete-exam')
   async DeleteExam(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deleteExams(id);
@@ -216,6 +228,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Consultations price lists returned' })
   @Get('consultation-price-list')
+  @AllowRoles(ERoles.CLINIC)
   async ClinicGetAllConsultationPriceList(@GetUser() user: User) {
     const result = await this.clinic.getConsultationPriceList(user);
     return new GenericResponse('Consultations price lists returned', result);
@@ -223,6 +236,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Exams price lists returned ' })
   @Get('exam-price-list')
+  @AllowRoles(ERoles.CLINIC)
   async ClinicGetAllExamPriceList(@GetUser() user: User) {
     const result = await this.clinic.getExamPriceList(user);
     return new GenericResponse('Exams price lists returned', result);
@@ -232,6 +246,7 @@ export class ClinicController {
   @ApiBody({ type: PriceListDto })
   @ApiConflictResponse({ description: 'Pricelist already exists' })
   @ApiBadRequestResponse({ description: 'Bad request invalid type ' })
+  @AllowRoles(ERoles.CLINIC)
   @Post('register-pricelist')
   async RegisterPriceList(@Body() dto: PriceListDto, @GetUser() user: User) {
     const result = await this.clinic.createPriceList(dto, user);
@@ -245,6 +260,7 @@ export class ClinicController {
   @ApiBody({ type: UpdatePriceListDto })
   @HttpCode(200)
   @Patch('update-pricelist')
+  @AllowRoles(ERoles.CLINIC)
   async UpdatePriceList(
     @Body() dto: UpdatePriceListDto,
     @Query('itemId', ParseIntPipe) itemId: number,
@@ -259,12 +275,14 @@ export class ClinicController {
   @ApiQuery({ name: 'id', type: Number })
   @HttpCode(200)
   @Delete('delete-rice-list')
+  @AllowRoles(ERoles.CLINIC)
   async DeletePriceList(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deletePriceList(id);
     return new GenericResponse('PriceList deleted successfully', result);
   }
   @ApiOkResponse({ description: 'Clinic reports' })
   @Get('clinic-reports')
+  @AllowRoles(ERoles.CLINIC)
   async GetClinicReport(@GetUser() user: User) {
     const result = await this.clinic.ClinicReport(user);
     return new GenericResponse('clinic reports', result);
@@ -274,6 +292,7 @@ export class ClinicController {
   @ApiQuery({ name: 'month', type: Number, required: false })
   @ApiQuery({ name: 'year', type: Number, required: false })
   @Get('clinic-payment-reports')
+  @AllowRoles(ERoles.CLINIC)
   async GetPaymentReport(
     @GetUser() user: User,
     @Query('month') month: number,
@@ -285,6 +304,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'User info' })
   @ApiQuery({ name: 'id', type: Number, required: true })
+  @AllowRoles(ERoles.CLINIC)
   @Get('View-One-User')
   async viewUserTable(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.ViewUser(id);
@@ -294,6 +314,7 @@ export class ClinicController {
   @ApiCreatedResponse({ description: 'Assign Roles' })
   @Post('assign-roles')
   @ApiBody({ type: AsignRoleDto })
+  @AllowRoles(ERoles.CLINIC)
   async AssignRoles(
     @Body('') dto: AsignRoleDto,
     @Query('id', ParseIntPipe) id: number,
@@ -305,6 +326,7 @@ export class ClinicController {
   @ApiCreatedResponse({ description: 'Assign Roles' })
   @Post('update-roles')
   @ApiBody({ type: AsignRoleDto })
+  @AllowRoles(ERoles.CLINIC)
   async UpdateRoles(
     @Body('') dto: AsignRoleDto,
     @Query('id', ParseIntPipe) id: number,
@@ -317,6 +339,7 @@ export class ClinicController {
   @ApiConflictResponse({ description: 'Medcine name arleady registered' })
   @ApiBody({ type: createStockDto })
   @Post('add-item-to-stock')
+  @AllowRoles(ERoles.CLINIC)
   async createStock(@Body() dto: createStockDto, @GetUser() user: User) {
     const result = await this.clinic.createStock(dto, user);
     return new GenericResponse('item added to stock', result);
@@ -330,6 +353,7 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'stock item returned ' })
   @ApiQuery({ name: 'id', required: true })
+  @AllowRoles(ERoles.CLINIC)
   @Get('view-one-stock-item')
   async viewOneItem(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.viewOneStock(id);
@@ -340,6 +364,7 @@ export class ClinicController {
   @ApiOkResponse({ description: 'stock item updated success' })
   @Patch('update-stock-item')
   @ApiBody({ type: createStockDto })
+  @AllowRoles(ERoles.CLINIC)
   @ApiQuery({ name: 'id', required: true })
   async updateItem(
     @Query('id', ParseIntPipe) id: number,
@@ -352,6 +377,7 @@ export class ClinicController {
   @Delete('delete-stock-item')
   @HttpCode(200)
   @ApiOkResponse({ description: 'stock item deleted success' })
+  @AllowRoles(ERoles.CLINIC)
   @ApiQuery({ name: 'id', required: true })
   async removeItem(@Query('id', ParseIntPipe) id: number) {
     const result = await this.clinic.deleteStock(id);
@@ -367,6 +393,7 @@ export class ClinicController {
   }
 
   @Post('report-generate')
+  @AllowRoles(ERoles.CLINIC)
   async generateReport(
     @Body() dto: filterclinicReports,
     @GetUser() user: User,
@@ -377,12 +404,14 @@ export class ClinicController {
 
   @ApiOkResponse({ description: 'Diseases found' })
   @Get('all-diseases-found')
+  @AllowRoles(ERoles.CLINIC)
   async seeDeases(@GetUser() user: User) {
     const result = await this.clinic.totalDiseaseFound(user);
     return new GenericResponse('Diseases', result);
   }
 
   @ApiOkResponse({ description: 'Services offered' })
+  @AllowRoles(ERoles.CLINIC)
   @Get('all-services-offered')
   async seeServices(@GetUser() user: User) {
     const result = await this.clinic.servicesOffered(user);
