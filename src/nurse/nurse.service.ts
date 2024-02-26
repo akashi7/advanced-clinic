@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { records, record_details, User } from '@prisma/client';
+import { User, record_details, records } from '@prisma/client';
 import { ECases, ERecords, ERoles, EStatus } from 'src/auth/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { medicalHistoryDto, vitalsDto } from './dto';
@@ -168,13 +168,14 @@ export class NurseService {
         record_code: recordId,
       },
     });
+    console.log({ record });
     if (firstAid.length > 0) {
       firstAid.forEach(async (id) => {
         const stockItemPrice = await this.prisma.priceList.findFirst({
           where: {
             AND: [
-              { itemId: parseInt(id) },
-              { Type: 'stock' },
+              { itemId: dto.itemId },
+              { Type: 'exam' },
               { insuranceId: record.insurance },
               { clinicId: user.clinicId },
             ],
@@ -234,8 +235,8 @@ export class NurseService {
         await this.prisma.invoice_details.create({
           data: {
             invoiceId: invoice.id,
-            itemId: parseInt(id),
-            type: 'stock',
+            itemId: dto.itemId,
+            type: 'exam',
             price: stockItemPrice.price,
             priceToPay: priceToPayStock,
             insurancePaid: insurancePaidStock,
